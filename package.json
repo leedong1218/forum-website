@@ -15,9 +15,11 @@
     "@mui/material": "^6.4.7",
     "@tinymce/tinymce-react": "^6.0.0",
     "@toolpad/core": "^0.13.0",
+    "framer-motion": "^12.6.2",
     "next": "15.1.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hook-form": "^7.54.2",
     "react-quill": "^2.0.0",
     "sass": "^1.85.0"
   },
