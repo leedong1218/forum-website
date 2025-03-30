@@ -1,0 +1,140 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(3px);
+  z-index: 20;
+}
+
+.loadingContainer {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 30;
+}
+
+.loadingBox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 280px;
+  height: 180px;
+  padding: 2rem;
+  border-radius: 12px;
+  background-color: white;
+  box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(14, 165, 233, 0.1);
+  transition: all 0.3s ease;
+}
+
+.decorCircle1 {
+  position: absolute;
+  right: -20px;
+  top: -10px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(14, 165, 233, 0.05);
+  z-index: 0;
+}
+
+.decorCircle2 {
+  position: absolute;
+  left: 10px;
+  bottom: -30px;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: rgba(14, 165, 233, 0.05);
+  z-index: 0;
+}
+
+.loadingIcon {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  margin-bottom: 20px;
+  z-index: 1;
+}
+
+.pulseCircle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(14, 165, 233, 0.1);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.spinner {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  border: 4px solid transparent;
+  border-top-color: #0ea5e9;
+  border-bottom-color: #3b82f6;
+  animation: spin 1.5s linear infinite;
+}
+
+.spinner:before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border-radius: 50%;
+  border: 4px solid transparent;
+  border-left-color: #3b82f6;
+  border-right-color: #0ea5e9;
+  animation: spin 1s linear infinite reverse;
+}
+
+.loadingText {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8px;
+  z-index: 1;
+}
+
+.loadingSubtext {
+  font-size: 14px;
+  color: #64748b;
+  z-index: 1;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+  }
+}

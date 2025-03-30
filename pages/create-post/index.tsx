@@ -6,39 +6,173 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  SelectChangeEvent,
   TextField,
   Typography,
+  CircularProgress,
 } from "@mui/material";
-import { useState } from "react";
-import { Editor } from "@tinymce/tinymce-react";
+import { useState, useRef } from "react";
+import "react-quill-new/dist/quill.snow.css";
+import dynamic from "next/dynamic";
+
+const ReactQuill = dynamic(
+  async () => {
+    const { default: RQ } = await import("react-quill-new");
+    return function comp({ forwardedRef, ...props }) {
+      return <RQ ref={forwardedRef} {...props} />;
+    };
+  },
+  { ssr: false, loading: () => <CircularProgress /> }
+);
+
+// 预定义文章类型选项，方便维护和扩展
+const POST_TYPES = [
+  { value: "搞笑", label: "搞笑" },
+  { value: "美食", label: "美食" },
+  { value: "科技", label: "科技" },
+  { value: "旅遊", label: "旅遊" },
+];
 
 export default function CreatePost() {
-  const [type, setType] = useState("");
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [formData, setFormData] = useState({
+    type: "",
+    title: "",
+    content: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [localImages, setLocalImages] = useState<{[key: string]: File}>({});
+  const quillRef = useRef(null);
 
-  const handleTypeChange = (event: SelectChangeEvent) => {
-    setType(event.target.value);
+  const handleFormChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(event.target.value);
+  const isFormValid = () => {
+    return formData.type && formData.title && formData.content;
   };
 
-  const handleEditorChange = (content: string) => {
-    setContent(content);
+  const handleSubmit = async () => {
+    console.log(formData);
+    if (!isFormValid()) {
+      alert("請填寫所有必填欄位");
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      // 如果有本地图片，先上传所有图片
+      const imageUploadPromises = Object.entries(localImages).map(async ([dataUrl, file]) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        
+        // 替换为您的实际图片上传API
+        // const response = await fetch("/api/upload", {
+        //   method: "POST",
+        //   body: formData,
+        // });
+        
+        // if (!response.ok) throw new Error("图片上传失败");
+        // const { url } = await response.json();
+        
+        // 返回本地数据URL和远程URL的映射
+        // return { dataUrl, remoteUrl: url };
+        return { dataUrl, remoteUrl: dataUrl }; // 临时使用本地URL
+      });
+      
+      // 等待所有图片上传完成
+      // const imageUrls = await Promise.all(imageUploadPromises);
+      
+      // 替换内容中的本地URL为远程URL
+      // let finalContent = formData.content;
+      // imageUrls.forEach(({ dataUrl, remoteUrl }) => {
+      //   finalContent = finalContent.replace(new RegExp(dataUrl, 'g'), remoteUrl);
+      // });
+      
+      // 提交帖子
+      // const postResponse = await fetch("/api/posts", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({
+      //     ...formData,
+      //     content: finalContent,
+      //   }),
+      // });
+      
+      // if (!postResponse.ok) throw new Error("发布失败");
+      
+      alert("文章已发布！");
+      setFormData({ type: "", title: "", content: "" });
+      setLocalImages({});
+      
+    } catch (error) {
+      console.error("Error submitting post:", error);
+      alert("發布失敗，請稍後再試。");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleSubmit = () => {
-    console.log({
-      type,
-      title,
-      content,
-    });
-    // 此處可以添加表單提交邏輯，如API請求等
-    alert("文章已發布！");
+  const handleImageUpload = () => {
+    const input = document.createElement("input");
+    input.setAttribute("type", "file");
+    input.setAttribute("accept", "image/*");
+    input.click();
+
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (file) {
+        try {
+          // 使用FileReader将图片转换为base64字符串
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const dataUrl = e.target?.result as string;
+            if (dataUrl) {
+              // 保存本地图片记录
+              setLocalImages(prev => ({
+                ...prev,
+                [dataUrl]: file
+              }));
+              
+              // 将图片插入到编辑器中
+              const quill = quillRef.current.getEditor();
+              const range = quill.getSelection(true);
+              quill.insertEmbed(range.index, "image", dataUrl);
+              quill.setSelection(range.index + 1);
+            }
+          };
+          reader.readAsDataURL(file);
+        } catch (error) {
+          console.error("Error handling local image:", error);
+          alert("图片处理失败");
+        }
+      }
+    };
   };
+
+  const modules = {
+    toolbar: {
+      container: [
+        [{ header: [1, 2, false] }],
+        ["bold", "italic", "underline", "strike", "blockquote"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        ["link", "image"],
+        ["clean"],
+      ],
+      handlers: { image: handleImageUpload },
+    },
+  };
+
+  const formats = [
+    "header",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "list",
+    "link",
+    "image",
+    "blockquote",
+  ];
 
   return (
     <Layout>
@@ -66,14 +200,15 @@ export default function CreatePost() {
             <Select
               labelId="board-select-label"
               id="board-select"
-              value={type}
+              value={formData.type}
               label="選擇看板"
-              onChange={handleTypeChange}
+              onChange={(e) => handleFormChange("type", e.target.value)}
             >
-              <MenuItem value={"搞笑"}>搞笑</MenuItem>
-              <MenuItem value={"美食"}>美食</MenuItem>
-              <MenuItem value={"科技"}>科技</MenuItem>
-              <MenuItem value={"旅遊"}>旅遊</MenuItem>
+              {POST_TYPES.map((type) => (
+                <MenuItem key={type.value} value={type.value}>
+                  {type.label}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
 
@@ -81,9 +216,8 @@ export default function CreatePost() {
             fullWidth
             label="文章標題"
             variant="outlined"
-            value={title}
-            onChange={handleTitleChange}
-            sx={{ mb: 2 }}
+            value={formData.title}
+            onChange={(e) => handleFormChange("title", e.target.value)}
           />
         </Box>
 
@@ -91,23 +225,17 @@ export default function CreatePost() {
           <Typography variant="subtitle1" sx={{ mb: 1 }}>
             文章內容
           </Typography>
-          <Editor
-            apiKey="z2h5umi81d0bpq7wloj9hdo07vvct4vnq6xt71gplhy1zpgi" // 需要替換為您的TinyMCE API金鑰
-            init={{
-              height: 400,
-              menubar: true,
-              plugins: [
-                "advlist autolink lists link image charmap print preview anchor",
-                "searchreplace visualblocks code fullscreen",
-                "insertdatetime media table paste code help wordcount",
-              ],
-              toolbar:
-                "undo redo | formatselect | bold italic backcolor | \
-                alignleft aligncenter alignright alignjustify | \
-                bullist numlist outdent indent | removeformat | help",
-            }}
-            onEditorChange={handleEditorChange}
-          />
+          <div style={{ height: "400px" }}>
+            <ReactQuill
+              forwardedRef={quillRef}
+              value={formData.content}
+              onChange={(content: string) => handleFormChange("content", content)}
+              modules={modules}
+              formats={formats}
+              theme="snow"
+              style={{ height: "350px" }}
+            />
+          </div>
         </Box>
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
@@ -116,9 +244,14 @@ export default function CreatePost() {
             color="primary"
             size="large"
             onClick={handleSubmit}
-            disabled={!type || !title || !content}
+            disabled={isSubmitting || !isFormValid()}
+            startIcon={
+              isSubmitting ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : null
+            }
           >
-            發布文章
+            {isSubmitting ? "發布中..." : "發布文章"}
           </Button>
         </Box>
       </Box>
