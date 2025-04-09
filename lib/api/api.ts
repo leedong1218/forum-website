@@ -1,35 +1,37 @@
-// import axios, { AxiosRequestConfig } from 'axios';
+// import axios, { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 
-// const API = axios.create({ 'baseURL': process.env.NEXT_PUBLIC_API_URL });
+// const API = axios.create({
+//   baseURL: process.env.NEXT_PUBLIC_API_URL,
+// });
 
-// API.interceptors.request.use(function (config: AxiosRequestConfig) {
-//   if (!config) {
-//     config = {};
-//   }
-//   if (!config.headers) {
-//     config.headers = {};
-//   }
+// API.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+//   config.headers = config.headers || {};
 //   if (!config.headers['Content-Type']) {
 //     config.headers['Content-Type'] = 'application/json';
 //   }
-//   if (sessionStorage.getItem('token')) {
-//     config.headers['Authorization'] = `Bearer ${sessionStorage.getItem('token')}`;
+//   const token = sessionStorage.getItem('token');
+//   if (token) {
+//     config.headers['Authorization'] = `Bearer ${token}`;
 //   }
 //   return config;
 // });
 
 // API.interceptors.response.use(
-//   async config => {
-//     if (!config.data.result) {
-//       throw config.data;
-//     } else {
-//       if (config.headers['x-auth-token']) {
-//         sessionStorage.setItem('token', config.headers['x-auth-token']);
-//       }
+//   (response: AxiosResponse) => {
+//     const token = response.headers['x-auth-token'];
+//     if (token) {
+//       sessionStorage.setItem('token', token);
 //     }
-//     return config.data;
+
+//     if (response.data?.result === false) {
+//       throw response.data;
+//     }
+
+//     return response.data;
 //   },
-//   error => Promise.reject(error.response.data)
+//   error => {
+//     return Promise.reject(error.response?.data || error);
+//   }
 // );
 
 // export default API;
