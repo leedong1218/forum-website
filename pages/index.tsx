@@ -138,7 +138,11 @@ export default function Home() {
 
   return (
     <Layout title={title}>
-      <Banner title={title} content="查看所有系統通知、功能更新與安全提醒" icon={NotificationsActive} />
+      <Banner
+        title={title}
+        content="查看所有系統通知、功能更新與安全提醒"
+        icon={NotificationsActive}
+      />
 
       <Box sx={{ mb: 3 }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>

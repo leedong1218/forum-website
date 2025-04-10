@@ -70,7 +70,8 @@ import Link from "next/link";
 const accentColor = "#0ea5e9"; // 主藍色
 const accentColorLight = "#e0f2fe"; // 淺藍背景色
 const accentColorDark = "#0284c7"; // 深藍色
-const gradientOverlay = "linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(0,0,0,0.2) 100%)"; // 漸變覆蓋
+const gradientOverlay =
+  "linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(0,0,0,0.2) 100%)"; // 漸變覆蓋
 
 // 定義使用者資料的型別
 interface UserProfile {
@@ -89,12 +90,12 @@ interface UserProfile {
 // 獲取分類顏色
 const getCategoryColor = (category: string) => {
   const categoryColors: { [key: string]: { bg: string; text: string } } = {
-    "Technology": { bg: "#e0f2fe", text: "#0284c7" },
+    Technology: { bg: "#e0f2fe", text: "#0284c7" },
     "AI & ML": { bg: "#fce7f3", text: "#db2777" },
-    "Development": { bg: "#dcfce7", text: "#16a34a" },
-    "Blockchain": { bg: "#fef3c7", text: "#d97706" },
+    Development: { bg: "#dcfce7", text: "#16a34a" },
+    Blockchain: { bg: "#fef3c7", text: "#d97706" },
   };
-  
+
   return categoryColors[category] || { bg: "#f1f5f9", text: "#64748b" };
 };
 
@@ -208,10 +209,10 @@ export default function Personal() {
   const [openCoverDialog, setOpenCoverDialog] = useState(false);
   const [userCopied, setUserCopied] = useState(false);
   const [likedPosts, setLikedPosts] = useState<number[]>(
-    posts.filter(post => post.isLiked).map(post => post.id)
+    posts.filter((post) => post.isLiked).map((post) => post.id)
   );
   const [bookmarkedPosts, setBookmarkedPosts] = useState<number[]>(
-    posts.filter(post => post.isBookmarked).map(post => post.id)
+    posts.filter((post) => post.isBookmarked).map((post) => post.id)
   );
 
   // 初始使用者資料
@@ -251,9 +252,9 @@ export default function Personal() {
   const handleLike = (postId: number, event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-    
+
     if (likedPosts.includes(postId)) {
-      setLikedPosts(likedPosts.filter(id => id !== postId));
+      setLikedPosts(likedPosts.filter((id) => id !== postId));
     } else {
       setLikedPosts([...likedPosts, postId]);
     }
@@ -263,9 +264,9 @@ export default function Personal() {
   const handleBookmark = (postId: number, event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-    
+
     if (bookmarkedPosts.includes(postId)) {
-      setBookmarkedPosts(bookmarkedPosts.filter(id => id !== postId));
+      setBookmarkedPosts(bookmarkedPosts.filter((id) => id !== postId));
     } else {
       setBookmarkedPosts([...bookmarkedPosts, postId]);
     }
@@ -280,23 +281,25 @@ export default function Personal() {
 
   // 更換大頭照的對話框
   const AvatarUploadDialog = () => (
-    <Dialog 
-      open={openAvatarDialog} 
+    <Dialog
+      open={openAvatarDialog}
       onClose={() => setOpenAvatarDialog(false)}
       PaperProps={{
         sx: {
           borderRadius: 3,
           boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
-        }
+        },
       }}
     >
-      <DialogTitle sx={{ 
-        pb: 1, 
-        fontWeight: 600,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}>
+      <DialogTitle
+        sx={{
+          pb: 1,
+          fontWeight: 600,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         更換大頭照
         <IconButton onClick={() => setOpenAvatarDialog(false)} size="small">
           <Close />
@@ -313,16 +316,16 @@ export default function Personal() {
         >
           <Avatar
             src={userProfile.avatarUrl}
-            sx={{ 
-              width: 150, 
-              height: 150, 
+            sx={{
+              width: 150,
+              height: 150,
               mb: 3,
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)" 
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
             }}
           />
-          <Button 
-            variant="contained" 
-            component="label" 
+          <Button
+            variant="contained"
+            component="label"
             startIcon={<Camera />}
             sx={{
               bgcolor: accentColor,
@@ -359,9 +362,9 @@ export default function Personal() {
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button 
+        <Button
           onClick={() => setOpenAvatarDialog(false)}
-          sx={{ 
+          sx={{
             borderRadius: 2,
             color: "text.secondary",
             textTransform: "none",
@@ -370,8 +373,8 @@ export default function Personal() {
         >
           取消
         </Button>
-        <Button 
-          onClick={() => setOpenAvatarDialog(false)} 
+        <Button
+          onClick={() => setOpenAvatarDialog(false)}
           variant="contained"
           sx={{
             bgcolor: accentColor,
@@ -392,23 +395,25 @@ export default function Personal() {
 
   // 更換封面照片對話框
   const CoverUploadDialog = () => (
-    <Dialog 
-      open={openCoverDialog} 
+    <Dialog
+      open={openCoverDialog}
       onClose={() => setOpenCoverDialog(false)}
       PaperProps={{
         sx: {
           borderRadius: 3,
           boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
-        }
+        },
       }}
     >
-      <DialogTitle sx={{ 
-        pb: 1, 
-        fontWeight: 600,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}>
+      <DialogTitle
+        sx={{
+          pb: 1,
+          fontWeight: 600,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         更換封面照片
         <IconButton onClick={() => setOpenCoverDialog(false)} size="small">
           <Close />
@@ -432,12 +437,12 @@ export default function Personal() {
               backgroundPosition: "center",
               borderRadius: 2,
               mb: 3,
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
             }}
           />
-          <Button 
-            variant="contained" 
-            component="label" 
+          <Button
+            variant="contained"
+            component="label"
             startIcon={<Camera />}
             sx={{
               bgcolor: accentColor,
@@ -474,9 +479,9 @@ export default function Personal() {
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button 
+        <Button
           onClick={() => setOpenCoverDialog(false)}
-          sx={{ 
+          sx={{
             borderRadius: 2,
             color: "text.secondary",
             textTransform: "none",
@@ -485,8 +490,8 @@ export default function Personal() {
         >
           取消
         </Button>
-        <Button 
-          onClick={() => setOpenCoverDialog(false)} 
+        <Button
+          onClick={() => setOpenCoverDialog(false)}
           variant="contained"
           sx={{
             bgcolor: accentColor,
@@ -535,7 +540,7 @@ export default function Personal() {
               right: 0,
               bottom: 0,
               background: gradientOverlay,
-            }
+            },
           }}
         >
           {/* 封面照片編輯按鈕 */}
@@ -565,23 +570,7 @@ export default function Personal() {
           <Box sx={{ position: "relative", width: "fit-content" }}>
             <Badge
               overlap="circular"
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-              badgeContent={
-                userProfile.verified && (
-                  <Tooltip title="已驗證用戶">
-                    <Avatar
-                      sx={{
-                        bgcolor: accentColor,
-                        width: 28,
-                        height: 28,
-                        border: "3px solid white",
-                      }}
-                    >
-                      <VerifiedUser sx={{ fontSize: 16, color: "white" }} />
-                    </Avatar>
-                  </Tooltip>
-                )
-              }
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             >
               <Avatar
                 sx={{
@@ -597,7 +586,7 @@ export default function Personal() {
                 alt="Profile Picture"
               />
             </Badge>
-            
+
             {/* 頭像編輯按鈕 */}
             <Tooltip title="更換大頭照">
               <IconButton
@@ -623,16 +612,16 @@ export default function Personal() {
           {/* 暱稱與簡短介紹 */}
           <Box>
             <Box sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
-              <Typography 
-                variant="h4" 
-                sx={{ 
+              <Typography
+                variant="h4"
+                sx={{
                   fontWeight: 700,
                   color: "#1e293b",
                 }}
               >
                 {userProfile.displayName}
               </Typography>
-              
+
               {/* 編輯資料按鈕 */}
               <Button
                 variant="outlined"
@@ -656,72 +645,79 @@ export default function Personal() {
                 編輯個人資料
               </Button>
             </Box>
-            
+
             <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-              <Typography 
-                variant="subtitle1" 
+              <Typography
+                variant="subtitle1"
                 color="text.secondary"
-                sx={{ 
-                  display: "flex", 
+                sx={{
+                  display: "flex",
                   alignItems: "center",
                   cursor: "pointer",
                   "&:hover": {
                     color: accentColor,
-                  }
+                  },
                 }}
                 onClick={handleCopyUsername}
               >
                 @{userProfile.username}
                 <Tooltip title={userCopied ? "已複製" : "複製用戶名稱"}>
                   <IconButton size="small" sx={{ ml: 0.5 }}>
-                    {userCopied ? <Check fontSize="small" /> : <ContentCopy fontSize="small" />}
+                    {userCopied ? (
+                      <Check fontSize="small" />
+                    ) : (
+                      <ContentCopy fontSize="small" />
+                    )}
                   </IconButton>
                 </Tooltip>
               </Typography>
-              
+
               <Tooltip title="查看位置">
-                <Chip 
+                <Chip
                   icon={<LocationOn sx={{ fontSize: 16 }} />}
                   label={userProfile.location}
                   size="small"
-                  sx={{ 
+                  sx={{
                     ml: 2,
                     fontSize: "0.8rem",
                     bgcolor: "rgba(0,0,0,0.04)",
                     "& .MuiChip-icon": {
-                      color: "text.secondary"
-                    }
+                      color: "text.secondary",
+                    },
                   }}
                   clickable
                 />
               </Tooltip>
-              
+
               <Tooltip title="加入日期">
-                <Chip 
+                <Chip
                   icon={<CalendarMonth sx={{ fontSize: 16 }} />}
-                  label={new Date(userProfile.joinDate).toLocaleDateString('zh-TW', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}
+                  label={new Date(userProfile.joinDate).toLocaleDateString(
+                    "zh-TW",
+                    {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    }
+                  )}
                   size="small"
-                  sx={{ 
+                  sx={{
                     ml: 1,
                     fontSize: "0.8rem",
                     bgcolor: "rgba(0,0,0,0.04)",
                     "& .MuiChip-icon": {
-                      color: "text.secondary"
-                    }
+                      color: "text.secondary",
+                    },
                   }}
                   clickable
                 />
               </Tooltip>
             </Box>
-            
-            <Typography 
-              variant="body1" 
-              sx={{ 
-                mb: 3, 
+
+            <Typography
+              variant="body1"
+              sx={{
+                mb: 3,
                 maxWidth: "100%",
                 color: "#475569",
                 lineHeight: 1.6,
@@ -738,11 +734,11 @@ export default function Personal() {
                 mb: 2,
               }}
             >
-              <Paper 
-                elevation={0} 
-                sx={{ 
-                  p: 2, 
-                  borderRadius: 3, 
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
                   border: "1px solid rgba(0,0,0,0.06)",
                   display: "flex",
                   alignItems: "center",
@@ -752,12 +748,15 @@ export default function Personal() {
                   "&:hover": {
                     boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                     borderColor: "rgba(0,0,0,0.12)",
-                  }
+                  },
                 }}
               >
                 <Groups sx={{ color: accentColor, mr: 1.5, fontSize: 24 }} />
                 <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 700, lineHeight: 1.2 }}
+                  >
                     142
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
@@ -765,12 +764,12 @@ export default function Personal() {
                   </Typography>
                 </Box>
               </Paper>
-              
-              <Paper 
-                elevation={0} 
-                sx={{ 
-                  p: 2, 
-                  borderRadius: 3, 
+
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
                   border: "1px solid rgba(0,0,0,0.06)",
                   display: "flex",
                   alignItems: "center",
@@ -780,12 +779,15 @@ export default function Personal() {
                   "&:hover": {
                     boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                     borderColor: "rgba(0,0,0,0.12)",
-                  }
+                  },
                 }}
               >
                 <Groups sx={{ color: accentColor, mr: 1.5, fontSize: 24 }} />
                 <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 700, lineHeight: 1.2 }}
+                  >
                     98
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
@@ -793,12 +795,12 @@ export default function Personal() {
                   </Typography>
                 </Box>
               </Paper>
-              
-              <Paper 
-                elevation={0} 
-                sx={{ 
-                  p: 2, 
-                  borderRadius: 3, 
+
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
                   border: "1px solid rgba(0,0,0,0.06)",
                   display: "flex",
                   alignItems: "center",
@@ -808,12 +810,17 @@ export default function Personal() {
                   "&:hover": {
                     boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                     borderColor: "rgba(0,0,0,0.12)",
-                  }
+                  },
                 }}
               >
-                <ArticleIcon sx={{ color: accentColor, mr: 1.5, fontSize: 24 }} />
+                <ArticleIcon
+                  sx={{ color: accentColor, mr: 1.5, fontSize: 24 }}
+                />
                 <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 700, lineHeight: 1.2 }}
+                  >
                     56
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
@@ -821,12 +828,12 @@ export default function Personal() {
                   </Typography>
                 </Box>
               </Paper>
-              
-              <Paper 
-                elevation={0} 
-                sx={{ 
-                  p: 2, 
-                  borderRadius: 3, 
+
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
                   border: "1px solid rgba(0,0,0,0.06)",
                   display: "flex",
                   alignItems: "center",
@@ -836,12 +843,15 @@ export default function Personal() {
                   "&:hover": {
                     boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                     borderColor: "rgba(0,0,0,0.12)",
-                  }
+                  },
                 }}
               >
                 <ThumbUp sx={{ color: accentColor, mr: 1.5, fontSize: 24 }} />
                 <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 700, lineHeight: 1.2 }}
+                  >
                     1.2K
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
@@ -870,8 +880,8 @@ export default function Personal() {
           value={tabValue}
           onChange={handleTabChange}
           variant="fullWidth"
-          sx={{ 
-            borderBottom: 1, 
+          sx={{
+            borderBottom: 1,
             borderColor: "divider",
             "& .MuiTabs-indicator": {
               backgroundColor: accentColor,
@@ -880,53 +890,53 @@ export default function Personal() {
             },
           }}
         >
-          <Tab 
-            icon={<ArticleIcon />} 
+          <Tab
+            icon={<ArticleIcon />}
             iconPosition="start"
-            label="發布的文章" 
-            sx={{ 
-              textTransform: "none", 
+            label="發布的文章"
+            sx={{
+              textTransform: "none",
               fontWeight: tabValue === 0 ? 600 : 400,
               fontSize: "0.95rem",
               color: tabValue === 0 ? accentColor : "text.secondary",
               minHeight: 56,
-            }} 
+            }}
           />
-          <Tab 
-            icon={<BookmarkIcon />} 
+          <Tab
+            icon={<BookmarkIcon />}
             iconPosition="start"
-            label="追蹤的看板" 
-            sx={{ 
-              textTransform: "none", 
+            label="追蹤的看板"
+            sx={{
+              textTransform: "none",
               fontWeight: tabValue === 1 ? 600 : 400,
               fontSize: "0.95rem",
               color: tabValue === 1 ? accentColor : "text.secondary",
               minHeight: 56,
-            }} 
+            }}
           />
-          <Tab 
-            icon={<PersonIcon />} 
+          <Tab
+            icon={<PersonIcon />}
             iconPosition="start"
-            label="個人資訊" 
-            sx={{ 
-              textTransform: "none", 
+            label="個人資訊"
+            sx={{
+              textTransform: "none",
               fontWeight: tabValue === 2 ? 600 : 400,
               fontSize: "0.95rem",
               color: tabValue === 2 ? accentColor : "text.secondary",
               minHeight: 56,
-            }} 
+            }}
           />
-          <Tab 
-            icon={<SettingsIcon />} 
+          <Tab
+            icon={<SettingsIcon />}
             iconPosition="start"
-            label="設定" 
-            sx={{ 
-              textTransform: "none", 
+            label="設定"
+            sx={{
+              textTransform: "none",
               fontWeight: tabValue === 3 ? 600 : 400,
               fontSize: "0.95rem",
               color: tabValue === 3 ? accentColor : "text.secondary",
               minHeight: 56,
-            }} 
+            }}
           />
         </Tabs>
 
@@ -937,7 +947,7 @@ export default function Personal() {
               const isLiked = likedPosts.includes(post.id);
               const isBookmarked = bookmarkedPosts.includes(post.id);
               const categoryColor = getCategoryColor(post.category);
-              
+
               return (
                 <Card
                   component={Link}
@@ -983,7 +993,7 @@ export default function Personal() {
                         <Typography
                           variant="h6"
                           component="div"
-                          sx={{ 
+                          sx={{
                             fontWeight: 600,
                             fontSize: "1.1rem",
                             color: "#1e293b",
@@ -993,9 +1003,9 @@ export default function Personal() {
                         </Typography>
                       </Box>
 
-                      <Box 
-                        sx={{ 
-                          display: "flex", 
+                      <Box
+                        sx={{
+                          display: "flex",
                           alignItems: "center",
                           color: "text.secondary",
                           fontSize: "0.75rem",
@@ -1038,17 +1048,19 @@ export default function Personal() {
                           <IconButton
                             onClick={(e) => handleLike(post.id, e)}
                             size="small"
-                            sx={{ 
+                            sx={{
                               p: 0.5,
                               color: isLiked ? "#f43f5e" : "text.secondary",
                             }}
                           >
-                            <Badge 
-                              badgeContent={post.likes} 
+                            <Badge
+                              badgeContent={post.likes}
                               color="default"
                               sx={{
                                 "& .MuiBadge-badge": {
-                                  bgcolor: isLiked ? "#fee2e2" : "rgba(0,0,0,0.06)",
+                                  bgcolor: isLiked
+                                    ? "#fee2e2"
+                                    : "rgba(0,0,0,0.06)",
                                   color: isLiked ? "#f43f5e" : "text.secondary",
                                   fontWeight: 600,
                                   fontSize: "0.7rem",
@@ -1056,22 +1068,26 @@ export default function Personal() {
                                 },
                               }}
                             >
-                              {isLiked ? <Favorite fontSize="small" /> : <FavoriteBorder fontSize="small" />}
+                              {isLiked ? (
+                                <Favorite fontSize="small" />
+                              ) : (
+                                <FavoriteBorder fontSize="small" />
+                              )}
                             </Badge>
                           </IconButton>
                         </Tooltip>
-                        
+
                         {/* 評論 */}
                         <Tooltip title="查看評論">
                           <IconButton
                             size="small"
-                            sx={{ 
+                            sx={{
                               p: 0.5,
                               color: "text.secondary",
                             }}
                           >
-                            <Badge 
-                              badgeContent={post.comments} 
+                            <Badge
+                              badgeContent={post.comments}
                               color="default"
                               sx={{
                                 "& .MuiBadge-badge": {
@@ -1087,40 +1103,50 @@ export default function Personal() {
                             </Badge>
                           </IconButton>
                         </Tooltip>
-                        
+
                         {/* 收藏 */}
                         <Tooltip title={isBookmarked ? "取消收藏" : "收藏"}>
                           <IconButton
                             onClick={(e) => handleBookmark(post.id, e)}
                             size="small"
-                            sx={{ 
+                            sx={{
                               p: 0.5,
-                              color: isBookmarked ? accentColor : "text.secondary",
+                              color: isBookmarked
+                                ? accentColor
+                                : "text.secondary",
                             }}
                           >
-                            <Badge 
-                              badgeContent={post.bookmarks} 
+                            <Badge
+                              badgeContent={post.bookmarks}
                               color="default"
                               sx={{
                                 "& .MuiBadge-badge": {
-                                  bgcolor: isBookmarked ? accentColorLight : "rgba(0,0,0,0.06)",
-                                  color: isBookmarked ? accentColor : "text.secondary",
+                                  bgcolor: isBookmarked
+                                    ? accentColorLight
+                                    : "rgba(0,0,0,0.06)",
+                                  color: isBookmarked
+                                    ? accentColor
+                                    : "text.secondary",
                                   fontWeight: 600,
                                   fontSize: "0.7rem",
                                   right: -16,
                                 },
                               }}
                             >
-                              {isBookmarked ? <Bookmark fontSize="small" /> : <TurnedInNot fontSize="small" />}
+                              {isBookmarked ? (
+                                <Bookmark fontSize="small" />
+                              ) : (
+                                <TurnedInNot fontSize="small" />
+                              )}
                             </Badge>
                           </IconButton>
                         </Tooltip>
                       </Box>
-                      
+
                       {/* 檢視次數 */}
-                      <Box 
-                        sx={{ 
-                          display: "flex", 
+                      <Box
+                        sx={{
+                          display: "flex",
                           alignItems: "center",
                           color: "text.secondary",
                           fontSize: "0.75rem",
@@ -1182,29 +1208,38 @@ export default function Personal() {
                         {board.icon}
                       </Avatar>
                       <Box>
-                        <Typography variant="h6" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+                        <Typography
+                          variant="h6"
+                          sx={{ fontWeight: 600, lineHeight: 1.2 }}
+                        >
                           {board.name}
                         </Typography>
-                        <Chip 
-                          label={`活躍度: ${board.activityLevel}`} 
+                        <Chip
+                          label={`活躍度: ${board.activityLevel}`}
                           size="small"
-                          sx={{ 
+                          sx={{
                             height: 20,
                             fontSize: "0.65rem",
-                            bgcolor: board.activityLevel === "高" ? "#dcfce7" : "#fef3c7",
-                            color: board.activityLevel === "高" ? "#16a34a" : "#d97706",
+                            bgcolor:
+                              board.activityLevel === "高"
+                                ? "#dcfce7"
+                                : "#fef3c7",
+                            color:
+                              board.activityLevel === "高"
+                                ? "#16a34a"
+                                : "#d97706",
                             fontWeight: 600,
                             mt: 0.5,
                           }}
                         />
                       </Box>
                     </Box>
-                    
+
                     <Typography
                       variant="body2"
                       color="text.secondary"
-                      sx={{ 
-                        mb: 2, 
+                      sx={{
+                        mb: 2,
                         lineHeight: 1.6,
                         display: "-webkit-box",
                         WebkitBoxOrient: "vertical",
@@ -1216,18 +1251,22 @@ export default function Personal() {
                     >
                       {board.description}
                     </Typography>
-                    
-                    <Box sx={{ pt: 2, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-                      <Box sx={{ 
-                        display: "flex", 
-                        justifyContent: "space-between", 
-                        alignItems: "center",
-                        mb: 2,
-                      }}>
-                        <Typography 
-                          variant="caption" 
-                          sx={{ 
-                            display: "flex", 
+
+                    <Box
+                      sx={{ pt: 2, borderTop: "1px solid rgba(0,0,0,0.06)" }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          mb: 2,
+                        }}
+                      >
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            display: "flex",
                             alignItems: "center",
                             color: "text.secondary",
                             fontWeight: 500,
@@ -1236,11 +1275,11 @@ export default function Personal() {
                           <Groups sx={{ mr: 0.5, fontSize: 14 }} />
                           {board.members.toLocaleString()} 成員
                         </Typography>
-                        
-                        <Typography 
-                          variant="caption" 
-                          sx={{ 
-                            display: "flex", 
+
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            display: "flex",
                             alignItems: "center",
                             color: "text.secondary",
                             fontWeight: 500,
@@ -1250,19 +1289,25 @@ export default function Personal() {
                           {board.posts.toLocaleString()} 文章
                         </Typography>
                       </Box>
-                      
-                      <Button 
+
+                      <Button
                         fullWidth
                         variant="contained"
                         sx={{
-                          bgcolor: board.isFollowing ? "transparent" : accentColor,
+                          bgcolor: board.isFollowing
+                            ? "transparent"
+                            : accentColor,
                           color: board.isFollowing ? "text.secondary" : "white",
-                          border: board.isFollowing ? "1px solid rgba(0,0,0,0.12)" : "none",
+                          border: board.isFollowing
+                            ? "1px solid rgba(0,0,0,0.12)"
+                            : "none",
                           borderRadius: 2,
                           textTransform: "none",
                           fontWeight: 600,
                           "&:hover": {
-                            bgcolor: board.isFollowing ? "rgba(0,0,0,0.04)" : accentColorDark,
+                            bgcolor: board.isFollowing
+                              ? "rgba(0,0,0,0.04)"
+                              : accentColorDark,
                           },
                         }}
                       >
@@ -1278,7 +1323,14 @@ export default function Personal() {
 
         {/* 個人資訊 */}
         <TabPanel value={tabValue} index={2}>
-          <Box sx={{ display: "flex", flexDirection: "column", maxWidth: 800, mx: "auto" }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              maxWidth: 800,
+              mx: "auto",
+            }}
+          >
             <Paper
               elevation={0}
               sx={{
@@ -1289,12 +1341,12 @@ export default function Personal() {
                 boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
               }}
             >
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 600, 
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
                   mb: 2,
-                  color: "#1e293b", 
+                  color: "#1e293b",
                   display: "flex",
                   alignItems: "center",
                 }}
@@ -1302,16 +1354,18 @@ export default function Personal() {
                 <PersonIcon sx={{ mr: 1, color: accentColor }} />
                 基本資料
               </Typography>
-              
+
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
-                  <Box sx={{ 
-                    display: "flex", 
-                    mb: 2,
-                    p: 2,
-                    borderRadius: 2,
-                    bgcolor: "rgba(0,0,0,0.02)",
-                  }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      mb: 2,
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: "rgba(0,0,0,0.02)",
+                    }}
+                  >
                     <PersonEditIcon sx={{ color: accentColor, mr: 2 }} />
                     <Box>
                       <Typography variant="caption" color="text.secondary">
@@ -1323,15 +1377,17 @@ export default function Personal() {
                     </Box>
                   </Box>
                 </Grid>
-                
+
                 <Grid item xs={12} md={6}>
-                  <Box sx={{ 
-                    display: "flex", 
-                    mb: 2,
-                    p: 2,
-                    borderRadius: 2,
-                    bgcolor: "rgba(0,0,0,0.02)",
-                  }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      mb: 2,
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: "rgba(0,0,0,0.02)",
+                    }}
+                  >
                     <AlternateEmail sx={{ color: accentColor, mr: 2 }} />
                     <Box>
                       <Typography variant="caption" color="text.secondary">
@@ -1343,15 +1399,17 @@ export default function Personal() {
                     </Box>
                   </Box>
                 </Grid>
-                
+
                 <Grid item xs={12} md={6}>
-                  <Box sx={{ 
-                    display: "flex", 
-                    mb: 2,
-                    p: 2,
-                    borderRadius: 2,
-                    bgcolor: "rgba(0,0,0,0.02)",
-                  }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      mb: 2,
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: "rgba(0,0,0,0.02)",
+                    }}
+                  >
                     <Email sx={{ color: accentColor, mr: 2 }} />
                     <Box>
                       <Typography variant="caption" color="text.secondary">
@@ -1363,35 +1421,41 @@ export default function Personal() {
                     </Box>
                   </Box>
                 </Grid>
-                
+
                 <Grid item xs={12} md={6}>
-                  <Box sx={{ 
-                    display: "flex", 
-                    mb: 2,
-                    p: 2,
-                    borderRadius: 2,
-                    bgcolor: "rgba(0,0,0,0.02)",
-                  }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      mb: 2,
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: "rgba(0,0,0,0.02)",
+                    }}
+                  >
                     <Cake sx={{ color: accentColor, mr: 2 }} />
                     <Box>
                       <Typography variant="caption" color="text.secondary">
                         生日
                       </Typography>
                       <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                        {new Date(userProfile.birthday).toLocaleDateString('zh-TW')}
+                        {new Date(userProfile.birthday).toLocaleDateString(
+                          "zh-TW"
+                        )}
                       </Typography>
                     </Box>
                   </Box>
                 </Grid>
-                
+
                 <Grid item xs={12} md={6}>
-                  <Box sx={{ 
-                    display: "flex", 
-                    mb: 2,
-                    p: 2,
-                    borderRadius: 2,
-                    bgcolor: "rgba(0,0,0,0.02)",
-                  }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      mb: 2,
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: "rgba(0,0,0,0.02)",
+                    }}
+                  >
                     <LocationOn sx={{ color: accentColor, mr: 2 }} />
                     <Box>
                       <Typography variant="caption" color="text.secondary">
@@ -1403,32 +1467,37 @@ export default function Personal() {
                     </Box>
                   </Box>
                 </Grid>
-                
+
                 <Grid item xs={12} md={6}>
-                  <Box sx={{ 
-                    display: "flex", 
-                    mb: 2,
-                    p: 2,
-                    borderRadius: 2,
-                    bgcolor: "rgba(0,0,0,0.02)",
-                  }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      mb: 2,
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: "rgba(0,0,0,0.02)",
+                    }}
+                  >
                     <CalendarMonth sx={{ color: accentColor, mr: 2 }} />
                     <Box>
                       <Typography variant="caption" color="text.secondary">
                         加入日期
                       </Typography>
                       <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                        {new Date(userProfile.joinDate).toLocaleDateString('zh-TW', { 
-                          year: 'numeric', 
-                          month: 'long', 
-                          day: 'numeric' 
-                        })}
+                        {new Date(userProfile.joinDate).toLocaleDateString(
+                          "zh-TW",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }
+                        )}
                       </Typography>
                     </Box>
                   </Box>
                 </Grid>
               </Grid>
-              
+
               <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
                 <Button
                   variant="outlined"
@@ -1451,7 +1520,7 @@ export default function Personal() {
                 </Button>
               </Box>
             </Paper>
-            
+
             <Paper
               elevation={0}
               sx={{
@@ -1461,12 +1530,12 @@ export default function Personal() {
                 boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
               }}
             >
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 600, 
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
                   mb: 2,
-                  color: "#1e293b", 
+                  color: "#1e293b",
                   display: "flex",
                   alignItems: "center",
                 }}
@@ -1474,16 +1543,18 @@ export default function Personal() {
                 <ArticleIcon sx={{ mr: 1, color: accentColor }} />
                 活動統計
               </Typography>
-              
+
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ 
-                    display: "flex", 
-                    mb: 2,
-                    p: 2,
-                    borderRadius: 2,
-                    bgcolor: "rgba(0,0,0,0.02)",
-                  }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      mb: 2,
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: "rgba(0,0,0,0.02)",
+                    }}
+                  >
                     <ArticleIcon sx={{ color: accentColor, mr: 2 }} />
                     <Box>
                       <Typography variant="caption" color="text.secondary">
@@ -1495,15 +1566,17 @@ export default function Personal() {
                     </Box>
                   </Box>
                 </Grid>
-                
+
                 <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ 
-                    display: "flex", 
-                    mb: 2,
-                    p: 2,
-                    borderRadius: 2,
-                    bgcolor: "rgba(0,0,0,0.02)",
-                  }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      mb: 2,
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: "rgba(0,0,0,0.02)",
+                    }}
+                  >
                     <ThumbUp sx={{ color: accentColor, mr: 2 }} />
                     <Box>
                       <Typography variant="caption" color="text.secondary">
@@ -1515,15 +1588,17 @@ export default function Personal() {
                     </Box>
                   </Box>
                 </Grid>
-                
+
                 <Grid item xs={12} sm={6} md={4}>
-                  <Box sx={{ 
-                    display: "flex", 
-                    mb: 2,
-                    p: 2,
-                    borderRadius: 2,
-                    bgcolor: "rgba(0,0,0,0.02)",
-                  }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      mb: 2,
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: "rgba(0,0,0,0.02)",
+                    }}
+                  >
                     <AccessAlarm sx={{ color: accentColor, mr: 2 }} />
                     <Box>
                       <Typography variant="caption" color="text.secondary">
@@ -1553,12 +1628,12 @@ export default function Personal() {
                 boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
               }}
             >
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 600, 
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
                   mb: 3,
-                  color: "#1e293b", 
+                  color: "#1e293b",
                   display: "flex",
                   alignItems: "center",
                 }}
@@ -1566,13 +1641,13 @@ export default function Personal() {
                 <Security sx={{ mr: 1, color: accentColor }} />
                 帳號與安全
               </Typography>
-              
+
               <List disablePadding>
-                <ListItem 
-                  sx={{ 
-                    mb: 1, 
-                    py: 2, 
-                    px: 3, 
+                <ListItem
+                  sx={{
+                    mb: 1,
+                    py: 2,
+                    px: 3,
                     borderRadius: 2,
                     "&:hover": {
                       bgcolor: "rgba(0,0,0,0.02)",
@@ -1606,12 +1681,12 @@ export default function Personal() {
                     修改
                   </Button>
                 </ListItem>
-                
-                <ListItem 
-                  sx={{ 
-                    mb: 1, 
-                    py: 2, 
-                    px: 3, 
+
+                <ListItem
+                  sx={{
+                    mb: 1,
+                    py: 2,
+                    px: 3,
                     borderRadius: 2,
                     "&:hover": {
                       bgcolor: "rgba(0,0,0,0.02)",
@@ -1647,8 +1722,8 @@ export default function Personal() {
                 </ListItem>
               </List>
             </Paper>
-            
-            <Paper
+
+            {/* <Paper
               elevation={0}
               sx={{
                 borderRadius: 3,
@@ -1811,7 +1886,7 @@ export default function Personal() {
                   </Button>
                 </ListItem>
               </List>
-            </Paper>
+            </Paper> */}
           </Box>
         </TabPanel>
       </Box>
@@ -1826,12 +1901,12 @@ export default function Personal() {
           sx: {
             borderRadius: 3,
             boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
-          }
+          },
         }}
       >
-        <DialogTitle 
-          sx={{ 
-            pb: 1, 
+        <DialogTitle
+          sx={{
+            pb: 1,
             fontWeight: 600,
             display: "flex",
             justifyContent: "space-between",
@@ -1849,10 +1924,10 @@ export default function Personal() {
             <Box sx={{ position: "relative" }}>
               <Avatar
                 src={userProfile.avatarUrl}
-                sx={{ 
-                  width: 120, 
+                sx={{
+                  width: 120,
                   height: 120,
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)" 
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                 }}
               />
               <IconButton
@@ -1895,7 +1970,7 @@ export default function Personal() {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 2,
-                  }
+                  },
                 }}
               />
             </Grid>
@@ -1917,7 +1992,7 @@ export default function Personal() {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 2,
-                  }
+                  },
                 }}
               />
             </Grid>
@@ -1941,7 +2016,7 @@ export default function Personal() {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 2,
-                  }
+                  },
                 }}
               />
             </Grid>
@@ -1967,7 +2042,7 @@ export default function Personal() {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 2,
-                  }
+                  },
                 }}
               />
             </Grid>
@@ -1991,7 +2066,7 @@ export default function Personal() {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 2,
-                  }
+                  },
                 }}
               />
             </Grid>
@@ -2015,16 +2090,16 @@ export default function Personal() {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 2,
-                  }
+                  },
                 }}
               />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button 
+          <Button
             onClick={() => setIsEditingProfile(false)}
-            sx={{ 
+            sx={{
               borderRadius: 2,
               color: "text.secondary",
               textTransform: "none",

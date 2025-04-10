@@ -63,20 +63,19 @@ interface NavbarProps {
   title?: string;
   handleDrawerToggle: () => void; // 接收來自父元件的函數
   isCompactView?: boolean; // 添加檢查是否為壓縮視圖的屬性
+  isLogin?: boolean;
 }
 
 export default function Navbar({
-  showProfileCard = true,
   handleDrawerToggle,
-  isCompactView = false
+  isCompactView = false,
+  isLogin = false,
 }: NavbarProps) {
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [showMobileProfile, setShowMobileProfile] = useState(false);
   const open = Boolean(anchorEl);
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -85,10 +84,6 @@ export default function Navbar({
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-  };
-
-  const handleMobileProfileToggle = () => {
-    setShowMobileProfile(!showMobileProfile);
   };
 
   // 現在搜尋按鈕將觸發側邊欄的開啟
@@ -101,7 +96,7 @@ export default function Navbar({
       position="fixed"
       elevation={0}
       sx={{
-        zIndex: (theme) => theme.zIndex.drawer + 1,
+        zIndex: 9999,
         bgcolor: colors.cardBg,
         borderBottom: "1px solid rgba(0,0,0,0.08)",
       }}
@@ -207,115 +202,124 @@ export default function Navbar({
               </IconButton>
             </Tooltip>
           )}
-
-          <Tooltip title="通知">
-            <IconButton
-              sx={{
-                mr: isMobile ? 1 : 2,
-                "&:hover": {
-                  color: colors.accent,
-                  bgcolor: colors.accentLight,
-                },
-              }}
-            >
-              <Badge
-                badgeContent={4}
-                color="primary"
+          {isLogin && (
+            <Tooltip title="通知">
+              <IconButton
                 sx={{
-                  "& .MuiBadge-badge": {
-                    fontSize: "0.7rem",
-                    boxShadow: "0 2px 5px rgba(14, 165, 233, 0.3)",
+                  mr: isMobile ? 1 : 2,
+                  "&:hover": {
+                    color: colors.accent,
+                    bgcolor: colors.accentLight,
                   },
                 }}
               >
-                <NotificationsIcon sx={{ color: colors.textSecondary }} />
-              </Badge>
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="個人選單">
-            <IconButton
-              onClick={handleMenuClick}
-              sx={{
-                p: 0.5,
-                border: `2px solid ${open ? colors.accent : "transparent"}`,
-                transition: "all 0.2s",
-                "&:hover": {
-                  border: `2px solid ${colors.accentLight}`,
-                },
-              }}
-            >
-              <Avatar
-                sx={{
-                  width: 36,
-                  height: 36,
-                  bgcolor: open ? colors.accent : colors.gradient,
-                  boxShadow: open ? `0 0 0 2px ${colors.accentLight}` : "none",
-                  transition: "all 0.3s ease",
-                }}
-              >
-                U
-              </Avatar>
-            </IconButton>
-          </Tooltip>
-
-          <Menu
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleMenuClose}
-            PaperProps={{
-              sx: {
-                mt: 1,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                borderRadius: 2,
-                width: 200,
-              },
-            }}
-          >
-            <MenuItem
-              onClick={handleMenuClose}
-              component={Link}
-              href="/personal"
-            >
-              <ListItemIcon>
-                <Avatar
+                <Badge
+                  badgeContent={4}
+                  color="primary"
                   sx={{
-                    width: 24,
-                    height: 24,
-                    bgcolor: colors.accent,
-                    fontSize: "0.8rem",
+                    "& .MuiBadge-badge": {
+                      fontSize: "0.7rem",
+                      boxShadow: "0 2px 5px rgba(14, 165, 233, 0.3)",
+                    },
                   }}
                 >
-                  U
-                </Avatar>
-              </ListItemIcon>
-              <ListItemText primary="個人檔案" />
-            </MenuItem>
-            <MenuItem
-              onClick={handleMenuClose}
-              component={Link}
-              href="/settings"
-            >
-              <ListItemIcon>
-                <Edit fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary="設置" />
-            </MenuItem>
-            <Divider />
+                  <NotificationsIcon sx={{ color: colors.textSecondary }} />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+          )}
+
+          {isLogin && (
+            <>
+              <Tooltip title="個人選單">
+                <IconButton
+                  onClick={handleMenuClick}
+                  sx={{
+                    p: 0.5,
+                    border: `2px solid ${open ? colors.accent : "transparent"}`,
+                    transition: "all 0.2s",
+                    "&:hover": {
+                      border: `2px solid ${colors.accentLight}`,
+                    },
+                  }}
+                >
+                  <Avatar
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      bgcolor: open ? colors.accent : colors.gradient,
+                      boxShadow: open
+                        ? `0 0 0 2px ${colors.accentLight}`
+                        : "none",
+                      transition: "all 0.3s ease",
+                    }}
+                  >
+                    U
+                  </Avatar>
+                </IconButton>
+              </Tooltip>
+
+              <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleMenuClose}
+                PaperProps={{
+                  sx: {
+                    mt: 1,
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                    borderRadius: 2,
+                    width: 200,
+                  },
+                }}
+              >
+                <MenuItem
+                  onClick={handleMenuClose}
+                  component={Link}
+                  href="/personal"
+                >
+                  <ListItemIcon>
+                    <Avatar
+                      sx={{
+                        width: 24,
+                        height: 24,
+                        bgcolor: colors.accent,
+                        fontSize: "0.8rem",
+                      }}
+                    >
+                      U
+                    </Avatar>
+                  </ListItemIcon>
+                  <ListItemText primary="個人檔案" />
+                </MenuItem>
+                <MenuItem
+                  onClick={handleMenuClose}
+                  component={Link}
+                  href="/settings"
+                >
+                  <ListItemIcon>
+                    <Edit fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary="設置" />
+                </MenuItem>
+                <Divider />
+                <MenuItem onClick={handleMenuClose}>
+                  <ListItemText
+                    primary="登出"
+                    onClick={() => router.push("/login")}
+                  />
+                </MenuItem>
+              </Menu>
+            </>
+          )}
+          {!isLogin && (
             <MenuItem onClick={handleMenuClose}>
               <ListItemText
-                primary="登出"
+                sx={{ color: "#000" }}
+                primary="登入"
                 onClick={() => router.push("/login")}
               />
             </MenuItem>
-            {isTablet && showProfileCard && (
-              <MenuItem onClick={handleMobileProfileToggle}>
-                <ListItemText
-                  primary={showMobileProfile ? "隱藏個人資料" : "顯示個人資料"}
-                />
-              </MenuItem>
-            )}
-          </Menu>
+          )}
         </Box>
       </Toolbar>
     </AppBar>

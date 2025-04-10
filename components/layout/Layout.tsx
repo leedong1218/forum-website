@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
 import { useMediaQuery, useTheme } from "@mui/material";
@@ -26,15 +26,21 @@ export default function Layout({
   title,
 }: LayoutProps) {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
-  
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+
   // 更新斷點：1200px 用於側邊欄，1500px 用於個人檔案
-  const isCompactView = useMediaQuery('(max-width:1200px)');
-  const hideProfileSidebar = useMediaQuery('(max-width:1500px)');
+  const isCompactView = useMediaQuery("(max-width:1920px)");
+  const hideProfileSidebar = useMediaQuery("(max-width:1500px)");
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showMobileProfile, setShowMobileProfile] = useState(false);
+
+  const [isLogin, setIsLogin] = useState(false);
+
+  useEffect(() => {
+    setIsLogin(localStorage.getItem("access_token") !== null ? true : false);
+  }, []);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -47,21 +53,23 @@ export default function Layout({
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: bgColor }}>
       <CssBaseline />
-      
+
       {/* 導航欄 */}
-      <Navbar 
-        handleDrawerToggle={handleDrawerToggle} 
+      <Navbar
+        handleDrawerToggle={handleDrawerToggle}
         isCompactView={isCompactView}
+        isLogin={isLogin}
       />
 
       {/* 側邊欄 */}
-      <Sidebar 
+      <Sidebar
         title={title}
         isMobile={isMobile}
         isCompactView={isCompactView}
         hideProfileSidebar={hideProfileSidebar}
         mobileOpen={mobileOpen}
         handleDrawerToggle={handleDrawerToggle}
+        isLogin={isLogin}
       />
 
       {/* 主要內容區域 + 個人資料卡 */}
@@ -77,32 +85,38 @@ export default function Layout({
           minHeight: "calc(100vh - 64px)", // 減去頂部導航欄高度
         }}
       >
-        <Box sx={{ 
-          display: "flex",
-          flexDirection: { xs: 'column', md: 'row' },
-          width: '100%',
-          gap: { xs: 0, md: 3 },
-          flexGrow: 1, // 讓內容區域佔據剩餘空間
-        }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            width: "100%",
+            gap: { xs: 0, md: 3 },
+            flexGrow: 1, // 讓內容區域佔據剩餘空間
+          }}
+        >
           {/* 主要內容區域 */}
-          <Box sx={{ 
-            flexGrow: 1, 
-            width: '100%',
-            mb: (showMobileProfile && (isMobile || isTablet)) ? 3 : 0
-          }}>
+          <Box
+            sx={{
+              flexGrow: 1,
+              width: "100%",
+              mb: showMobileProfile && (isMobile || isTablet) ? 3 : 0,
+            }}
+          >
             {children}
           </Box>
 
           {/* 個人資料區域以及在線用戶 - 僅在寬屏 (>1500px) 顯示在右側 */}
-          {showProfileCard && !hideProfileSidebar && (
-            <Box sx={{ 
-              width: { sm: '100%', md: profileCardWidth },
-              flexShrink: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 3
-            }}>
-              <ProfileSection 
+          {showProfileCard && !hideProfileSidebar && isLogin && (
+            <Box
+              sx={{
+                width: { sm: "100%", md: profileCardWidth },
+                flexShrink: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: 3,
+              }}
+            >
+              <ProfileSection
                 isMobile={isMobile}
                 isTablet={isTablet}
                 isCompactView={isCompactView}
@@ -118,8 +132,8 @@ export default function Layout({
         </Box>
 
         {/* 1500px 以下時，在主內容區域底部顯示在線用戶 */}
-        {hideProfileSidebar && (
-          <Box sx={{ mt: 4, width: '100%' }}>
+        {hideProfileSidebar && isLogin && (
+          <Box sx={{ mt: 4, width: "100%" }}>
             <OnlineUsers />
           </Box>
         )}
