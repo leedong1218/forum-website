@@ -1,16 +1,19 @@
 import { StaticImageData } from "next/image";
 
-export type BoardsType = {
+export type BoardItem = {
   id: number;
-  title: string;
+  name: string;
   description: string;
-  avatar: StaticImageData;
-  category: string;
-  followers: number;
-  isFollow: boolean;
+  avatar: string | StaticImageData;
+  color: string;
+  moderator: string;
+  moderator_avatar: string;
+  moderator_group_color: string;
+  followers?: number;
+  isFollow?: boolean;
+  postsCount?: number;
   isNew?: boolean;
   trending?: boolean;
-  postsCount?: number;
 };
 
-export type FilterType =  "all" | "followed" | "unfollowed";
+export type FilterType = 'all' | 'followed' | 'unfollowed';
