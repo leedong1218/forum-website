@@ -60,6 +60,7 @@ export default function LoginForm() {
   };
 
   useEffect(() => {
+    localStorage.removeItem('access_token');
     fetchCaptcha();
 
     // 添加懸浮線條動畫元素
