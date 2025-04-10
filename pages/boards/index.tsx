@@ -55,8 +55,8 @@ const BoardPage = () => {
           colors: b.color,
           avatar: b.avatar || Sticker,
           moderator: b.moderator,
-          moderator_avatar: b.moderator_avatar || Sticker,
-          moderator_group_color: b.moderator_group_color || "#000000",
+          moderatorAvatar: b.moderatorAvatar || Sticker,
+          moderatorGroupColor: b.moderatorGroupColor || "#000000",
           followers: b.followers || 0,
           postsCount: b.postsCount || 0,
           isFollow: b.isFollow || false,
@@ -230,12 +230,12 @@ const BoardPage = () => {
                             }}
                           >
                             <Avatar
-                              src={typeof b.moderator_avatar === 'string' ? b.moderator_avatar : b.moderator_avatar?.src}
+                              src={typeof b.moderatorAvatar === 'string' ? b.moderatorAvatar : b.moderatorAvatar?.src}
                               sx={{ 
                                 width: 20, 
                                 height: 20,
                                 border: '1.5px solid',
-                                borderColor: b.moderator_group_color || theme.palette.primary.main
+                                borderColor: b.moderatorGroupColor || theme.palette.primary.main
                               }}
                             />
                             <Box sx={{ ml: 1, overflow: 'hidden' }}>
@@ -243,7 +243,7 @@ const BoardPage = () => {
                                 variant="body2" 
                                 sx={{ 
                                   fontWeight: 600,
-                                  color: b.moderator_group_color || theme.palette.primary.main,
+                                  color: b.moderatorGroupColor || theme.palette.primary.main,
                                   whiteSpace: 'nowrap',
                                   overflow: 'hidden',
                                   textOverflow: 'ellipsis',

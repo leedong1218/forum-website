@@ -7,8 +7,8 @@ export type BoardItem = {
   avatar: string | StaticImageData;
   color: string;
   moderator: string;
-  moderator_avatar: string;
-  moderator_group_color: string;
+  moderatorAvatar: string;
+  moderatorGroupColor: string;
   followers?: number;
   isFollow?: boolean;
   postsCount?: number;
