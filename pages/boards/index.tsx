@@ -60,6 +60,7 @@ const BoardPage = () => {
           followers: b.followers || 0,
           postsCount: b.postsCount || 0,
           isFollow: b.isFollow || false,
+          url: b.url
         }));
         setBoards(mapped);
       } catch (err: any) {
@@ -171,7 +172,7 @@ const BoardPage = () => {
                 }}
               >
                 <Box 
-                  onClick={() => router.push(`/f/${b.id}`)} 
+                  onClick={() => {router.push(`/boards/${b.url}`); console.log(b.url)}} 
                   sx={{ 
                     cursor: 'pointer',
                     flex: 1,
