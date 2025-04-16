@@ -59,7 +59,6 @@ import {
 import Link from "next/link";
 import UserAPI from "@/services/User/UserAPI";
 import { StatCard } from "@/components/common/Personal/StatCard";
-import Detail from "@/components/common/Personal/Detail";
 import { posts, boards } from '@/lib/data/personal/detail';
 
 // 主題色彩定義
@@ -97,7 +96,7 @@ export default function Personal() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [openAvatarDialog, setOpenAvatarDialog] = useState(false);
   const [userCopied, setUserCopied] = useState(false);
-  const [likedPosts, setLikedPosts] = useState<number[]>(
+  const [likedPosts] = useState<number[]>(
     posts.filter((post) => post.isLiked).map((post) => post.id)
   );
   const [bookmarkedPosts, setBookmarkedPosts] = useState<number[]>(
