@@ -40,7 +40,7 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     UserAPI.self()
-      .then(res => setUser(res.data))
+      .then(res => {setUser(res.data); localStorage.setItem('firstName', res.data.username?.[0]?.toUpperCase())})
       .catch(err => console.error("取得用戶資料失敗", err))
       .finally(() => setLoading(false));
   }, []);

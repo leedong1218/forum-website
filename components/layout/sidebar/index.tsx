@@ -72,6 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           handleDrawerToggle={handleDrawerToggle}
         />
       )}
+      
 
       {/* 在壓縮視圖下 (1200px) 或寬度 1500px 以下時，在側邊欄底部顯示簡化的個人資料 */}
       {(isCompactView || hideProfileSidebar) && isLogin && <SimplifiedProfile />}

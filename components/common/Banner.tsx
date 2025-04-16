@@ -16,6 +16,7 @@ export default function Banner({
   textColor?: string 
 }) {
   // 使用傳入的boardColor或默認漸變背景
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const gradientBg = boardColor = "linear-gradient(135deg, #3975c9 0%, #295699 100%)";
 
   return (

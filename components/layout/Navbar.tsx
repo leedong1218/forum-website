@@ -17,7 +17,6 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { Edit } from "@mui/icons-material";
 import Link from "@mui/material/Link";
 import {
-  Chip,
   Menu,
   MenuItem,
   Tooltip,
@@ -26,10 +25,9 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useRouter } from "next/router";
-import { useState } from "react";
-import { colors } from "@/styles/theme"; // Import colors from theme file
+import { useEffect, useState } from "react";
+import { colors } from "@/styles/theme";
 
-// Custom styled component for responsive search bar
 const SearchField = styled(TextField)(({ theme }) => ({
   [theme.breakpoints.up("sm")]: {
     width: "40%",
@@ -76,7 +74,12 @@ export default function Navbar({
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [firstName, setFirstName] = useState<string | null>();
   const open = Boolean(anchorEl);
+
+  useEffect(() => {
+    setFirstName(localStorage.getItem('firstName'))
+  }, [])
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -128,7 +131,9 @@ export default function Navbar({
             }}
           >
             <Box
+              onClick={() => router.push('/')}
               sx={{
+                cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -143,20 +148,6 @@ export default function Navbar({
               <ForumIcon sx={{ color: "white" }} />
             </Box>
             {!isMobile && "TechForum"}
-            {!isMobile && (
-              <Chip
-                label="Beta"
-                size="small"
-                sx={{
-                  ml: 1,
-                  fontSize: "0.6rem",
-                  height: 20,
-                  bgcolor: colors.accentLight,
-                  color: colors.accentDark,
-                  fontWeight: 600,
-                }}
-              />
-            )}
           </Typography>
         </Box>
 
@@ -254,7 +245,7 @@ export default function Navbar({
                       transition: "all 0.3s ease",
                     }}
                   >
-                    U
+                    {firstName}
                   </Avatar>
                 </IconButton>
               </Tooltip>
@@ -286,7 +277,7 @@ export default function Navbar({
                         fontSize: "0.8rem",
                       }}
                     >
-                      U
+                      {firstName}
                     </Avatar>
                   </ListItemIcon>
                   <ListItemText primary="個人檔案" />

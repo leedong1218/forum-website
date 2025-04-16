@@ -7,7 +7,6 @@ import { useMediaQuery, useTheme } from "@mui/material";
 import Navbar from "./Navbar";
 import Sidebar from "./sidebar";
 import ProfileSection from "./profile/ProfileSection";
-import OnlineUsers from "./profile/OnlineUsers";
 import ActionButton from "../common/ActionButton";
 
 // 背景色
@@ -30,7 +29,7 @@ export default function Layout({
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
 
   // 更新斷點：1200px 用於側邊欄，1500px 用於個人檔案
-  const isCompactView = useMediaQuery("(max-width:1920px)");
+  const isCompactView = useMediaQuery("(max-width:1200px)");
   const hideProfileSidebar = useMediaQuery("(max-width:1500px)");
 
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -125,17 +124,9 @@ export default function Layout({
                 handleMobileProfileToggle={handleMobileProfileToggle}
                 profileCardWidth={profileCardWidth}
               />
-              <OnlineUsers />
             </Box>
           )}
         </Box>
-
-        {hideProfileSidebar && isLogin && (
-          <Box sx={{ mt: 4, width: "100%" }}>
-            <OnlineUsers />
-          </Box>
-        )}
-
         <ActionButton />
       </Box>
     </Box>

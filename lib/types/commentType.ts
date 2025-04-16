@@ -1,4 +1,5 @@
 export interface commentType {
+    authorAvatar: any;
     id: number;
     content: string;
     createdAt: string;

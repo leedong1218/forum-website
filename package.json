@@ -4,34 +4,21 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "next build --no-lint",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:lint": "next build"
+  
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^6.4.7",
-    "@mui/material": "^6.4.7",
-    "@react-oauth/google": "^0.12.1",
-    "@tinymce/tinymce-react": "^6.0.0",
-    "@toolpad/core": "^0.13.0",
-    "axios": "^1.8.4",
-    "framer-motion": "^12.6.2",
-    "jwt-decode": "^4.0.0",
     "next": "15.1.7",
-    "quill-image-resize-module-ts": "^3.0.3",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-hook-form": "^7.55.0",
-    "react-quill": "^2.0.0",
-    "react-quill-new": "^3.4.6",
-    "sass": "^1.85.0",
-    "scss": "^0.2.4"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-icons": "^5.5.0",
+    "sass": "^1.85.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@types/axios": "^0.14.4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

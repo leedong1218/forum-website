@@ -24,15 +24,12 @@ import {
   CardContent,
   Badge,
   Tooltip,
-  Switch,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ArticleIcon from "@mui/icons-material/Article";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
-import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {
-  AccessAlarm,
   CalendarMonth,
   Edit,
   Camera,
@@ -49,42 +46,37 @@ import {
   TurnedInNot,
   Bookmark,
   Visibility,
-  PhotoCamera,
   Groups,
-  VerifiedUser,
-  Notifications,
   Security,
-  Language,
   Close,
   ContentCopy,
   Check,
   Lock,
-  DarkMode,
   Forum,
   AccessTime,
   Email,
 } from "@mui/icons-material";
 import Link from "next/link";
+import UserAPI from "@/services/User/UserAPI";
+import { StatCard } from "@/components/common/Personal/StatCard";
+import { posts, boards } from '@/lib/data/personal/detail';
 
 // 主題色彩定義
 const accentColor = "#0ea5e9"; // 主藍色
 const accentColorLight = "#e0f2fe"; // 淺藍背景色
 const accentColorDark = "#0284c7"; // 深藍色
-const gradientOverlay =
-  "linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(0,0,0,0.2) 100%)"; // 漸變覆蓋
 
 // 定義使用者資料的型別
 interface UserProfile {
-  username: string;
-  email: string;
-  displayName: string;
-  birthday: string;
-  location: string;
-  bio: string;
-  avatarUrl: string;
-  coverUrl: string;
-  joinDate: string;
-  verified: boolean;
+  username?: string;
+  email?: string;
+  displayName?: string;
+  birthday?: string;
+  location?: string;
+  avatarUrl?: string;
+  coverUrl?: string;
+  joinedDate?: string;
+  verified?: boolean;
 }
 
 // 獲取分類顏色
@@ -99,116 +91,12 @@ const getCategoryColor = (category: string) => {
   return categoryColors[category] || { bg: "#f1f5f9", text: "#64748b" };
 };
 
-// 樣本文章數據
-const posts = [
-  {
-    id: 1,
-    title: "Quantum Computing Breakthroughs",
-    description:
-      "Discussing the latest advancements in quantum computing and their implications for cybersecurity. This post looks at recent findings and their potential impact on encryption standards.",
-    author: "TechExplorer",
-    avatar: "T",
-    category: "Technology",
-    comments: 42,
-    views: 1287,
-    likes: 95,
-    bookmarks: 32,
-    timestamp: "2 hours ago",
-    isLiked: true,
-    isBookmarked: false,
-    link: "/post/1",
-  },
-  {
-    id: 2,
-    title: "AI Model Architecture Design",
-    description:
-      "Share your experiences with different AI model architectures and optimization techniques. I've been experimenting with transformer models and found some interesting performance tradeoffs.",
-    author: "DataScientist",
-    avatar: "D",
-    category: "AI & ML",
-    comments: 28,
-    views: 956,
-    likes: 73,
-    bookmarks: 27,
-    timestamp: "5 hours ago",
-    isLiked: false,
-    isBookmarked: true,
-    link: "/post/2",
-  },
-  {
-    id: 3,
-    title: "Future of Web Development",
-    description:
-      "Exploring emerging technologies that will shape the future of web applications. WebAssembly, edge computing, and new JavaScript frameworks are changing how we build for the web.",
-    author: "CodeCrafter",
-    avatar: "C",
-    category: "Development",
-    comments: 36,
-    views: 1105,
-    likes: 82,
-    bookmarks: 41,
-    timestamp: "1 day ago",
-    isLiked: true,
-    isBookmarked: false,
-    link: "/post/3",
-  },
-];
-
-// 樣本看板數據
-const boards = [
-  {
-    id: 1,
-    name: "Technology",
-    description: "討論最新科技趨勢、產品和創新，分享科技新聞及見解。",
-    members: 12480,
-    posts: 4235,
-    icon: "T",
-    color: "#0284c7",
-    isFollowing: true,
-    activityLevel: "高",
-  },
-  {
-    id: 2,
-    name: "Programming",
-    description: "程式設計師社群，分享程式技巧、專案經驗和學習資源。",
-    members: 9750,
-    posts: 3678,
-    icon: "P",
-    color: "#16a34a",
-    isFollowing: true,
-    activityLevel: "高",
-  },
-  {
-    id: 3,
-    name: "AI & Machine Learning",
-    description: "人工智能與機器學習的討論區，交流最新研究和應用。",
-    members: 8320,
-    posts: 2789,
-    icon: "A",
-    color: "#db2777",
-    isFollowing: true,
-    activityLevel: "中",
-  },
-  {
-    id: 4,
-    name: "Blockchain",
-    description: "區塊鏈技術與加密貨幣的專業討論，包括開發和應用案例。",
-    members: 6450,
-    posts: 1876,
-    icon: "B",
-    color: "#d97706",
-    isFollowing: true,
-    activityLevel: "中",
-  },
-];
-
 export default function Personal() {
   const [tabValue, setTabValue] = useState(0);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [openAvatarDialog, setOpenAvatarDialog] = useState(false);
-  const [openCoverDialog, setOpenCoverDialog] = useState(false);
   const [userCopied, setUserCopied] = useState(false);
-  const [likedPosts, setLikedPosts] = useState<number[]>(
+  const [likedPosts] = useState<number[]>(
     posts.filter((post) => post.isLiked).map((post) => post.id)
   );
   const [bookmarkedPosts, setBookmarkedPosts] = useState<number[]>(
@@ -216,48 +104,29 @@ export default function Personal() {
   );
 
   // 初始使用者資料
-  const [userProfile, setUserProfile] = useState<UserProfile>({
-    username: "giahow",
-    email: "giahow@example.com",
-    displayName: "陳家豪",
-    birthday: "1990-01-01",
-    location: "台北市",
-    bio: "資深軟體工程師｜人工智能愛好者｜喜歡分享心得和閱讀各種有趣的討論｜TechForum 活躍貢獻者",
-    avatarUrl: "/api/placeholder/200/200",
-    coverUrl: "/api/placeholder/1200/400",
-    joinDate: "2025-03-15",
-    verified: true,
-  });
+  const [userProfile, setUserProfile] = useState<UserProfile | null>();
+  // const [userProfile, setUserProfile] = useState();
+
+  useEffect(() => {
+    UserAPI.self()
+      .then(res => setUserProfile(res.data))
+      .catch(err => console.error("取得用戶資料失敗", err))
+  }, []);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
+  const STATS_CARDS = [
+    { icon: Groups, label: '追蹤者', count: 142 },
+    { icon: Groups, label: '正在追蹤', count: 98 },
+    { icon: ArticleIcon, label: '文章', count: 56 },
+    { icon: ThumbUp, label: '獲得讚數', count: '1.2K' }
+  ];
+
   // 更新個人資料的函數
-  const handleProfileUpdate = (field: keyof UserProfile, value: string) => {
-    setUserProfile((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  // 儲存變更
-  const handleSaveProfile = () => {
-    // 在實際應用中，這裡會呼叫 API 來儲存資料
-    console.log("儲存的使用者資料:", userProfile);
-    setIsEditingProfile(false);
-  };
-
-  // 點讚功能處理
-  const handleLike = (postId: number, event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (likedPosts.includes(postId)) {
-      setLikedPosts(likedPosts.filter((id) => id !== postId));
-    } else {
-      setLikedPosts([...likedPosts, postId]);
-    }
+  const handleProfileUpdate = (p0: string, p1: string) => {
+    console.log(p0 + p1);
   };
 
   // 收藏功能處理
@@ -274,7 +143,7 @@ export default function Personal() {
 
   // 複製使用者名稱
   const handleCopyUsername = () => {
-    navigator.clipboard.writeText(`@${userProfile.username}`);
+    navigator.clipboard.writeText(`@${userProfile?.username}`);
     setUserCopied(true);
     setTimeout(() => setUserCopied(false), 2000);
   };
@@ -315,7 +184,7 @@ export default function Personal() {
           }}
         >
           <Avatar
-            src={userProfile.avatarUrl}
+            src={userProfile?.avatarUrl}
             sx={{
               width: 150,
               height: 150,
@@ -393,214 +262,38 @@ export default function Personal() {
     </Dialog>
   );
 
-  // 更換封面照片對話框
-  const CoverUploadDialog = () => (
-    <Dialog
-      open={openCoverDialog}
-      onClose={() => setOpenCoverDialog(false)}
-      PaperProps={{
-        sx: {
-          borderRadius: 3,
-          boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
-        },
-      }}
-    >
-      <DialogTitle
-        sx={{
-          pb: 1,
-          fontWeight: 600,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        更換封面照片
-        <IconButton onClick={() => setOpenCoverDialog(false)} size="small">
-          <Close />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            py: 2,
-          }}
-        >
-          <Box
-            sx={{
-              width: "100%",
-              height: 150,
-              backgroundImage: `url(${userProfile.coverUrl})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              borderRadius: 2,
-              mb: 3,
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-            }}
-          />
-          <Button
-            variant="contained"
-            component="label"
-            startIcon={<Camera />}
-            sx={{
-              bgcolor: accentColor,
-              "&:hover": {
-                bgcolor: accentColorDark,
-              },
-              borderRadius: 2,
-              px: 3,
-              py: 1,
-              textTransform: "none",
-              fontWeight: 600,
-            }}
-          >
-            選擇圖片
-            <input
-              type="file"
-              hidden
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    handleProfileUpdate("coverUrl", reader.result as string);
-                  };
-                  reader.readAsDataURL(file);
-                }
-              }}
-            />
-          </Button>
-          <Typography variant="caption" sx={{ mt: 2, color: "text.secondary" }}>
-            建議使用寬度至少 1200 像素的橫向圖片。檔案大小上限為 10MB。
-          </Typography>
-        </Box>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button
-          onClick={() => setOpenCoverDialog(false)}
-          sx={{
-            borderRadius: 2,
-            color: "text.secondary",
-            textTransform: "none",
-            fontWeight: 500,
-          }}
-        >
-          取消
-        </Button>
-        <Button
-          onClick={() => setOpenCoverDialog(false)}
-          variant="contained"
-          sx={{
-            bgcolor: accentColor,
-            "&:hover": {
-              bgcolor: accentColorDark,
-            },
-            borderRadius: 2,
-            px: 3,
-            textTransform: "none",
-            fontWeight: 600,
-          }}
-        >
-          套用變更
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-
   return (
     <Layout showProfileCard={false}>
       {/* 上半部區塊：背景照、大頭照、暱稱等 */}
-      <Box
-        sx={{
-          width: "100%",
-          mb: 3,
-          borderRadius: 3,
-          background: "#fff",
-          border: "1px solid rgba(0,0,0,0.08)",
-          overflow: "hidden",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
-        }}
-      >
-        {/* 背景照片 */}
-        <Box
-          sx={{
-            height: 240,
-            backgroundImage: `url(${userProfile.coverUrl})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            position: "relative",
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: gradientOverlay,
-            },
-          }}
-        >
-          {/* 封面照片編輯按鈕 */}
-          <Tooltip title="更換封面照片">
-            <IconButton
-              sx={{
-                position: "absolute",
-                bottom: 16,
-                right: 16,
-                bgcolor: "rgba(255,255,255,0.9)",
-                boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-                "&:hover": {
-                  bgcolor: "white",
-                },
-                zIndex: 1,
-              }}
-              onClick={() => setOpenCoverDialog(true)}
-            >
-              <PhotoCamera />
-            </IconButton>
-          </Tooltip>
-        </Box>
-
-        {/* 個人資訊區域 */}
-        <Box sx={{ p: 4, pt: 0, position: "relative" }}>
-          {/* 大頭照 */}
-          <Box sx={{ position: "relative", width: "fit-content" }}>
-            <Badge
-              overlap="circular"
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            >
+      <Box sx={{
+        width: '100%', mb: 3, borderRadius: 3, background: '#fff',
+        border: '1px solid rgba(0,0,0,0.08)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
+      }}>
+        <Box sx={{
+          p: 4,
+          display: 'flex', flexWrap: 'wrap', gap: { xs: 3, md: 0 }
+        }}>
+          {/* 大頭照區域 */}
+          <Box sx={{ mr: 4, position: 'relative' }}>
+            <Badge overlap="circular" anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
               <Avatar
                 sx={{
-                  width: 140,
-                  height: 140,
-                  border: "4px solid white",
-                  position: "relative",
-                  top: -70,
-                  marginBottom: -8,
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                  width: 140, height: 140, border: '4px solid white',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
                 }}
-                src={userProfile.avatarUrl}
+                src={userProfile?.avatarUrl}
                 alt="Profile Picture"
               />
             </Badge>
-
-            {/* 頭像編輯按鈕 */}
             <Tooltip title="更換大頭照">
               <IconButton
                 sx={{
-                  position: "absolute",
-                  bottom: 0,
-                  right: 0,
-                  bgcolor: accentColor,
-                  color: "white",
-                  boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-                  "&:hover": {
-                    bgcolor: accentColorDark,
-                  },
-                  border: "2px solid white",
+                  position: 'absolute', bottom: '50px', right: '-10px',
+                  bgcolor: accentColor, color: 'white',
+                  boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                  '&:hover': { bgcolor: accentColorDark },
+                  border: '2px solid white'
                 }}
                 onClick={() => setOpenAvatarDialog(true)}
               >
@@ -609,239 +302,69 @@ export default function Personal() {
             </Tooltip>
           </Box>
 
-          {/* 暱稱與簡短介紹 */}
-          <Box>
-            <Box sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
-              <Typography
-                variant="h4"
-                sx={{
-                  fontWeight: 700,
-                  color: "#1e293b",
-                }}
-              >
-                {userProfile.displayName}
+          {/* 用戶資訊區域 */}
+          <Box sx={{ flex: 1, minWidth: { xs: '100%', sm: 0 }, mt: { xs: -8, md: 0 } }}>
+            {/* 名稱與編輯按鈕 */}
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5, flexWrap: 'wrap', gap: 1 }}>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e293b' }}>
+                {userProfile?.displayName}
               </Typography>
-
-              {/* 編輯資料按鈕 */}
               <Button
                 variant="outlined"
                 startIcon={<Edit />}
                 onClick={() => setIsEditingProfile(true)}
                 sx={{
-                  ml: 2,
-                  borderRadius: 6,
-                  textTransform: "none",
-                  borderColor: "rgba(0,0,0,0.2)",
-                  color: "text.secondary",
-                  fontWeight: 500,
-                  px: 2,
-                  "&:hover": {
-                    borderColor: accentColor,
-                    color: accentColor,
-                    bgcolor: "transparent",
-                  },
+                  borderRadius: 6, textTransform: 'none',
+                  borderColor: 'rgba(0,0,0,0.2)', color: 'text.secondary',
+                  fontWeight: 500, px: 2,
+                  '&:hover': {
+                    borderColor: accentColor, color: accentColor,
+                    bgcolor: 'transparent'
+                  }
                 }}
               >
                 編輯個人資料
               </Button>
             </Box>
 
-            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+            {/* 用戶名與加入日期 */}
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
               <Typography
                 variant="subtitle1"
                 color="text.secondary"
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  cursor: "pointer",
-                  "&:hover": {
-                    color: accentColor,
-                  },
+                  display: 'flex', alignItems: 'center', cursor: 'pointer',
+                  '&:hover': { color: accentColor }
                 }}
                 onClick={handleCopyUsername}
               >
-                @{userProfile.username}
+                @{userProfile?.username}
                 <Tooltip title={userCopied ? "已複製" : "複製用戶名稱"}>
                   <IconButton size="small" sx={{ ml: 0.5 }}>
-                    {userCopied ? (
-                      <Check fontSize="small" />
-                    ) : (
-                      <ContentCopy fontSize="small" />
-                    )}
+                    {userCopied ? <Check fontSize="small" /> : <ContentCopy fontSize="small" />}
                   </IconButton>
                 </Tooltip>
               </Typography>
-
               <Tooltip title="加入日期">
                 <Chip
                   icon={<CalendarMonth sx={{ fontSize: 16 }} />}
-                  label={new Date(userProfile.joinDate).toLocaleDateString(
-                    "zh-TW",
-                    {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    }
-                  )}
+                  label={userProfile?.joinedDate}
                   size="small"
                   sx={{
-                    ml: 1,
-                    fontSize: "0.8rem",
-                    bgcolor: "rgba(0,0,0,0.04)",
-                    "& .MuiChip-icon": {
-                      color: "text.secondary",
-                    },
+                    fontSize: '0.8rem',
+                    bgcolor: 'rgba(0,0,0,0.04)',
+                    '& .MuiChip-icon': { color: 'text.secondary' }
                   }}
                   clickable
                 />
               </Tooltip>
             </Box>
 
-            <Typography
-              variant="body1"
-              sx={{
-                mb: 3,
-                maxWidth: "100%",
-                color: "#475569",
-                lineHeight: 1.6,
-              }}
-            >
-              {userProfile.bio}
-            </Typography>
-
-            {/* 追蹤數據卡片 */}
-            <Box
-              sx={{
-                display: "flex",
-                gap: 2,
-                mb: 2,
-              }}
-            >
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2,
-                  borderRadius: 3,
-                  border: "1px solid rgba(0,0,0,0.06)",
-                  display: "flex",
-                  alignItems: "center",
-                  minWidth: 120,
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                  "&:hover": {
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                    borderColor: "rgba(0,0,0,0.12)",
-                  },
-                }}
-              >
-                <Groups sx={{ color: accentColor, mr: 1.5, fontSize: 24 }} />
-                <Box>
-                  <Typography
-                    variant="h6"
-                    sx={{ fontWeight: 700, lineHeight: 1.2 }}
-                  >
-                    142
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    追蹤者
-                  </Typography>
-                </Box>
-              </Paper>
-
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2,
-                  borderRadius: 3,
-                  border: "1px solid rgba(0,0,0,0.06)",
-                  display: "flex",
-                  alignItems: "center",
-                  minWidth: 120,
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                  "&:hover": {
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                    borderColor: "rgba(0,0,0,0.12)",
-                  },
-                }}
-              >
-                <Groups sx={{ color: accentColor, mr: 1.5, fontSize: 24 }} />
-                <Box>
-                  <Typography
-                    variant="h6"
-                    sx={{ fontWeight: 700, lineHeight: 1.2 }}
-                  >
-                    98
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    正在追蹤
-                  </Typography>
-                </Box>
-              </Paper>
-
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2,
-                  borderRadius: 3,
-                  border: "1px solid rgba(0,0,0,0.06)",
-                  display: "flex",
-                  alignItems: "center",
-                  minWidth: 120,
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                  "&:hover": {
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                    borderColor: "rgba(0,0,0,0.12)",
-                  },
-                }}
-              >
-                <ArticleIcon
-                  sx={{ color: accentColor, mr: 1.5, fontSize: 24 }}
-                />
-                <Box>
-                  <Typography
-                    variant="h6"
-                    sx={{ fontWeight: 700, lineHeight: 1.2 }}
-                  >
-                    56
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    文章
-                  </Typography>
-                </Box>
-              </Paper>
-
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2,
-                  borderRadius: 3,
-                  border: "1px solid rgba(0,0,0,0.06)",
-                  display: "flex",
-                  alignItems: "center",
-                  minWidth: 120,
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                  "&:hover": {
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                    borderColor: "rgba(0,0,0,0.12)",
-                  },
-                }}
-              >
-                <ThumbUp sx={{ color: accentColor, mr: 1.5, fontSize: 24 }} />
-                <Box>
-                  <Typography
-                    variant="h6"
-                    sx={{ fontWeight: 700, lineHeight: 1.2 }}
-                  >
-                    1.2K
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    獲得讚數
-                  </Typography>
-                </Box>
-              </Paper>
+            {/* 統計卡片 */}
+            <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+              {STATS_CARDS.map((card, index) => (
+                <StatCard key={index} icon={card.icon} label={card.label} count={card.count} />
+              ))}
             </Box>
           </Box>
         </Box>
@@ -1017,7 +540,6 @@ export default function Personal() {
                         {/* 點讚 */}
                         <Tooltip title={isLiked ? "取消點讚" : "點讚"}>
                           <IconButton
-                            onClick={(e) => handleLike(post.id, e)}
                             size="small"
                             sx={{
                               p: 0.5,
@@ -1435,7 +957,7 @@ export default function Personal() {
           <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
             <Box sx={{ position: "relative" }}>
               <Avatar
-                src={userProfile.avatarUrl}
+                src={userProfile?.avatarUrl}
                 sx={{
                   width: 120,
                   height: 120,
@@ -1467,7 +989,7 @@ export default function Personal() {
               <TextField
                 fullWidth
                 label="使用者帳號"
-                value={userProfile.username}
+                value={userProfile?.username}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -1491,7 +1013,7 @@ export default function Personal() {
               <TextField
                 fullWidth
                 label="電子信箱"
-                value={userProfile.email}
+                value={userProfile?.email}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -1513,7 +1035,7 @@ export default function Personal() {
               <TextField
                 fullWidth
                 label="顯示名稱"
-                value={userProfile.displayName}
+                value={userProfile?.displayName}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -1538,7 +1060,7 @@ export default function Personal() {
                 fullWidth
                 label="生日"
                 type="date"
-                value={userProfile.birthday}
+                value={userProfile?.birthday}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -1563,7 +1085,7 @@ export default function Personal() {
               <TextField
                 fullWidth
                 label="居住地"
-                value={userProfile.location}
+                value={userProfile?.location}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -1589,7 +1111,7 @@ export default function Personal() {
                 label="個人簡介"
                 multiline
                 rows={4}
-                value={userProfile.bio}
+                value={userProfile?.bio}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -1621,7 +1143,7 @@ export default function Personal() {
             取消
           </Button>
           <Button
-            onClick={handleSaveProfile}
+            onClick={handleProfileUpdate}
             color="primary"
             startIcon={<Save />}
             variant="contained"
@@ -1644,9 +1166,6 @@ export default function Personal() {
 
       {/* 大頭照上傳對話框 */}
       <AvatarUploadDialog />
-
-      {/* 封面照片上傳對話框 */}
-      <CoverUploadDialog />
     </Layout>
   );
 }
