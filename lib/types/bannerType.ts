@@ -1,8 +1,9 @@
-import { SvgIconComponent } from "@mui/icons-material";
 
 export type BannerType = {
   title: string;
   content?: string;
-  icon?: SvgIconComponent;
+  avatarUrl?: string | null;
+  bgColor?: string;
+  textColor?: string;
   children?: React.ReactNode;
 };

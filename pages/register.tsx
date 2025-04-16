@@ -1,15 +1,17 @@
+import RegisterAPI from "@/services/Register/RegisterAPI";
 import React, { useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { getCaptcha } from "@/services/Captcha/captchaAPI";
-import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
-import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
-import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import PhoneIphoneOutlinedIcon from "@mui/icons-material/PhoneIphoneOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
+import {
+  VpnKeyOutlined as VpnKeyOutlinedIcon,
+  PersonOutlineOutlined as PersonOutlineOutlinedIcon,
+  RefreshOutlined as RefreshOutlinedIcon,
+  EmailOutlined as EmailOutlinedIcon,
+  LockOutlined as LockOutlinedIcon,
+  VisibilityOutlined as VisibilityOutlinedIcon,
+  VisibilityOffOutlined as VisibilityOffOutlinedIcon,
+  AccountCircleOutlined as AccountCircleOutlinedIcon
+} from "@mui/icons-material";
 import {
   Box,
   TextField,
@@ -23,35 +25,15 @@ import {
   CircularProgress,
   IconButton,
 } from "@mui/material";
-
-// 導入模組化 SCSS 樣式
 import styles from "@/styles/pages/Login.module.scss";
 import { useRouter } from "next/router";
-
-// 註冊 API 服務
-const registerAPI = {
-  register: async (
-    name: string,
-    email: string,
-    phone: string,
-    password: string,
-    confirmPassword: string,
-    captchaKey: string,
-    captchaValue: string
-  ) => {
-    // 實際專案中，這裡應該是真正的API調用
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({ success: true, message: "註冊成功！" });
-      }, 1000);
-    });
-  },
-};
+import { useMessageModal } from "@/lib/context/MessageModalContext";
+import { ModalTypes } from "@/lib/types/modalType";
 
 interface RegisterFormInputs {
+  username: string;
   name: string;
   email: string;
-  phone: string;
   password: string;
   confirmPassword: string;
   captcha_value: string;
@@ -62,22 +44,21 @@ interface RegisterFormProps {
 }
 
 export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
+  const { setIsShow, setModalProps } = useMessageModal();
   const router = useRouter();
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
-    trigger,
   } = useForm<RegisterFormInputs>();
 
   const [captcha, setCaptcha] = useState({ key: "", image_url: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [animatedFocus, setAnimatedFocus] = useState("");
-  const [registerSuccess, setRegisterSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   const fetchCaptcha = async () => {
     try {
       const data = await getCaptcha();
@@ -92,20 +73,16 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
   useEffect(() => {
     fetchCaptcha();
-    
-    // 添加懸浮線條動畫元素
+
     const loginContainer = document.querySelector(`.${styles.loginContainer}`);
     if (loginContainer) {
-      const floatingLines = document.createElement('div');
+      const floatingLines = document.createElement("div");
       floatingLines.className = styles.floatingLines;
-      
-      // 創建10條線
       for (let i = 0; i < 10; i++) {
-        const line = document.createElement('div');
+        const line = document.createElement("div");
         line.className = styles.line;
         floatingLines.appendChild(line);
       }
-      
       loginContainer.appendChild(floatingLines);
     }
   }, []);
@@ -113,63 +90,32 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const onSubmit: SubmitHandler<RegisterFormInputs> = async (data) => {
     setIsLoading(true);
     try {
-      const res = await registerAPI.register(
-        data.name,
-        data.email,
-        data.phone,
-        data.password,
-        data.confirmPassword,
-        captcha.key,
-        data.captcha_value
-      );
-      setRegisterSuccess(true);
-      setTimeout(() => {
-        if (onSwitchToLogin) {
-          onSwitchToLogin();
-        } else {
-          router.push("/login");
-        }
-      }, 2000);
+      await RegisterAPI.register({
+        username: data.username,
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+        captcha_key: captcha.key,
+        captcha_value: data.captcha_value,
+      });
+  
+      router.push('/verify-email');
+      
     } catch (error: any) {
-      alert(error.message || "註冊失敗");
+      setModalProps({
+        type: ModalTypes.ERROR,
+        message: error?.message || "註冊失敗，請稍後再試。",
+      });
+      setIsShow(true);
       fetchCaptcha(); // 刷新驗證碼
     } finally {
       setIsLoading(false);
     }
-  };
+  };  
 
-  const handleFieldFocus = (fieldName: string) => {
-    setAnimatedFocus(fieldName);
-  };
-
-  const handleFieldBlur = () => {
-    setAnimatedFocus("");
-  };
-
-  if (registerSuccess) {
-    return (
-      <div className={styles.loginContainer}>
-        <Fade in={true} timeout={800}>
-          <Paper
-            elevation={3}
-            sx={{ p: 4, borderRadius: 2 }}
-            className={`${styles.registerPaper} ${styles.formFadeIn}`}
-          >
-            <Box sx={{ textAlign: 'center', py: 3 }}>
-              <CheckCircleOutlineIcon sx={{ fontSize: 60, color: 'success.main', mb: 2 }} />
-              <Typography variant="h5" sx={{ mb: 2 }}>
-                註冊成功！
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 4 }}>
-                您的帳號已成功創建，即將自動跳轉到登入頁面...
-              </Typography>
-              <CircularProgress size={24} />
-            </Box>
-          </Paper>
-        </Fade>
-      </div>
-    );
-  }
+  const handleFieldFocus = (fieldName: string) => setAnimatedFocus(fieldName);
+  const handleFieldBlur = () => setAnimatedFocus("");
 
   return (
     <div className={styles.loginContainer}>
@@ -188,82 +134,86 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
           <TextField
             sx={{ mb: 2 }}
             fullWidth
-            label="姓名"
+            label="電子郵件"
             variant="outlined"
-            className={animatedFocus === "name" ? styles.activeField : ""}
-            onFocus={() => handleFieldFocus("name")}
+            className={animatedFocus === "email" ? styles.activeField : ""}
+            onFocus={() => handleFieldFocus("email")}
             onBlur={handleFieldBlur}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <PersonOutlineOutlinedIcon />
+                  <EmailOutlinedIcon />
                 </InputAdornment>
               ),
             }}
-            {...register("name", {
-              required: "姓名是必填的",
-              minLength: {
-                value: 2,
-                message: "姓名長度不得小於2個字元",
+            {...register("email", {
+              required: "電子郵件是必填的",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "無效的電子郵件格式",
               },
             })}
-            error={!!errors.name}
-            helperText={errors.name?.message}
+            error={!!errors.email}
+            helperText={errors.email?.message}
           />
 
-          <div className={styles.gridContainer} style={{marginBottom: '1rem'}}>
+          <div className={styles.gridContainer} style={{ marginBottom: "1rem" }}>
             <TextField
               fullWidth
-              label="電子郵件"
+              label="帳號"
               variant="outlined"
-              className={animatedFocus === "email" ? styles.activeField : ""}
-              onFocus={() => handleFieldFocus("email")}
+              className={animatedFocus === "username" ? styles.activeField : ""}
+              onFocus={() => handleFieldFocus("username")}
               onBlur={handleFieldBlur}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <EmailOutlinedIcon />
+                    <AccountCircleOutlinedIcon />
                   </InputAdornment>
                 ),
               }}
-              {...register("email", {
-                required: "電子郵件是必填的",
+              {...register("username", {
+                required: "帳號是必填的",
+                minLength: {
+                  value: 4,
+                  message: "帳號長度不得小於4個字元",
+                },
                 pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "無效的電子郵件格式",
+                  value: /^[a-zA-Z0-9_]+$/,
+                  message: "帳號只能包含英文、數字和底線",
                 },
               })}
-              error={!!errors.email}
-              helperText={errors.email?.message}
+              error={!!errors.username}
+              helperText={errors.username?.message}
             />
 
             <TextField
               fullWidth
-              label="手機號碼"
+              label="姓名"
               variant="outlined"
-              className={animatedFocus === "phone" ? styles.activeField : ""}
-              onFocus={() => handleFieldFocus("phone")}
+              className={animatedFocus === "name" ? styles.activeField : ""}
+              onFocus={() => handleFieldFocus("name")}
               onBlur={handleFieldBlur}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <PhoneIphoneOutlinedIcon />
+                    <PersonOutlineOutlinedIcon />
                   </InputAdornment>
                 ),
               }}
-              {...register("phone", {
-                required: "手機號碼是必填的",
-                pattern: {
-                  value: /^09\d{8}$/,
-                  message: "請輸入有效的台灣手機號碼",
+              {...register("name", {
+                required: "姓名是必填的",
+                minLength: {
+                  value: 2,
+                  message: "姓名長度不得小於2個字元",
                 },
               })}
-              error={!!errors.phone}
-              helperText={errors.phone?.message}
+              error={!!errors.name}
+              helperText={errors.name?.message}
             />
           </div>
 
-          <div className={styles.gridContainer} style={{marginBottom: '1rem'}}>
+          <div className={styles.gridContainer} style={{ marginBottom: "1rem" }}>
             <TextField
               fullWidth
               label="密碼"
@@ -281,7 +231,6 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
-                      aria-label="切換密碼可見性"
                       onClick={() => setShowPassword(!showPassword)}
                       edge="end"
                       size="small"
@@ -323,7 +272,6 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
-                      aria-label="切換確認密碼可見性"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       edge="end"
                       size="small"
@@ -335,8 +283,7 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
               }}
               {...register("confirmPassword", {
                 required: "請確認密碼",
-                validate: (value) =>
-                  value === watch("password") || "密碼不一致",
+                validate: (value) => value === watch("password") || "密碼不一致",
               })}
               error={!!errors.confirmPassword}
               helperText={errors.confirmPassword?.message}
@@ -349,7 +296,7 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
             </Typography>
             <Stack direction="row" spacing={2} alignItems="center">
               <img
-                src={`${process.env.NEXT_PUBLIC_API_URL}${captcha.image_url?.replace("/backend", "")}`}
+                src={`${process.env.NEXT_PUBLIC_API_URL}${captcha.image_url}`}
                 alt="captcha"
                 style={{ height: "50px" }}
                 className={styles.captchaImage}
@@ -387,11 +334,7 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
               className={styles.registerButton}
               disabled={isLoading}
             >
-              {isLoading ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                "註冊"
-              )}
+              {isLoading ? <CircularProgress size={24} color="inherit" /> : "註冊"}
             </Button>
 
             <Typography variant="body2" align="center">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import Link from "next/link";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -20,8 +20,15 @@ interface PostListItemProps {
   getCategoryColor: (category: string) => { bg: string; text: string };
 }
 
+// 工具：移除 HTML、限制字數
+const getTextPreview = (html: string, maxLength = 60): string => {
+  const text = html.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+  return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
+};
+
 const PostListItem: React.FC<PostListItemProps> = ({ post, getCategoryColor }) => {
-  const categoryColor = getCategoryColor(post.category);
+  const categoryColor = getCategoryColor(post.boardUrl);
+  const textPreview = getTextPreview(post.content);
 
   return (
     <Card
@@ -41,7 +48,7 @@ const PostListItem: React.FC<PostListItemProps> = ({ post, getCategoryColor }) =
     >
       <Box
         component={Link}
-        href={`/f/1/p/${post.id}`}
+        href={`/forum/${post.boardUrl}/post/${post.id}`}
         sx={{
           textDecoration: "none",
           color: "inherit",
@@ -49,89 +56,78 @@ const PostListItem: React.FC<PostListItemProps> = ({ post, getCategoryColor }) =
         }}
       >
         <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "flex-start" }}>
-            <Avatar
+          {/* 頂部區域 - 包含版區信息 */}
+          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+              <Chip
+                avatar={post.boardAvatar ? <Avatar src={post.boardAvatar} /> : null}
+                size="small"
+                label={post.boardName}
+                clickable
+                sx={{
+                  backgroundColor: categoryColor.bg,
+                  color: categoryColor.text,
+                  fontWeight: 600,
+                  borderRadius: 1,
+                  height: 28,
+                  px: 1
+                }}
+              />
+            
+            <Box
               sx={{
-                width: 30,
-                height: 30,
+                display: "flex",
+                alignItems: "center",
+                color: "text.secondary",
+                fontSize: "0.75rem",
+              }}
+            >
+              <AccessTime sx={{ fontSize: 14, mr: 0.5 }} />
+              {new Date(post.createdAt).toLocaleDateString()}
+            </Box>
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "flex-start" }}>
+            {/* 作者頭像 */}
+            <Avatar
+              src={post.authorAvatar || undefined}
+              sx={{
+                width: 40,
+                height: 40,
                 bgcolor: categoryColor.text,
                 fontSize: "1.2rem",
                 mr: 2,
                 fontWeight: 600,
               }}
             >
-              {post.avatar}
+              {!post.authorAvatar && post.authorName?.charAt(0).toUpperCase()}
             </Avatar>
 
             <Box sx={{ flexGrow: 1 }}>
-              <Box
+              {/* 作者名稱 */}
+              <Typography
+                variant="body1"
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
+                  fontWeight: 500,
                   mb: 0.5,
-                  flexWrap: "wrap",
-                  gap: 1,
                 }}
               >
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontWeight: 500,
-                    mr: 1.5,
-                  }}
-                >
-                  {post.author}
-                </Typography>
+                {post.authorName}
+              </Typography>
 
-                <Chip
-                  size="small"
-                  label={post.category}
-                  sx={{
-                    backgroundColor: categoryColor.bg,
-                    color: categoryColor.text,
-                    fontWeight: 600,
-                    borderRadius: 1.5,
-                    px: 1,
-                    height: 24,
-                    mr: 1,
-                  }}
-                />
-
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    color: "text.secondary",
-                    fontSize: "0.75rem",
-                    ml: "auto",
-                    flexShrink: 0,
-                  }}
-                >
-                  <AccessTime sx={{ fontSize: 14, mr: 0.5 }} />
-                  {post.timestamp}
-                </Box>
-              </Box>
-
-              <Box
+              {/* 標題 */}
+              <Typography
+                variant="body1"
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
+                  fontWeight: 700,
+                  color: "#1e293b",
+                  fontSize: "1.1rem",
                   mb: 1,
                 }}
               >
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontWeight: 700,
-                    color: "#1e293b",
-                    fontSize: "1.1rem",
-                    mr: 1.5,
-                  }}
-                >
-                  {post.title}
-                </Typography>
-              </Box>
+                {post.title}
+              </Typography>
 
+              {/* 內容預覽 */}
               <Typography
                 variant="body2"
                 sx={{
@@ -146,9 +142,10 @@ const PostListItem: React.FC<PostListItemProps> = ({ post, getCategoryColor }) =
                   pr: { xs: 0, sm: 8 },
                 }}
               >
-                {post.description}
+                {textPreview}
               </Typography>
 
+              {/* 帖子統計信息 */}
               <Box
                 sx={{
                   display: "flex",
@@ -169,7 +166,7 @@ const PostListItem: React.FC<PostListItemProps> = ({ post, getCategoryColor }) =
                     }}
                   >
                     <FavoriteBorder sx={{ fontSize: 16, mr: 0.5 }} />
-                    {post.likes}
+                    {post.likes ?? 0}
                   </Box>
                   <Box
                     sx={{
@@ -180,7 +177,7 @@ const PostListItem: React.FC<PostListItemProps> = ({ post, getCategoryColor }) =
                     }}
                   >
                     <ChatBubbleOutline sx={{ fontSize: 16, mr: 0.5 }} />
-                    {post.comments}
+                    {post.comments ?? 0}
                   </Box>
                   <Box
                     sx={{
@@ -191,11 +188,10 @@ const PostListItem: React.FC<PostListItemProps> = ({ post, getCategoryColor }) =
                     }}
                   >
                     <TurnedInNot sx={{ fontSize: 16, mr: 0.5 }} />
-                    {post.bookmarks}
+                    {post.bookmarks ?? 0}
                   </Box>
                 </Box>
 
-                {/* View count */}
                 <Box
                   sx={{
                     display: "flex",
@@ -205,7 +201,7 @@ const PostListItem: React.FC<PostListItemProps> = ({ post, getCategoryColor }) =
                   }}
                 >
                   <Visibility sx={{ fontSize: 16, mr: 0.5 }} />
-                  {post.views}
+                  {post.views ?? 0}
                 </Box>
               </Box>
             </Box>

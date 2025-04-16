@@ -5,28 +5,23 @@ import PostButton from "@/components/common/Post/PostButton";
 import SubscribeButton from "@/components/common/SubscribeButton";
 import { PostType, ArticleFormValues } from "@/lib/types/postListType";
 import { sortOptions } from "@/lib/data/sortOptions";
-import { samplePosts } from "@/lib/data/postListData";
 import EmptyState from "@/components/common/EmptyState";
 import PostsGrid from "@/components/common/Post/PostGrid";
 import PostsList from "@/components/common/Post/PostsList";
 import SearchBar from "@/components/common/SearchBar";
 import SortSelect from "@/components/common/SortSelect";
 import ViewModeToggle from "@/components/common/ViewModeToggle";
-import { ArticleOutlined } from "@mui/icons-material";
 import { useRouter } from "next/router";
 import Banner from "@/components/common/Banner";
 import { useForm } from "react-hook-form";
 import { useLoading } from "@/lib/context/LoadingContext";
+import PostAPI from "@/services/Post/PostAPI";
 
-const getCategoryColor = (category: string) => {
-  const categoryColors: { [key: string]: { bg: string; text: string } } = {
-    科技: { bg: "#e0f2fe", text: "#0284c7" },
-    人工智慧: { bg: "#fce7f3", text: "#db2777" },
-    開發: { bg: "#dcfce7", text: "#16a34a" },
-    區塊鏈: { bg: "#fef3c7", text: "#d97706" },
+const getCategoryColor = (color: string) => {
+  return {
+    bg: color + "33", // 透明度 0.2
+    text: color,
   };
-
-  return categoryColors[category] || { bg: "#f1f5f9", text: "#64748b" };
 };
 
 export default function Article() {
@@ -49,6 +44,8 @@ export default function Article() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [posts, setPosts] = useState<PostType[]>([]);
+  const [boardAvatar, setBoardAvatar] = useState<string | null>(null);
+  const [boardColor, setBoardColor] = useState("#64748b");
 
   const fetchPosts = async (params: {
     type?: string;
@@ -56,21 +53,28 @@ export default function Article() {
     search?: string;
   }) => {
     try {
-      console.log("API call with params:", params);
-      setPosts(samplePosts);
-      setLoading(false);
+      setLoading(true);
+      const res = await PostAPI.list({
+        board: params.type,
+        sort: params.sort,
+        search: params.search,
+      });
+
+      const data = res.data;
+      setTitle(data.boardName || "所有文章");
+      setBoardAvatar(data.boardAvatar || null);
+      setBoardColor(data.boardColor || "#64748b");
+      setPosts(data.posts || []);
     } catch (error) {
       console.error("Error fetching posts:", error);
+      setPosts([]);
+    } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    setLoading(true);
     if (router.isReady && type) {
-      setTitle("所有文章");
-      setContent("");
-
       const sortType = getValues("sortType");
       const searchValue = getValues("searchValue");
 
@@ -91,18 +95,15 @@ export default function Article() {
   };
 
   const handleSearch = () => {
-    const value = getValues("searchValue");
-
     fetchPosts({
       type: type as string,
       sort: getValues("sortType"),
-      search: value,
+      search: getValues("searchValue"),
     });
   };
 
   const handleClearSearch = () => {
     setValue("searchValue", "");
-
     fetchPosts({
       type: type as string,
       sort: getValues("sortType"),
@@ -110,9 +111,16 @@ export default function Article() {
     });
   };
 
+  const categoryColor = getCategoryColor(boardColor);
+
   return (
     <Layout title={title}>
-      <Banner title={title} content={content} icon={ArticleOutlined}>
+      <Banner
+        title={title}
+        content={content}
+        avatarUrl={boardAvatar}
+        textColor={categoryColor.text}
+      >
         <Box
           sx={{
             display: "flex",
@@ -167,9 +175,9 @@ export default function Article() {
       {posts.length === 0 ? (
         <EmptyState searchTerm={searchTerm} onClearSearch={handleClearSearch} />
       ) : viewMode === "grid" ? (
-        <PostsGrid posts={posts} getCategoryColor={getCategoryColor} />
+        <PostsGrid posts={posts} getCategoryColor={() => categoryColor} />
       ) : (
-        <PostsList posts={posts} getCategoryColor={getCategoryColor} />
+        <PostsList posts={posts} getCategoryColor={() => categoryColor} />
       )}
     </Layout>
   );

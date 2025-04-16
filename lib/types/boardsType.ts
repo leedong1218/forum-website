@@ -16,4 +16,10 @@ export type BoardItem = {
   trending?: boolean;
 };
 
+export type CreatableBoardItem = {
+  id: number;
+  name: string;
+  avatar: string | null;
+};
+
 export type FilterType = 'all' | 'followed' | 'unfollowed';
