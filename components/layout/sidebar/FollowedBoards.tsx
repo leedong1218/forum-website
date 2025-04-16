@@ -60,28 +60,24 @@ const FollowedBoards: React.FC<FollowedBoardsProps> = ({
       text: "Technology",
       icon: <DevicesIcon />,
       link: "/f/1",
-      online: 42,
       hasNewContent: true,
     },
     {
       text: "Programming",
       icon: <CodeIcon />,
       link: "/f/2",
-      online: 28,
       hasNewContent: false,
     },
     {
       text: "Data Science",
       icon: <DataObjectIcon />,
       link: "/f/3",
-      online: 15,
       hasNewContent: true,
     },
     {
       text: "Trending",
       icon: <TrendingUpIcon />,
       link: "/f/4",
-      online: 67,
       hasNewContent: false,
     },
   ];
@@ -166,7 +162,6 @@ const FollowedBoards: React.FC<FollowedBoardsProps> = ({
                     fontWeight: title === item.text ? 600 : 500,
                     fontSize: "0.95rem",
                   }}
-                  secondary={`${item.online} 人在線`}
                   secondaryTypographyProps={{
                     fontSize: "0.75rem",
                     color: colors.accentHover, // Assuming successColor is similar to accentHover
