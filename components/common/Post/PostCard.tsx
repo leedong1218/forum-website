@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import Link from "next/link";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -20,8 +20,15 @@ interface PostCardProps {
   getCategoryColor: (category: string) => { bg: string; text: string };
 }
 
+// 工具函式：移除 HTML + 限制長度
+const getTextPreview = (html: string, maxLength = 60): string => {
+  const text = html.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+  return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
+};
+
 const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
-  const categoryColor = getCategoryColor(post.category);
+  const categoryColor = getCategoryColor(post.boardUrl);
+  const preview = getTextPreview(post.content);
 
   return (
     <Card
@@ -43,7 +50,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
     >
       <Box
         component={Link}
-        href={`/f/1/p/${post.id}`}
+        href={`/forum/${post.boardUrl}/post/${post.id}`}
         sx={{
           textDecoration: "none",
           color: "inherit",
@@ -58,11 +65,10 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
             display: "flex",
             flexDirection: "column",
             height: "100%",
-            "&:last-child": {
-              pb: 3,
-            },
+            "&:last-child": { pb: 3 },
           }}
         >
+          {/* 分類 + 時間 */}
           <Box
             sx={{
               display: "flex",
@@ -71,18 +77,20 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
               mb: 2,
             }}
           >
-            <Chip
-              size="small"
-              label={post.category}
-              sx={{
-                backgroundColor: categoryColor.bg,
-                color: categoryColor.text,
-                fontWeight: 600,
-                borderRadius: 1.5,
-                px: 1,
-                height: 24,
-              }}
-            />
+        <Chip
+          avatar={post.boardAvatar ? <Avatar src={post.boardAvatar} /> : null}
+          size="small"
+          label={post.boardName}
+          sx={{
+            backgroundColor: categoryColor.bg,
+            color: categoryColor.text,
+            fontWeight: 600,
+            borderRadius: 1.5,
+            px: 1,
+            height: 24,
+            mr: 1,
+          }}
+        />
             <Box
               sx={{
                 display: "flex",
@@ -92,14 +100,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
               }}
             >
               <AccessTime sx={{ fontSize: 14, mr: 0.5 }} />
-              {post.timestamp}
+              {new Date(post.createdAt).toLocaleDateString()}
             </Box>
           </Box>
 
-          <Box
-            sx={{ display: "flex", alignItems: "center", mb: 1.5 }}
-          >
+          {/* 作者 */}
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1.5 }}>
             <Avatar
+              src={post.authorAvatar || undefined}
               sx={{
                 width: 25,
                 height: 25,
@@ -107,24 +115,19 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
                 fontSize: "0.8rem",
                 mr: 0.5,
                 fontWeight: 600,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
               }}
             >
-              {post.avatar}
+              {!post.authorAvatar && post.authorName?.charAt(0).toUpperCase()}
             </Avatar>
             <Typography
               variant="body2"
-              sx={{
-                fontWeight: 500,
-                color: "text.primary",
-              }}
+              sx={{ fontWeight: 500, color: "text.primary" }}
             >
-              {post.author}
+              {post.authorName}
             </Typography>
           </Box>
 
+          {/* 標題 */}
           <Typography
             variant="h6"
             component="div"
@@ -139,6 +142,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
             {post.title}
           </Typography>
 
+          {/* 摘要內容 */}
           <Typography
             variant="body2"
             sx={{
@@ -153,9 +157,10 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
               color: "#64748b",
             }}
           >
-            {post.description}
+            {preview}
           </Typography>
 
+          {/* 底部統計數據 */}
           <Box
             sx={{
               display: "flex",
@@ -176,7 +181,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
                 }}
               >
                 <FavoriteBorder sx={{ fontSize: 16, mr: 0.5 }} />
-                {post.likes}
+                {post.likes ?? 0}
               </Box>
               <Box
                 sx={{
@@ -187,7 +192,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
                 }}
               >
                 <ChatBubbleOutline sx={{ fontSize: 16, mr: 0.5 }} />
-                {post.comments}
+                {post.comments ?? 0}
               </Box>
               <Box
                 sx={{
@@ -198,11 +203,10 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
                 }}
               >
                 <TurnedInNot sx={{ fontSize: 16, mr: 0.5 }} />
-                {post.bookmarks}
+                {post.bookmarks ?? 0}
               </Box>
             </Box>
 
-            {/* View count */}
             <Box
               sx={{
                 display: "flex",
@@ -212,7 +216,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
               }}
             >
               <Visibility sx={{ fontSize: 16, mr: 0.5 }} />
-              {post.views}
+              {post.views ?? 0}
             </Box>
           </Box>
         </CardContent>

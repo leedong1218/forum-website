@@ -80,6 +80,10 @@
   &.success {
     background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
   }
+
+  &.warning {
+    background: linear-gradient(135deg, #c6ad6d 0%, #c4a65b 100%);
+  }
 }
 
 .modalTitle {

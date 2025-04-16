@@ -1,424 +1,452 @@
-import { useState } from "react";
+// CommentSection.tsx (整合 Toast + 隱藏回覆 + 美化版本)
+
+import { useState, useEffect } from "react";
 import {
-  Avatar,
-  Box,
-  Typography,
-  TextField,
-  Button,
-  IconButton,
-  Divider,
-  Collapse,
+  Box, Typography, TextField, Button, Divider, IconButton, Collapse, Avatar, Snackbar, Alert,
+  Paper, Stack, Chip
 } from "@mui/material";
 import {
-  FavoriteBorder,
-  Favorite,
-  Reply,
-  ExpandMore,
-  ExpandLess,
+  FavoriteBorder, Favorite, Reply, ExpandMore, ExpandLess, DeleteOutline, EditOutlined
 } from "@mui/icons-material";
-import Sticker from "@/public/images/sticker.jpg";
 import Image from "next/image";
+import Sticker from "@/public/images/sticker.jpg";
+import { commentType } from "@/lib/types/commentType";
+import CommentAPI from "@/services/Comment/CommentAPI";
 
-// Types
-export interface ReplyType {
-  id: number;
-  author: string;
-  avatar?: string;
-  content: string;
-  timestamp: string;
-  likes: number;
-  isLiked: boolean;
-}
-
-export interface CommentType {
-  id: number;
-  author: string;
-  avatar?: string;
-  content: string;
-  timestamp: string;
-  likes: number;
-  isLiked: boolean;
-  replies?: ReplyType[];
-}
-
-interface CommentItemProps {
-  comment: CommentType;
-  onLike: (id: number) => void;
-  onReply: (id: number) => void;
-  activeReplyId: number | null;
-  onReplySubmit: (commentId: number, content: string) => void;
-  onCancelReply: () => void;
-}
-
-// Comment item component
 const CommentItem = ({
   comment,
-  onLike,
+  replies,
   onReply,
+  onSubmit,
+  onDelete,
+  onRefresh,
   activeReplyId,
-  onReplySubmit,
-  onCancelReply,
-}: CommentItemProps) => {
+  cancelReply,
+  showRepliesInitially = false
+}: {
+  comment: commentType;
+  replies: commentType[];
+  onReply: (id: number) => void;
+  onSubmit: (parentId: number, content: string) => void;
+  onDelete: (id: number) => void;
+  onRefresh: () => void;
+  activeReplyId: number | null;
+  cancelReply: () => void;
+  showRepliesInitially?: boolean;
+}) => {
   const [replyText, setReplyText] = useState("");
-  const [showReplies, setShowReplies] = useState(false);
+  const [showReplies, setShowReplies] = useState(showRepliesInitially);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(comment.content);
 
   const handleReplySubmit = () => {
     if (replyText.trim()) {
-      onReplySubmit(comment.id, replyText);
+      onSubmit(comment.id, replyText);
       setReplyText("");
     }
   };
 
+  const toggleLike = () => {
+    setLiked(!liked);
+    setLikeCount(liked ? likeCount - 1 : likeCount + 1);
+  };
+
+  const timeSince = (date: string) => {
+    const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + " 年前";
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + " 個月前";
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + " 天前";
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + " 小時前";
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + " 分鐘前";
+    return "剛剛";
+  };
+
   return (
-    <Box sx={{ mb: 3 }}>
-      <Box sx={{ display: "flex", gap: 2 }}>
-        {/* Use Image for avatar */}
-        <Box 
-          sx={{ 
-            width: 40, 
-            height: 40, 
-            borderRadius: '50%', 
-            overflow: 'hidden', 
-            flexShrink: 0,
-            position: 'relative'
-          }}
-        >
+    <Paper 
+      elevation={0} 
+      sx={{ 
+        mb: 2.5, 
+        pl: comment.parentId ? 2 : 0, 
+        borderLeft: comment.parentId ? '2px solid #eee' : 'none',
+        bgcolor: 'transparent'
+      }}
+    >
+      <Box sx={{ display: 'flex', gap: 2 }}>
+        <Avatar sx={{ width: 40, height: 40 }}>
           <Image 
-            src={comment.avatar || Sticker} 
-            alt={comment.author}
-            fill
-            style={{ objectFit: 'cover' }}
+            src={comment.authorAvatar || Sticker} 
+            alt={comment.authorName} 
+            fill 
+            style={{ objectFit: 'cover' }} 
           />
-        </Box>
-        <Box sx={{ flexGrow: 1 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Typography variant="subtitle2" fontWeight={600}>
-              {comment.author}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {comment.timestamp}
-            </Typography>
-          </Box>
-          <Typography variant="body2" sx={{ mt: 1, mb: 1 }}>
-            {comment.content}
-          </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <IconButton
-              size="small"
-              onClick={() => onLike(comment.id)}
-              sx={{ color: comment.isLiked ? "error.main" : "text.secondary" }}
-            >
-              {comment.isLiked ? (
-                <Favorite fontSize="small" />
-              ) : (
-                <FavoriteBorder fontSize="small" />
-              )}
-            </IconButton>
-            <Typography variant="caption">{comment.likes}</Typography>
-            <IconButton
-              size="small"
-              onClick={() => onReply(comment.id)}
-              sx={{ color: "text.secondary" }}
-            >
-              <Reply fontSize="small" />
-            </IconButton>
-            {comment.replies && comment.replies.length > 0 && (
-              <Button
-                size="small"
-                sx={{ ml: 1 }}
-                onClick={() => setShowReplies(!showReplies)}
-                endIcon={showReplies ? <ExpandLess /> : <ExpandMore />}
+        </Avatar>
+        <Box flex={1}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Stack direction="row" spacing={0.5} alignItems="center">
+                <Typography 
+                  fontWeight={600} 
+                  sx={{ color: comment.authorGroupColor || 'inherit' }}
+                >
+                  {comment.authorName}
+                </Typography>
+                <Chip 
+                  label={comment.authorGroupName || "用戶"} 
+                  size="small" 
+                  sx={{ 
+                    height: 20, 
+                    fontSize: '0.65rem',
+                    bgcolor: comment.authorGroupColor ? `${comment.authorGroupColor}20` : '#3c80c320',
+                    color: comment.authorGroupColor || '#3c80c3',
+                    fontWeight: 500,
+                    '& .MuiChip-label': {
+                      px: 1
+                    }
+                  }} 
+                />
+              </Stack>
+              <IconButton 
+                size="small" 
+                onClick={toggleLike} 
+                sx={{ p: 0.5, ml: -0.5 }}
               >
-                {showReplies
-                  ? "收起回覆"
-                  : `${comment.replies.length} 則回覆`}
+                {liked ? 
+                  <Favorite fontSize="small" color="error" /> : 
+                  <FavoriteBorder fontSize="small" />
+                }
+                {likeCount > 0 && 
+                  <Typography variant="caption" sx={{ ml: 0.5 }}>
+                    {likeCount}
+                  </Typography>
+                }
+              </IconButton>
+            </Stack>
+            <Typography variant="caption" color="text.secondary">{timeSince(comment.createdAt)}</Typography>
+          </Box>
+
+          {isEditing ? (
+            <TextField
+              fullWidth
+              multiline
+              size="small"
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              sx={{ my: 1 }}
+              InputProps={{
+                sx: { borderRadius: 2 }
+              }}
+            />
+          ) : (
+            <Typography
+              variant="body2"
+              sx={{
+                color: comment.isLocked ? 'text.disabled' : 'text.primary',
+                fontStyle: comment.isLocked ? 'italic' : 'normal',
+                mt: 1,
+                mb: 1,
+                lineHeight: 1.6
+              }}
+            >
+              {comment.isLocked ? '此留言已被刪除' : comment.content}
+            </Typography>
+          )}
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {!comment.isLocked && (
+              <Button 
+                size="small" 
+                onClick={() => onReply(comment.id)} 
+                startIcon={<Reply fontSize="small" />}
+                sx={{ 
+                  textTransform: 'none', 
+                  color: 'text.secondary',
+                  '&:hover': { bgcolor: 'action.hover' }
+                }}
+              >
+                回覆
               </Button>
+            )}
+            {comment.isMine && !comment.isLocked && (
+              isEditing ? (
+                <Stack direction="row" spacing={1}>
+                  <Button 
+                    size="small" 
+                    onClick={() => setIsEditing(false)}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    取消
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    onClick={async () => {
+                      if (!editText.trim()) return;
+                      await CommentAPI.update(comment.id, editText);
+                      setIsEditing(false);
+                      onRefresh();
+                    }}
+                    sx={{ 
+                      textTransform: 'none',
+                      borderRadius: 1.5
+                    }}
+                  >
+                    儲存
+                  </Button>
+                </Stack>
+              ) : (
+                <Stack direction="row" spacing={0.5}>
+                  <IconButton 
+                    size="small" 
+                    onClick={() => setIsEditing(true)}
+                    sx={{ color: 'text.secondary' }}
+                  >
+                    <EditOutlined fontSize="small" />
+                  </IconButton>
+                  <IconButton 
+                    size="small" 
+                    onClick={() => onDelete(comment.id)}
+                    sx={{ color: 'text.secondary' }}
+                  >
+                    <DeleteOutline fontSize="small" />
+                  </IconButton>
+                </Stack>
+              )
             )}
           </Box>
 
-          {/* Reply form */}
           {activeReplyId === comment.id && (
-            <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
+            <Box sx={{ mt: 2 }}>
               <TextField
                 fullWidth
                 size="small"
-                placeholder="回覆..."
+                multiline
+                rows={2}
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
-                variant="outlined"
+                placeholder="回覆內容..."
+                InputProps={{
+                  sx: { borderRadius: 2 }
+                }}
               />
-              <Button
-                variant="contained"
-                size="small"
-                onClick={handleReplySubmit}
-                disabled={!replyText.trim()}
-              >
-                送出
-              </Button>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={onCancelReply}
-              >
-                取消
-              </Button>
+              <Box sx={{ mt: 1, textAlign: 'right' }}>
+                <Button 
+                  size="small" 
+                  onClick={cancelReply} 
+                  sx={{ mr: 1, textTransform: 'none' }}
+                >
+                  取消
+                </Button>
+                <Button 
+                  size="small" 
+                  variant="contained" 
+                  onClick={handleReplySubmit} 
+                  disabled={!replyText.trim()}
+                  sx={{ 
+                    textTransform: 'none',
+                    borderRadius: 1.5
+                  }}
+                >
+                  送出
+                </Button>
+              </Box>
             </Box>
           )}
 
-          {/* Replies */}
-          {comment.replies && comment.replies.length > 0 && (
-            <Collapse in={showReplies}>
-              <Box sx={{ mt: 2 }}>
-                {comment.replies.map((reply) => (
-                  <Box key={reply.id} sx={{ display: "flex", gap: 2, mt: 2 }}>
-                    {/* Use Image for reply avatar */}
-                    <Box 
-                      sx={{ 
-                        width: 32, 
-                        height: 32, 
-                        borderRadius: '50%', 
-                        overflow: 'hidden',
-                        flexShrink: 0,
-                        position: 'relative'
-                      }}
-                    >
-                      <Image 
-                        src={reply.avatar || Sticker} 
-                        alt={reply.author}
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </Box>
-                    <Box>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <Typography variant="subtitle2" fontWeight={600} fontSize="0.875rem">
-                          {reply.author}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {reply.timestamp}
-                        </Typography>
-                      </Box>
-                      <Typography variant="body2" sx={{ mt: 0.5 }}>
-                        {reply.content}
-                      </Typography>
-                      <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
-                        <IconButton
-                          size="small"
-                          sx={{
-                            p: 0.5,
-                            color: reply.isLiked ? "error.main" : "text.secondary",
-                          }}
-                        >
-                          {reply.isLiked ? (
-                            <Favorite fontSize="small" />
-                          ) : (
-                            <FavoriteBorder fontSize="small" />
-                          )}
-                        </IconButton>
-                        <Typography variant="caption" sx={{ ml: 0.5 }}>
-                          {reply.likes}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                ))}
-              </Box>
-            </Collapse>
+          {replies.length > 0 && (
+            <>
+              <Button
+                size="small"
+                onClick={() => setShowReplies(!showReplies)}
+                endIcon={showReplies ? <ExpandLess /> : <ExpandMore />}
+                sx={{ 
+                  textTransform: 'none', 
+                  color: 'primary.main',
+                  my: 0.5,
+                  '&:hover': { bgcolor: 'action.hover' }
+                }}
+              >
+                {showReplies ? "收起回覆" : `查看 ${replies.length} 則回覆`}
+              </Button>
+              <Collapse in={showReplies}>
+                <Box sx={{ mt: 1 }}>
+                  {replies.map((reply) => (
+                    <CommentItem
+                      key={reply.id}
+                      comment={reply}
+                      replies={[]}
+                      onReply={onReply}
+                      onSubmit={onSubmit}
+                      onDelete={onDelete}
+                      onRefresh={onRefresh}
+                      activeReplyId={activeReplyId}
+                      cancelReply={cancelReply}
+                      showRepliesInitially={false}
+                    />
+                  ))}
+                </Box>
+              </Collapse>
+            </>
           )}
         </Box>
       </Box>
-    </Box>
+    </Paper>
   );
 };
 
-// Comment section component
-interface CommentSectionProps {
-  postId: number;
-}
-
-// Sample data
-const sampleComments: CommentType[] = [
-  {
-    id: 1,
-    author: "張小明",
-    content: "哈哈哈笑死我了，尤其是第5個笑話太有梗了！",
-    timestamp: "3小時前",
-    likes: 24,
-    isLiked: false,
-    replies: [
-      {
-        id: 101,
-        author: "李大華",
-        content: "我最喜歡第9個法老王那個，太有創意了！",
-        timestamp: "2小時前",
-        likes: 7,
-        isLiked: false,
-      },
-      {
-        id: 102,
-        author: "王小美",
-        content: "同意！暖暖包那個也很妙",
-        timestamp: "1小時前",
-        likes: 3,
-        isLiked: true,
-      },
-    ],
-  },
-  {
-    id: 2,
-    author: "陳大中",
-    content: "這種笑話我阿公都知道了，不過還是笑出來了😂",
-    timestamp: "昨天",
-    likes: 18,
-    isLiked: true,
-    replies: [],
-  },
-  {
-    id: 3,
-    author: "林小華",
-    content: "冰塊退伍那個很有梗！我要分享給我朋友看",
-    timestamp: "2天前",
-    likes: 11,
-    isLiked: false,
-    replies: [],
-  },
-];
-
-const CommentSection = ({ postId }: CommentSectionProps) => {
-  const [comments, setComments] = useState<CommentType[]>(sampleComments);
+const CommentSection = ({ postId }: { postId: number }) => {
+  const [comments, setComments] = useState<commentType[]>([]);
   const [commentText, setCommentText] = useState("");
   const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
+  const [toast, setToast] = useState<{ open: boolean; message: string }>({ open: false, message: "" });
 
-  // Handle comment like
-  const handleCommentLike = (commentId: number) => {
-    setComments(
-      comments.map((comment) => {
-        if (comment.id === commentId) {
-          return {
-            ...comment,
-            isLiked: !comment.isLiked,
-            likes: comment.isLiked ? comment.likes - 1 : comment.likes + 1,
-          };
-        }
-        return comment;
-      })
-    );
+  const fetchComments = async () => {
+    const res = await CommentAPI.get(postId);
+    setComments(res.data);
   };
 
-  // Handle reply to comment
-  const handleReply = (commentId: number) => {
-    setActiveReplyId(commentId === activeReplyId ? null : commentId);
+  useEffect(() => {
+    fetchComments();
+  }, [postId]);
+
+  const showToast = (msg: string) => setToast({ open: true, message: msg });
+
+  const handleSubmitComment = async () => {
+    if (!commentText.trim()) return;
+    await CommentAPI.create({ post: postId, content: commentText });
+    setCommentText("");
+    showToast("留言成功");
+    fetchComments();
   };
 
-  // Handle reply submission
-  const handleReplySubmit = (commentId: number, content: string) => {
-    setComments(
-      comments.map((comment) => {
-        if (comment.id === commentId) {
-          const newReply: ReplyType = {
-            id: Date.now(),
-            author: "訪客用戶",
-            content,
-            timestamp: "剛剛",
-            likes: 0,
-            isLiked: false,
-          };
-          return {
-            ...comment,
-            replies: [...(comment.replies || []), newReply],
-          };
-        }
-        return comment;
-      })
-    );
+  const handleReplySubmit = async (parentId: number, content: string) => {
+    await CommentAPI.create({ post: postId, parent: parentId, content });
     setActiveReplyId(null);
+    showToast("回覆成功");
+    fetchComments();
   };
 
-  // Handle comment submission
-  const handleCommentSubmit = () => {
-    if (commentText.trim()) {
-      const newComment: CommentType = {
-        id: Date.now(),
-        author: "訪客用戶",
-        content: commentText,
-        timestamp: "剛剛",
-        likes: 0,
-        isLiked: false,
-        replies: [],
-      };
-      setComments([newComment, ...comments]);
-      setCommentText("");
-    }
+  const handleDeleteComment = async (commentId: number) => {
+    if (!window.confirm("確定要刪除嗎？")) return;
+    await CommentAPI.delete(commentId);
+    showToast("留言已刪除");
+    fetchComments();
   };
+
+  const roots = comments.filter(c => c.parentId === null);
+  const repliesByRoot = new Map<number, commentType[]>();
+  comments.forEach(c => {
+    if (c.parentId && c.root) {
+      if (!repliesByRoot.has(c.root)) repliesByRoot.set(c.root, []);
+      repliesByRoot.get(c.root)!.push(c);
+    }
+  });
 
   return (
-    <Box sx={{ mt: 4 }}>
-      <Typography variant="h6" fontWeight={600} sx={{ mb: 3 }}>
+    <Box sx={{ py: 2 }}>
+      <Typography 
+        variant="h6" 
+        sx={{ 
+          mb: 3, 
+          fontWeight: 600,
+          color: 'text.primary'
+        }}
+      >
         留言 ({comments.length})
       </Typography>
 
-      {/* Comment form */}
-      <Box sx={{ display: "flex", gap: 2, mb: 4 }}>
-        {/* Use Image for guest avatar */}
-        <Box 
-          sx={{ 
-            width: 40, 
-            height: 40, 
-            borderRadius: '50%', 
-            overflow: 'hidden',
-            flexShrink: 0,
-            position: 'relative'
-          }}
-        >
-          <Image 
-            src={Sticker} 
-            alt="Guest"
-            fill
-            style={{ objectFit: 'cover' }}
-          />
-        </Box>
-        <Box sx={{ flexGrow: 1 }}>
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          display: 'flex', 
+          gap: 2, 
+          mb: 4,
+          p: 2,
+          borderRadius: 2,
+          bgcolor: 'background.paper',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+        }}
+      >
+        <Box sx={{ flex: 1 }}>
           <TextField
             fullWidth
-            placeholder="留下您的留言..."
             multiline
             rows={2}
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
+            placeholder="寫下你的留言..."
             variant="outlined"
+            InputProps={{
+              sx: { borderRadius: 2 }
+            }}
           />
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
-            <Button
-              variant="contained"
-              onClick={handleCommentSubmit}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+            <Button 
+              variant="contained" 
+              onClick={handleSubmitComment} 
               disabled={!commentText.trim()}
+              sx={{ 
+                textTransform: 'none',
+                borderRadius: 1.5,
+                px: 3
+              }}
             >
-              送出留言
+              送出
             </Button>
           </Box>
         </Box>
-      </Box>
+      </Paper>
 
       <Divider sx={{ mb: 3 }} />
 
-      {/* Comments list */}
-      {comments.map((comment) => (
-        <CommentItem
-          key={comment.id}
-          comment={comment}
-          onLike={handleCommentLike}
-          onReply={handleReply}
-          activeReplyId={activeReplyId}
-          onReplySubmit={handleReplySubmit}
-          onCancelReply={() => setActiveReplyId(null)}
-        />
-      ))}
+      {roots.length > 0 ? (
+        roots.map(comment => (
+          <CommentItem
+            key={comment.id}
+            comment={comment}
+            replies={repliesByRoot.get(comment.id) || []}
+            onReply={(id) => setActiveReplyId(id)}
+            onSubmit={handleReplySubmit}
+            onDelete={handleDeleteComment}
+            onRefresh={fetchComments}
+            activeReplyId={activeReplyId}
+            cancelReply={() => setActiveReplyId(null)}
+            showRepliesInitially={false}
+          />
+        ))
+      ) : (
+        <Typography 
+          variant="body2" 
+          color="text.secondary" 
+          align="center"
+          sx={{ py: 4 }}
+        >
+          還沒有留言，快來留下第一則留言吧！
+        </Typography>
+      )}
+
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={3000}
+        onClose={() => setToast({ open: false, message: "" })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          severity="success" 
+          sx={{ 
+            width: '100%',
+            borderRadius: 2
+          }}
+        >
+          {toast.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

@@ -26,8 +26,8 @@ const MainNavItems: React.FC<MainNavItemsProps> = ({
   // 主要導航項目定義
   const mainNavItems = [
     { text: "系統公告", icon: <DashboardIcon />, link: "/" },
-    { text: "所有看板", icon: <ForumIcon />, link: "/boards" },
-    { text: "所有文章", icon: <Article />, link: "/f/0" },
+    { text: "所有看板", icon: <ForumIcon />, link: "/forum/all" },
+    { text: "所有文章", icon: <Article />, link: "/forum" },
   ];
 
   return (

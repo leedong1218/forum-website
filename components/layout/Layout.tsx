@@ -125,20 +125,17 @@ export default function Layout({
                 handleMobileProfileToggle={handleMobileProfileToggle}
                 profileCardWidth={profileCardWidth}
               />
-              {/* 在線用戶列表跟隨在個人檔案下方 */}
               <OnlineUsers />
             </Box>
           )}
         </Box>
 
-        {/* 1500px 以下時，在主內容區域底部顯示在線用戶 */}
         {hideProfileSidebar && isLogin && (
           <Box sx={{ mt: 4, width: "100%" }}>
             <OnlineUsers />
           </Box>
         )}
 
-        {/* 新增貼文按鈕 */}
         <ActionButton />
       </Box>
     </Box>

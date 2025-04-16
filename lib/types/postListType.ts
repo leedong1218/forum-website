@@ -1,19 +1,33 @@
+export interface PostListResponse {
+  boardName: string;
+  boardAvatar: string | null;
+  boardColor: string;
+  posts: PostType[];
+}
+
 export interface PostType {
   id: number;
   title: string;
-  description: string;
-  author: string;
-  avatar: string;
-  category: string;
-  comments: number;
-  views: number;
-  likes?: number;
-  bookmarks?: number;
-  timestamp: string;
-  isLiked?: boolean;
-  isBookmarked?: boolean;
-  isNew?: boolean;
-  isTrending?: boolean;
+  content: string;
+  board: number;
+  boardAvatar: string;
+  boardName: string;
+  boardColor: string;
+  boardUrl: string;
+  author: number;
+  authorName: string;
+  authorGroupName: string;
+  authorGroupColor: string;
+  authorAvatar: string;
+  isMine: boolean;
+  attachments: {
+    id: number;
+    url: string;
+    originalFilename: string;
+  }[];
+  createdAt: string;
+  isPinned: boolean;
+  isLocked: boolean;
 }
 
 export interface ArticleFormValues {

@@ -37,7 +37,9 @@ export default function MessageModal({
     >
       <div className={styles.modalContent}>
         <div
-          className={`${styles.modalHeader} ${type === ModalTypes.ERROR ? styles.error : styles.success}`}
+          className={`${styles.modalHeader} ${type === ModalTypes.ERROR ? styles.error : 
+            type === ModalTypes.WARNING ? styles.warning : 
+            styles.success}`}
         >
           <p className={styles.modalTitle}>訊息</p>
         </div>

@@ -22,20 +22,16 @@ import { Search, Forum, Groups, List, ThumbUp } from '@mui/icons-material';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/router';
 import { useLoading } from '@/lib/context/LoadingContext';
-import { useMessageModal } from '@/lib/context/MessageModalContext';
-import { ModalTypes } from '@/lib/types/modalType';
 import { BoardItem, FilterType } from '@/lib/types/boardsType';
 import BoardsAPI from '@/services/Boards/BoardsAPI';
 import { useEffect, useState } from 'react';
 import Sticker from '@/public/images/sticker.jpg';
-import { requireLogin } from '@/utils/auth'; // 假設你把 login 工具放 utils/auth
 
 const BoardPage = () => {
   const router = useRouter();
   const { register, watch } = useForm();
   const searchTerm = watch('searchTerm')?.trim() || '';
   const { setLoading } = useLoading();
-  const { setIsShow, setModalProps } = useMessageModal();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -55,8 +51,8 @@ const BoardPage = () => {
           colors: b.color,
           avatar: b.avatar || Sticker,
           moderator: b.moderator,
-          moderator_avatar: b.moderator_avatar || Sticker,
-          moderator_group_color: b.moderator_group_color || "#000000",
+          moderatorAvatar: b.moderatorAvatar || Sticker,
+          moderatorGroupColor: b.moderatorGroupColor || "#000000",
           followers: b.followers || 0,
           postsCount: b.postsCount || 0,
           isFollow: b.isFollow || false,
@@ -64,11 +60,7 @@ const BoardPage = () => {
         }));
         setBoards(mapped);
       } catch (err: any) {
-        setModalProps({
-          type: ModalTypes.ERROR,
-          message: err?.message || '取得看板失敗',
-        });
-        setIsShow(true);
+        console.log(err?.message);
       } finally {
         setLoading(false);
       }
@@ -172,7 +164,7 @@ const BoardPage = () => {
                 }}
               >
                 <Box 
-                  onClick={() => {router.push(`/boards/${b.url}`); console.log(b.url)}} 
+                  onClick={() => {router.push(`/forum/${b.url}`); console.log(b.url)}} 
                   sx={{ 
                     cursor: 'pointer',
                     flex: 1,
@@ -224,32 +216,32 @@ const BoardPage = () => {
                             sx={{ 
                               display: 'flex', 
                               alignItems: 'center',
-                              backgroundColor: 'rgba(245,245,245,0.6)',
-                              borderRadius: 1,
-                              py: 0.5,
-                              px: 1
+                              backgroundColor: b.moderatorGroupColor + "10",
+                              borderRadius: 10,
+                              py: 1,
+                              px: 2,
                             }}
                           >
                             <Avatar
-                              src={typeof b.moderator_avatar === 'string' ? b.moderator_avatar : b.moderator_avatar?.src}
+                              src={typeof b.moderatorAvatar === 'string' ? b.moderatorAvatar : b.moderatorAvatar?.src}
                               sx={{ 
-                                width: 20, 
-                                height: 20,
-                                border: '1.5px solid',
-                                borderColor: b.moderator_group_color || theme.palette.primary.main
+                                width: 28, 
+                                height: 28,
+                                border: '2px solid',
+                                borderColor: b.moderatorGroupColor || theme.palette.primary.main,
                               }}
                             />
-                            <Box sx={{ ml: 1, overflow: 'hidden' }}>
+                            <Box sx={{ ml: 1.5, overflow: 'hidden' }}>
                               <Typography 
-                                variant="body2" 
+                                variant="body1" 
                                 sx={{ 
                                   fontWeight: 600,
-                                  color: b.moderator_group_color || theme.palette.primary.main,
+                                  color: b.moderatorGroupColor || theme.palette.primary.main,
                                   whiteSpace: 'nowrap',
                                   overflow: 'hidden',
                                   textOverflow: 'ellipsis',
-                                  fontSize: '0.75rem',
-                                  maxWidth: '80px'
+                                  fontSize: '0.875rem',
+                                  maxWidth: '120px'
                                 }}
                               >
                                 {b.moderator || '未指定'}
@@ -312,41 +304,7 @@ const BoardPage = () => {
                           textTransform: 'none',
                           borderRadius: 1.5,
                           py: 1
-                        }}
-                        onClick={async e => {
-                          e.stopPropagation();
-                          requireLogin(
-                            async () => {
-                              setLoading(true);
-                              try {
-                                const res = await BoardsAPI.toggleFollow(b.id);
-                                setBoards(prev =>
-                                  prev.map(board =>
-                                    board.id === b.id
-                                      ? { ...board, isFollow: res.isFollow, followers: res.followers }
-                                      : board
-                                  )
-                                );
-                              } catch (err: any) {
-                                setModalProps({
-                                  type: ModalTypes.ERROR,
-                                  message: err?.message || '追蹤操作失敗',
-                                });
-                                setIsShow(true);
-                              } finally {
-                                setLoading(false);
-                              }
-                            },
-                            () => {
-                              setModalProps({
-                                type: ModalTypes.WARNING,
-                                message: '請先登入才能追蹤看板',
-                              });
-                              setIsShow(true);
-                            }
-                          );
-                        }}
-                      >
+                        }}>
                         {b.isFollow ? '已追蹤' : '追蹤'}
                       </Button>
                     </Box>
