@@ -14,6 +14,9 @@ export type BoardItem = {
   postsCount?: number;
   isNew?: boolean;
   trending?: boolean;
+  title: string;
+  url: string;
+  colors: string;
 };
 
 export type CreatableBoardItem = {

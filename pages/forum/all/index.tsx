@@ -26,6 +26,7 @@ import { BoardItem, FilterType } from '@/lib/types/boardsType';
 import BoardsAPI from '@/services/Boards/BoardsAPI';
 import { useEffect, useState } from 'react';
 import Sticker from '@/public/images/sticker.jpg';
+import styles from '@/styles/pages/BoardPage.module.scss';
 
 const BoardPage = () => {
   const router = useRouter();
@@ -144,9 +145,9 @@ const BoardPage = () => {
           </Typography>
         </Box>
       ) : (
-        <Grid container spacing={3}>
+        <Grid className={styles.contentWrap}>
           {visibleBoards.map(b => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={b.id}>
+            <Grid key={b.id}>
               <Card
                 elevation={2}
                 sx={{
@@ -164,7 +165,7 @@ const BoardPage = () => {
                 }}
               >
                 <Box 
-                  onClick={() => {router.push(`/forum/${b.url}`); console.log(b.url)}} 
+                  onClick={() => {router.push(`/forum/${b.url}`);}} 
                   sx={{ 
                     cursor: 'pointer',
                     flex: 1,
@@ -172,7 +173,7 @@ const BoardPage = () => {
                     flexDirection: 'column'
                   }}
                 >
-                  <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: { xs: 2, md: 3 } }}>
+                  <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: { xs: 1, sm: 2, md: 3 } }}>
                     <Box sx={{ mb: 2 }}>
                       <Box sx={{ textAlign: 'center', mb: 2 }}>
                         <Avatar
@@ -257,7 +258,7 @@ const BoardPage = () => {
                           align="left"
                           sx={{ 
                             fontSize: { xs: '0.8rem', md: '0.875rem' },
-                            height: { xs: 70, md: 84 },
+                            height: '50',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             display: '-webkit-box',

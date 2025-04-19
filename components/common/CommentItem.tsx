@@ -80,7 +80,8 @@ const CommentItem = ({
     >
       <Box sx={{ display: 'flex', gap: 2 }}>
         <Avatar sx={{ width: 40, height: 40 }}>
-          <Image 
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img 
             src={comment.authorAvatar || Sticker} 
             alt={comment.authorName} 
             fill 

@@ -13,7 +13,7 @@ const CARD_STYLES = {
   border: '1px solid rgba(0,0,0,0.06)',
   display: 'flex',
   alignItems: 'center',
-  minWidth: 120,
+  width: '100%',
   cursor: 'pointer',
   transition: 'all 0.2s',
   '&:hover': {

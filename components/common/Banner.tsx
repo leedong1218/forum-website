@@ -1,5 +1,4 @@
 import { Box, Typography, Paper } from "@mui/material";
-import NextImage from "next/image";
 import { BannerType } from "@/lib/types/bannerType";
 
 export default function Banner({
@@ -120,11 +119,12 @@ export default function Banner({
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: { xs: 2, md: 2.5 },
+              gap: { xs: 2 },
             }}
           >
             {avatarUrl ? (
-              <NextImage
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
                 src={avatarUrl}
                 alt="看板頭像"
                 width={56}

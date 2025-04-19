@@ -1,21 +1,31 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import { colors } from "@/styles/theme"; // Import colors from theme file
+import UserAPI from "@/services/User/UserAPI";
+import { UserProfile } from "@/lib/types/userProfileType";
 
 const SimplifiedProfile: React.FC = () => {
+  const [userProfile, setUserProfile] = useState<UserProfile | null>();
+
+  useEffect(() => {
+    UserAPI.self()
+      .then(res => setUserProfile(res.data))
+      .catch(err => console.error("取得用戶資料失敗", err))
+  }, []);
+
   return (
-    <Box sx={{ 
-      p: 2, 
+    <Box sx={{
+      p: 2,
       mt: 'auto', // 確保它固定在側邊欄的底部
       borderTop: "1px solid rgba(0,0,0,0.08)"
     }}>
       {/* 用戶基本信息 */}
-      <Box sx={{ 
-        display: "flex", 
-        alignItems: "center", 
+      <Box sx={{
+        display: "flex",
+        alignItems: "center",
         mb: 2,
         p: 2,
         borderRadius: 2,
@@ -38,51 +48,51 @@ const SimplifiedProfile: React.FC = () => {
             variant="subtitle1"
             sx={{ fontWeight: 700, color: colors.textPrimary }}
           >
-            陳家豪
+            {userProfile?.displayName}
           </Typography>
           <Typography
             variant="body2"
             sx={{ color: colors.textSecondary }}
           >
-            @GIAHOW
+            @{userProfile?.username}
           </Typography>
         </Box>
       </Box>
-      
+
       {/* 用戶數據統計 */}
       <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-        <Box sx={{ 
-          flex: 1, 
-          p: 1, 
+        <Box sx={{
+          flex: 1,
+          p: 1,
           bgcolor: "rgba(0,0,0,0.02)",
           borderRadius: 1,
-          textAlign: "center" 
+          textAlign: "center"
         }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>48</Typography>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>0</Typography>
           <Typography variant="caption" sx={{ color: colors.textSecondary }}>貼文</Typography>
         </Box>
-        <Box sx={{ 
-          flex: 1, 
-          p: 1, 
+        <Box sx={{
+          flex: 1,
+          p: 1,
           bgcolor: "rgba(0,0,0,0.02)",
           borderRadius: 1,
-          textAlign: "center" 
+          textAlign: "center"
         }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>86</Typography>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>0</Typography>
           <Typography variant="caption" sx={{ color: colors.textSecondary }}>追蹤者</Typography>
         </Box>
-        <Box sx={{ 
-          flex: 1, 
-          p: 1, 
+        <Box sx={{
+          flex: 1,
+          p: 1,
           bgcolor: "rgba(0,0,0,0.02)",
           borderRadius: 1,
-          textAlign: "center" 
+          textAlign: "center"
         }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>1,250</Typography>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>0</Typography>
           <Typography variant="caption" sx={{ color: colors.textSecondary }}>按讚</Typography>
         </Box>
       </Box>
-      
+
       {/* 個人檔案按鈕 */}
       <Button
         fullWidth

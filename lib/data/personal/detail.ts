@@ -15,6 +15,7 @@ export const posts = [
     isLiked: true,
     isBookmarked: false,
     link: "/post/1",
+    bg: '#ccc'
   },
   {
     id: 2,
@@ -32,6 +33,7 @@ export const posts = [
     isLiked: false,
     isBookmarked: true,
     link: "/post/2",
+    bg: '#ccc'
   },
   {
     id: 3,
@@ -49,6 +51,7 @@ export const posts = [
     isLiked: true,
     isBookmarked: false,
     link: "/post/3",
+    bg: '#ccc'
   },
 ];
 

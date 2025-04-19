@@ -1,0 +1,19 @@
+@import '../base/mixin';
+
+.contentWrap {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+
+  @include X-Large {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @include Large {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include Small {
+    grid-template-columns: 1fr;
+  }
+}

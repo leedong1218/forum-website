@@ -18,7 +18,7 @@ const UserStats: React.FC = () => {
             color: textPrimaryColor,
           }}
         >
-          48
+          0
         </Typography>
         <Typography
           variant="caption"
@@ -37,7 +37,7 @@ const UserStats: React.FC = () => {
             color: textPrimaryColor,
           }}
         >
-          1,250
+          0
         </Typography>
         <Typography
           variant="caption"
@@ -56,7 +56,7 @@ const UserStats: React.FC = () => {
             color: textPrimaryColor,
           }}
         >
-          86
+          0
         </Typography>
         <Typography
           variant="caption"

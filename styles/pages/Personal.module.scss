@@ -1,0 +1,24 @@
+@import '../base/mixin';
+
+.contentWrap {
+  .wrap {
+    width: fit-content;
+
+    @include Medium {
+      width: 100%;
+    }
+    .digital {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10;
+
+      @include Medium {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      @include X-Small {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+}

@@ -14,6 +14,7 @@ export default function MessageModal({
 
   const handleClose = (e: React.MouseEvent<HTMLElement>) => {
     if (e.currentTarget === e.target) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       handleClick
         ? handleClick()
         : type === ModalTypes.SUCCESS

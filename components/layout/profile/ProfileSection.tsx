@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Cake, Article, ThumbUp } from "@mui/icons-material";
-import UserStats from "./UserStats";
+// import UserStats from "./UserStats";
 import { colors } from "@/styles/theme";
 import UserAPI, { UserSelfInfo } from "@/services/User/UserAPI";
 
@@ -35,12 +35,12 @@ const FloatingBox = styled(Box)(() => ({
 }));
 
 const Profile: React.FC = () => {
-  const [user, setUser] = useState<UserSelfInfo | null>(null);
+  const [user, setUser] = useState<UserSelfInfo | null | undefined>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     UserAPI.self()
-      .then(res => {setUser(res.data); localStorage.setItem('firstName', res.data.username?.[0]?.toUpperCase())})
+      .then(res => {setUser(res.data); localStorage.setItem('firstName', res.data ? res.data.username?.[0]?.toUpperCase() : '')})
       .catch(err => console.error("取得用戶資料失敗", err))
       .finally(() => setLoading(false));
   }, []);
@@ -145,7 +145,7 @@ const Profile: React.FC = () => {
 
       <Divider sx={{ mb: 2 }} />
 
-      <UserStats />
+      {/* <UserStats /> */}
 
       {/* 加入日期 */}
       <Box sx={infoBoxStyle}>
