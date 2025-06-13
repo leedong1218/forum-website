@@ -28,6 +28,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { colors } from "@/styles/theme";
 import NotificationPopover from "../common/NotiPopup";
+import { io, Socket } from 'socket.io-client'
 
 const SearchField = styled(TextField)(({ theme }) => ({
   [theme.breakpoints.up("sm")]: {
@@ -73,6 +74,24 @@ export default function Navbar({
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  // webSocket
+  const [ws, setWs] = useState<Socket | null>(null);
+
+  useEffect(() => {
+    const socket = io('http://localhost:3000');
+    setWs(socket);
+    console.log('WebSocket connected');
+
+    socket.on('getMessage', (message) => {
+      console.log('Received message:', message);
+    });
+
+    return () => {
+      socket.disconnect();
+      console.log('WebSocket disconnected');
+    }
+  }, []);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [firstName, setFirstName] = useState<string | null>();
