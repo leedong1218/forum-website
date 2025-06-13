@@ -6,7 +6,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ForumIcon from "@mui/icons-material/Forum";
-import { Article } from "@mui/icons-material";
+import { Article, Warning } from "@mui/icons-material";
 import Link from "@mui/material/Link";
 import { colors } from "@/styles/theme"; // Import colors from theme file
 
@@ -28,6 +28,7 @@ const MainNavItems: React.FC<MainNavItemsProps> = ({
     { text: "系統公告", icon: <DashboardIcon />, link: "/" },
     { text: "所有看板", icon: <ForumIcon />, link: "/forum/all" },
     { text: "所有文章", icon: <Article />, link: "/forum" },
+    { text: "檢舉管理", icon: <Warning />, link: "/reportManagement" },
   ];
 
   return (

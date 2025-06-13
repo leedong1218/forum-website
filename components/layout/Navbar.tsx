@@ -27,6 +27,7 @@ import { styled } from "@mui/material/styles";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { colors } from "@/styles/theme";
+import NotificationPopover from "../common/NotiPopup";
 
 const SearchField = styled(TextField)(({ theme }) => ({
   [theme.breakpoints.up("sm")]: {
@@ -89,9 +90,23 @@ export default function Navbar({
     setAnchorEl(null);
   };
 
-  // 現在搜尋按鈕將觸發側邊欄的開啟
   const handleSearchClick = () => {
     handleDrawerToggle();
+  };
+
+  const [notiAnchorEl, setNotiAnchorEl] = useState<null | HTMLElement>(null);
+  const notiOpen = Boolean(notiAnchorEl);
+
+  const handleToggleNoti = (event: React.MouseEvent<HTMLElement>) => {
+    if (notiAnchorEl) {
+      setNotiAnchorEl(null);
+    } else {
+      setNotiAnchorEl(event.currentTarget);
+    }
+  };
+
+  const handleCloseNoti = () => {
+    setNotiAnchorEl(null);
   };
 
   return (
@@ -203,6 +218,7 @@ export default function Navbar({
                     bgcolor: colors.accentLight,
                   },
                 }}
+                onClick={e => handleToggleNoti(e)}
               >
                 <Badge
                   badgeContent={4}
@@ -313,6 +329,12 @@ export default function Navbar({
           )}
         </Box>
       </Toolbar>
+      <NotificationPopover
+        anchorEl={notiAnchorEl}
+        open={notiOpen}
+        onClose={handleCloseNoti}
+      // notifications={customNotifications}
+      />
     </AppBar>
   );
 }

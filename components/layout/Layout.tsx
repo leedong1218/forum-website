@@ -10,7 +10,7 @@ import ProfileSection from "./profile/ProfileSection";
 import ActionButton from "../common/ActionButton";
 
 // 背景色
-const bgColor = "#f8fafc"; // Light gray background
+const bgColor = "#edede9"; // Light gray background
 const profileCardWidth = 320;
 
 interface LayoutProps {

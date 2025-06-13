@@ -3,15 +3,17 @@
 import { useState, useEffect } from "react";
 import {
   Box, Typography, TextField, Button, Divider, IconButton, Collapse, Avatar, Snackbar, Alert,
-  Paper, Stack, Chip
+  Paper, Stack, Chip,
+  Tooltip
 } from "@mui/material";
 import {
-  FavoriteBorder, Favorite, Reply, ExpandMore, ExpandLess, DeleteOutline, EditOutlined
+  FavoriteBorder, Favorite, Reply, ExpandMore, ExpandLess, DeleteOutline, EditOutlined,
+  Warning
 } from "@mui/icons-material";
-import Image from "next/image";
 import Sticker from "@/public/images/sticker.jpg";
 import { commentType } from "@/lib/types/commentType";
 import CommentAPI from "@/services/Comment/CommentAPI";
+import { ReportDialog } from "./ReportPopup";
 
 const CommentItem = ({
   comment,
@@ -40,6 +42,7 @@ const CommentItem = ({
   const [likeCount, setLikeCount] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(comment.content);
+  const [reportDialogOpen, setReportDialogOpen] = useState<boolean>(false);
 
   const handleReplySubmit = () => {
     if (replyText.trim()) {
@@ -68,12 +71,20 @@ const CommentItem = ({
     return "剛剛";
   };
 
+  const handleOpenReport = () => {
+    setReportDialogOpen(true);
+  }
+
+  const handleCloseReport = () => {
+    setReportDialogOpen(false);
+  };
+
   return (
-    <Paper 
-      elevation={0} 
-      sx={{ 
-        mb: 2.5, 
-        pl: comment.parentId ? 2 : 0, 
+    <Paper
+      elevation={0}
+      sx={{
+        mb: 2.5,
+        pl: comment.parentId ? 2 : 0,
         borderLeft: comment.parentId ? '2px solid #eee' : 'none',
         bgcolor: 'transparent'
       }}
@@ -81,28 +92,28 @@ const CommentItem = ({
       <Box sx={{ display: 'flex', gap: 2 }}>
         <Avatar sx={{ width: 40, height: 40 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img 
-            src={comment.authorAvatar || Sticker} 
-            alt={comment.authorName} 
-            fill 
-            style={{ objectFit: 'cover' }} 
+          <img
+            src={comment.authorAvatar || Sticker}
+            alt={comment.authorName}
+            fill
+            style={{ objectFit: 'cover' }}
           />
         </Avatar>
         <Box flex={1}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Stack direction="row" spacing={1} alignItems="center">
               <Stack direction="row" spacing={0.5} alignItems="center">
-                <Typography 
-                  fontWeight={600} 
+                <Typography
+                  fontWeight={600}
                   sx={{ color: comment.authorGroupColor || 'inherit' }}
                 >
                   {comment.authorName}
                 </Typography>
-                <Chip 
-                  label={comment.authorGroupName || "用戶"} 
-                  size="small" 
-                  sx={{ 
-                    height: 20, 
+                <Chip
+                  label={comment.authorGroupName || "用戶"}
+                  size="small"
+                  sx={{
+                    height: 20,
                     fontSize: '0.65rem',
                     bgcolor: comment.authorGroupColor ? `${comment.authorGroupColor}20` : '#3c80c320',
                     color: comment.authorGroupColor || '#3c80c3',
@@ -110,24 +121,33 @@ const CommentItem = ({
                     '& .MuiChip-label': {
                       px: 1
                     }
-                  }} 
+                  }}
                 />
               </Stack>
-              <IconButton 
-                size="small" 
-                onClick={toggleLike} 
+              <IconButton
+                size="small"
+                onClick={toggleLike}
                 sx={{ p: 0.5, ml: -0.5 }}
               >
-                {liked ? 
-                  <Favorite fontSize="small" color="error" /> : 
+                {liked ?
+                  <Favorite fontSize="small" color="error" /> :
                   <FavoriteBorder fontSize="small" />
                 }
-                {likeCount > 0 && 
+                {likeCount > 0 &&
                   <Typography variant="caption" sx={{ ml: 0.5 }}>
                     {likeCount}
                   </Typography>
                 }
               </IconButton>
+              <Tooltip title={"檢舉"}>
+                <IconButton
+                  size="small"
+                  onClick={handleOpenReport}
+                  sx={{ p: 0.5, ml: -0.5 }}
+                >
+                  <Warning fontSize="small" color="warning" />
+                </IconButton>
+              </Tooltip>
             </Stack>
             <Typography variant="caption" color="text.secondary">{timeSince(comment.createdAt)}</Typography>
           </Box>
@@ -161,12 +181,12 @@ const CommentItem = ({
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {!comment.isLocked && (
-              <Button 
-                size="small" 
-                onClick={() => onReply(comment.id)} 
+              <Button
+                size="small"
+                onClick={() => onReply(comment.id)}
                 startIcon={<Reply fontSize="small" />}
-                sx={{ 
-                  textTransform: 'none', 
+                sx={{
+                  textTransform: 'none',
                   color: 'text.secondary',
                   '&:hover': { bgcolor: 'action.hover' }
                 }}
@@ -177,8 +197,8 @@ const CommentItem = ({
             {comment.isMine && !comment.isLocked && (
               isEditing ? (
                 <Stack direction="row" spacing={1}>
-                  <Button 
-                    size="small" 
+                  <Button
+                    size="small"
                     onClick={() => setIsEditing(false)}
                     sx={{ textTransform: 'none' }}
                   >
@@ -193,7 +213,7 @@ const CommentItem = ({
                       setIsEditing(false);
                       onRefresh();
                     }}
-                    sx={{ 
+                    sx={{
                       textTransform: 'none',
                       borderRadius: 1.5
                     }}
@@ -203,15 +223,15 @@ const CommentItem = ({
                 </Stack>
               ) : (
                 <Stack direction="row" spacing={0.5}>
-                  <IconButton 
-                    size="small" 
+                  <IconButton
+                    size="small"
                     onClick={() => setIsEditing(true)}
                     sx={{ color: 'text.secondary' }}
                   >
                     <EditOutlined fontSize="small" />
                   </IconButton>
-                  <IconButton 
-                    size="small" 
+                  <IconButton
+                    size="small"
                     onClick={() => onDelete(comment.id)}
                     sx={{ color: 'text.secondary' }}
                   >
@@ -237,19 +257,19 @@ const CommentItem = ({
                 }}
               />
               <Box sx={{ mt: 1, textAlign: 'right' }}>
-                <Button 
-                  size="small" 
-                  onClick={cancelReply} 
+                <Button
+                  size="small"
+                  onClick={cancelReply}
                   sx={{ mr: 1, textTransform: 'none' }}
                 >
                   取消
                 </Button>
-                <Button 
-                  size="small" 
-                  variant="contained" 
-                  onClick={handleReplySubmit} 
+                <Button
+                  size="small"
+                  variant="contained"
+                  onClick={handleReplySubmit}
                   disabled={!replyText.trim()}
-                  sx={{ 
+                  sx={{
                     textTransform: 'none',
                     borderRadius: 1.5
                   }}
@@ -266,8 +286,8 @@ const CommentItem = ({
                 size="small"
                 onClick={() => setShowReplies(!showReplies)}
                 endIcon={showReplies ? <ExpandLess /> : <ExpandMore />}
-                sx={{ 
-                  textTransform: 'none', 
+                sx={{
+                  textTransform: 'none',
                   color: 'primary.main',
                   my: 0.5,
                   '&:hover': { bgcolor: 'action.hover' }
@@ -297,6 +317,11 @@ const CommentItem = ({
           )}
         </Box>
       </Box>
+
+      <ReportDialog
+        open={reportDialogOpen}
+        onClose={handleCloseReport}
+      />
     </Paper>
   );
 };
@@ -351,10 +376,10 @@ const CommentSection = ({ postId }: { postId: number }) => {
 
   return (
     <Box sx={{ py: 2 }}>
-      <Typography 
-        variant="h6" 
-        sx={{ 
-          mb: 3, 
+      <Typography
+        variant="h6"
+        sx={{
+          mb: 3,
           fontWeight: 600,
           color: 'text.primary'
         }}
@@ -362,11 +387,11 @@ const CommentSection = ({ postId }: { postId: number }) => {
         留言 ({comments.length})
       </Typography>
 
-      <Paper 
-        elevation={0} 
-        sx={{ 
-          display: 'flex', 
-          gap: 2, 
+      <Paper
+        elevation={0}
+        sx={{
+          display: 'flex',
+          gap: 2,
           mb: 4,
           p: 2,
           borderRadius: 2,
@@ -388,11 +413,11 @@ const CommentSection = ({ postId }: { postId: number }) => {
             }}
           />
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-            <Button 
-              variant="contained" 
-              onClick={handleSubmitComment} 
+            <Button
+              variant="contained"
+              onClick={handleSubmitComment}
               disabled={!commentText.trim()}
-              sx={{ 
+              sx={{
                 textTransform: 'none',
                 borderRadius: 1.5,
                 px: 3
@@ -422,9 +447,9 @@ const CommentSection = ({ postId }: { postId: number }) => {
           />
         ))
       ) : (
-        <Typography 
-          variant="body2" 
-          color="text.secondary" 
+        <Typography
+          variant="body2"
+          color="text.secondary"
           align="center"
           sx={{ py: 4 }}
         >
@@ -438,9 +463,9 @@ const CommentSection = ({ postId }: { postId: number }) => {
         onClose={() => setToast({ open: false, message: "" })}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert 
-          severity="success" 
-          sx={{ 
+        <Alert
+          severity="success"
+          sx={{
             width: '100%',
             borderRadius: 2
           }}

@@ -6,7 +6,9 @@ import {
   ChatBubbleOutline,
   TurnedInNot,
   Bookmark,
+  Warning,
 } from "@mui/icons-material";
+import { ReportDialog } from "./ReportPopup";
 
 // Type definitions
 interface InteractionItemProps {
@@ -85,6 +87,7 @@ const InteractionBar = ({
   const [isSaved, setIsSaved] = useState<boolean>(false);
   const [likeCount, setLikeCount] = useState<number>(initialLikes);
   const [commentCount] = useState<number>(initialComments);
+  const [reportDialogOpen, setReportDialogOpen] = useState<boolean>(false);
 
   const handleLikeClick = (): void => {
     setIsLiked(!isLiked);
@@ -93,6 +96,14 @@ const InteractionBar = ({
 
   const handleSaveClick = (): void => {
     setIsSaved(!isSaved);
+  };
+
+  const handleOpenReport = () => {
+    setReportDialogOpen(true);
+  }
+
+  const handleCloseReport = () => {
+    setReportDialogOpen(false);
   };
 
   return (
@@ -121,17 +132,31 @@ const InteractionBar = ({
           count={commentCount}
           label="留言"
           active={false}
-          onClick={() => {}}
+          onClick={() => { }}
           color={theme.palette.primary.main}
         />
       </Box>
-      <InteractionItem
-        icon={<TurnedInNot />}
-        activeIcon={<Bookmark />}
-        label="收藏"
-        active={isSaved}
-        onClick={handleSaveClick}
-        color={theme.palette.primary.main}
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <InteractionItem
+          icon={<TurnedInNot />}
+          activeIcon={<Bookmark />}
+          label="收藏"
+          active={isSaved}
+          onClick={handleSaveClick}
+          color={theme.palette.primary.main}
+        />
+        <Tooltip title={"檢舉"}>
+          <IconButton
+            onClick={handleOpenReport}
+            sx={{ p: 0.5, ml: -0.5 }}
+          >
+            <Warning color="warning" />
+          </IconButton>
+        </Tooltip>
+      </Box>
+      <ReportDialog
+        open={reportDialogOpen}
+        onClose={handleCloseReport}
       />
     </Box>
   );
