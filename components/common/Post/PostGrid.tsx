@@ -10,9 +10,14 @@ interface PostsGridProps {
 
 const PostsGrid: React.FC<PostsGridProps> = ({ posts, getCategoryColor }) => {
   return (
-    <Grid container spacing={3}>
+    <Grid container
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: { lg: 'repeat(3, 1fr)', sm: 'repeat(2, 1fr)' },
+        gap: 1
+      }}>
       {posts.map((post) => (
-        <Grid item xs={12} sm={6} md={4} key={post.id}>
+        <Grid key={post.id}>
           <PostCard post={post} getCategoryColor={getCategoryColor} />
         </Grid>
       ))}

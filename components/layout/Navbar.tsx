@@ -82,6 +82,7 @@ export default function Navbar({
     const socket = io('http://localhost:3000');
     setWs(socket);
     console.log('WebSocket connected');
+    console.log(ws);
 
     socket.on('getMessage', (message) => {
       console.log('Received message:', message);

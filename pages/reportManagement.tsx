@@ -37,7 +37,8 @@ import {
   Close as CloseIcon,
   NotificationImportant as NotificationIcon,
   Send as SendIcon,
-  Warning
+  Warning,
+  Sort
 } from '@mui/icons-material';
 import Banner from '@/components/common/Banner';
 import Layout from '@/components/layout/Layout';
@@ -256,21 +257,51 @@ const ReportManagement = () => {
               />
             </Tabs>
           </Paper>
-          
+
           <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
-            <FormControl size="small" sx={{ minWidth: 150 }}>
+            <FormControl size="small"
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: '#0ea5e9',
+                  },
+                },
+              }}>
               <InputLabel id="status-filter-label">篩選狀態</InputLabel>
               <Select
                 labelId="status-filter-label"
                 value={statusFilter}
                 label="篩選狀態"
                 onChange={handleStatusFilterChange}
-                sx={{ borderRadius: 1, backgroundColor: '#fff' }}
+                sx={{ borderRadius: 2 }}
+                startAdornment={
+                  <Sort sx={{ fontSize: 18, mr: 0.5, color: '#0ea5e9' }} />
+                }
               >
-                <MenuItem value="all">全部狀態</MenuItem>
-                <MenuItem value="pending">待審核</MenuItem>
-                <MenuItem value="approved">檢舉成立</MenuItem>
-                <MenuItem value="rejected">檢舉不成立</MenuItem>
+                <MenuItem value="all">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    全部狀態
+                  </Box>
+                </MenuItem>
+                <MenuItem value="pending">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <ScheduleIcon sx={{ fontSize: 16, color: '#856404' }} />
+                    待審核
+                  </Box>
+                </MenuItem>
+                <MenuItem value="approved">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CheckCircleIcon sx={{ fontSize: 16, color: '#155724' }} />
+                    成立
+                  </Box>
+                </MenuItem>
+                <MenuItem value="rejected">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CancelIcon sx={{ fontSize: 16, color: '#721c24' }} />
+                    不成立
+                  </Box>
+                </MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -534,7 +565,7 @@ const ReportManagement = () => {
           </DialogActions>
         </Dialog>
       </Box>
-    </Layout>
+    </Layout >
   );
 };
 
