@@ -1,9 +1,9 @@
-// CommentSection.tsx (整合 Toast + 隱藏回覆 + 美化版本)
+// CommentSection.tsx (整合 Toast + 隱藏回覆 + 美化版本 + 無限滾動)
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Box, Typography, TextField, Button, Divider, IconButton, Collapse, Avatar, Snackbar, Alert,
-  Paper, Stack, Chip,
+  Paper, Stack, Chip, CircularProgress,
   Tooltip
 } from "@mui/material";
 import {
@@ -14,6 +14,7 @@ import Sticker from "@/public/images/sticker.jpg";
 import { commentType } from "@/lib/types/commentType";
 import CommentAPI from "@/services/Comment/CommentAPI";
 import { ReportDialog } from "./ReportPopup";
+import { useInfiniteScroll } from '@/lib/hooks/useInfiniteScroll'; // 調整路徑根據你的項目結構
 
 const CommentItem = ({
   comment,
@@ -95,7 +96,6 @@ const CommentItem = ({
           <img
             src={comment.authorAvatar || Sticker}
             alt={comment.authorName}
-            fill
             style={{ objectFit: 'cover' }}
           />
         </Avatar>
@@ -331,11 +331,51 @@ const CommentSection = ({ postId }: { postId: number }) => {
   const [commentText, setCommentText] = useState("");
   const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ open: boolean; message: string }>({ open: false, message: "" });
+  
+  // 無限滾動相關狀態
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalComments, setTotalComments] = useState(0);
 
-  const fetchComments = async () => {
-    const res = await CommentAPI.get(postId);
-    setComments(res.data);
+  const fetchComments = async (pageNum: number = 1, isLoadMore: boolean = false) => {
+    setIsLoading(true);
+    try {
+      // 假設你的 API 支援分頁參數
+      const res = await CommentAPI.get(postId, pageNum);
+      
+      if (isLoadMore) {
+        setComments(prev => [...prev, ...res.data]);
+      } else {
+        setComments(res.data);
+      }
+      
+      setTotalComments(res.total || res.data.length);
+      
+      // 檢查是否還有更多留言
+      if (res.data.length < 10 || (res.total && comments.length + res.data.length >= res.total)) {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error('載入留言失敗:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const loadMoreComments = useCallback(async () => {
+    if (isLoading || !hasMore) return;
+    
+    const nextPage = page + 1;
+    setPage(nextPage);
+    await fetchComments(nextPage, true);
+  }, [page, isLoading, hasMore, postId]);
+
+  const { setupObserver } = useInfiniteScroll({
+    hasMore,
+    isLoading,
+    onLoadMore: loadMoreComments,
+  });
 
   useEffect(() => {
     fetchComments();
@@ -348,21 +388,33 @@ const CommentSection = ({ postId }: { postId: number }) => {
     await CommentAPI.create({ post: postId, content: commentText });
     setCommentText("");
     showToast("留言成功");
-    fetchComments();
+    
+    // 重新載入第一頁留言
+    setPage(1);
+    setHasMore(true);
+    await fetchComments(1, false);
   };
 
   const handleReplySubmit = async (parentId: number, content: string) => {
     await CommentAPI.create({ post: postId, parent: parentId, content });
     setActiveReplyId(null);
     showToast("回覆成功");
-    fetchComments();
+    
+    // 重新載入第一頁留言
+    setPage(1);
+    setHasMore(true);
+    await fetchComments(1, false);
   };
 
   const handleDeleteComment = async (commentId: number) => {
     if (!window.confirm("確定要刪除嗎？")) return;
     await CommentAPI.delete(commentId);
     showToast("留言已刪除");
-    fetchComments();
+    
+    // 重新載入第一頁留言
+    setPage(1);
+    setHasMore(true);
+    await fetchComments(1, false);
   };
 
   const roots = comments.filter(c => c.parentId === null);
@@ -384,7 +436,7 @@ const CommentSection = ({ postId }: { postId: number }) => {
           color: 'text.primary'
         }}
       >
-        留言 ({comments.length})
+        留言 ({totalComments})
       </Typography>
 
       <Paper
@@ -432,20 +484,50 @@ const CommentSection = ({ postId }: { postId: number }) => {
       <Divider sx={{ mb: 3 }} />
 
       {roots.length > 0 ? (
-        roots.map(comment => (
-          <CommentItem
-            key={comment.id}
-            comment={comment}
-            replies={repliesByRoot.get(comment.id) || []}
-            onReply={(id) => setActiveReplyId(id)}
-            onSubmit={handleReplySubmit}
-            onDelete={handleDeleteComment}
-            onRefresh={fetchComments}
-            activeReplyId={activeReplyId}
-            cancelReply={() => setActiveReplyId(null)}
-            showRepliesInitially={false}
-          />
-        ))
+        <>
+          {roots.map((comment, index) => {
+            const isLastItem = index === roots.length - 1;
+            
+            return (
+              <Box
+                key={comment.id}
+                ref={isLastItem ? setupObserver : null}
+              >
+                <CommentItem
+                  comment={comment}
+                  replies={repliesByRoot.get(comment.id) || []}
+                  onReply={(id) => setActiveReplyId(id)}
+                  onSubmit={handleReplySubmit}
+                  onDelete={handleDeleteComment}
+                  onRefresh={() => {
+                    setPage(1);
+                    setHasMore(true);
+                    fetchComments(1, false);
+                  }}
+                  activeReplyId={activeReplyId}
+                  cancelReply={() => setActiveReplyId(null)}
+                  showRepliesInitially={false}
+                />
+              </Box>
+            );
+          })}
+          
+          {/* 載入指示器 */}
+          {isLoading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+              <CircularProgress size={24} />
+            </Box>
+          )}
+
+          {/* 沒有更多留言提示 */}
+          {!hasMore && !isLoading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+              <Typography variant="body2" color="text.secondary">
+                已載入所有留言
+              </Typography>
+            </Box>
+          )}
+        </>
       ) : (
         <Typography
           variant="body2"

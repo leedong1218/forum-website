@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Avatar,
   Box,
   Card,
   CardContent,
-  Typography
+  Typography,
+  CircularProgress
 } from '@mui/material';
 import {
   AccessTime,
@@ -15,6 +16,7 @@ import {
 import Banner from '@/components/common/Banner';
 import Layout from '@/components/layout/Layout';
 import { colors } from "@/styles/theme";
+import { useInfiniteScroll } from '@/lib/hooks/useInfiniteScroll'; // 調整路徑根據你的項目結構
 
 type Notification = {
   id: number;
@@ -29,33 +31,71 @@ type Notification = {
   };
 };
 
-const notification: Notification[] = [
-  {
-    id: 1,
-    title: "新的回覆",
-    description: "有人回覆了你的貼文",
-    timestamp: "2分鐘前",
-    avatar: { type: 'icon', content: Forum, bgcolor: colors.accent }
+// 模擬更多通知數據
+const generateNotifications = (page: number): Notification[] => {
+  const baseNotifications = [
+    {
+      title: "新的回覆",
+      description: "有人回覆了你的貼文",
+      avatar: { type: 'icon' as const, content: Forum, bgcolor: colors.accent }
+    },
+    {
+      title: "新的追蹤者",
+      description: "有人開始追蹤你",
+      avatar: { type: 'text' as const, content: 'U', bgcolor: colors.gradient }
+    },
+    {
+      title: "貼文被讚",
+      description: "你的貼文獲得了讚",
+      avatar: { type: 'icon' as const, content: Edit, bgcolor: '#ff9800' }
+    },
+  ];
 
-  },
-  {
-    id: 2,
-    title: "新的追蹤者",
-    description: "John 開始追蹤你",
-    timestamp: "1小時前",
-    avatar: { type: 'text', content: 'J', bgcolor: colors.gradient }
-  },
-  {
-    id: 3,
-    title: "貼文被讚",
-    description: "你的貼文獲得了10個讚",
-    timestamp: "3小時前",
-    avatar: { type: 'icon', content: Edit, bgcolor: '#ff9800' }
-  },
-];
+  return baseNotifications.map((notification, index) => ({
+    ...notification,
+    id: page * 10 + index + 1,
+    timestamp: `${Math.floor(Math.random() * 24) + 1}小時前`,
+    description: `${notification.description} (第${page + 1}頁)`,
+  }));
+};
 
 const Notify = () => {
   const title = "通知";
+  const [notifications, setNotifications] = useState<Notification[]>(() => 
+    generateNotifications(0)
+  );
+  const [page, setPage] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  // 模擬載入更多通知的函數
+  const loadMoreNotifications = useCallback(async () => {
+    if (isLoading || !hasMore) return;
+    
+    setIsLoading(true);
+    
+    // 模擬 API 調用延遲
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const nextPage = page + 1;
+    const newNotifications = generateNotifications(nextPage);
+    
+    setNotifications(prev => [...prev, ...newNotifications]);
+    setPage(nextPage);
+    
+    // 模擬在第5頁後沒有更多數據
+    if (nextPage >= 4) {
+      setHasMore(false);
+    }
+    
+    setIsLoading(false);
+  }, [page, isLoading, hasMore]);
+
+  const { setupObserver } = useInfiniteScroll({
+    hasMore,
+    isLoading,
+    onLoadMore: loadMoreNotifications,
+  });
 
   return (
     <Layout title={title}>
@@ -66,17 +106,18 @@ const Notify = () => {
           avatarUrl={""}
           textColor={""}
           icon={NotificationAddOutlined}
-        >
-        </Banner>
+        />
 
         <Box sx={{ mb: 2 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {notification.map((post) => {
-              const IconComponent = post.avatar.content;
+            {notifications.map((notification, index) => {
+              const IconComponent = notification.avatar.content;
+              const isLastItem = index === notifications.length - 1;
 
               return (
                 <Card
-                  key={post.id}
+                  key={notification.id}
+                  ref={isLastItem ? setupObserver : null}
                   sx={{
                     borderRadius: 3,
                     transition: "all 0.3s ease",
@@ -113,11 +154,11 @@ const Notify = () => {
                       }}
                     >
                       <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Avatar sx={{ bgcolor: post.avatar.bgcolor, mr: 2 }}>
-                          {post.avatar.type === 'icon' ? (
+                        <Avatar sx={{ bgcolor: notification.avatar.bgcolor, mr: 2 }}>
+                          {notification.avatar.type === 'icon' ? (
                             <IconComponent sx={{ fontSize: 18 }} />
                           ) : (
-                            <Typography>{post.avatar.content}</Typography>
+                            <Typography>{notification.avatar.content}</Typography>
                           )}
                         </Avatar>
 
@@ -131,7 +172,7 @@ const Notify = () => {
                               alignItems: "center",
                             }}
                           >
-                            {post.title}
+                            {notification.title}
                           </Typography>
                         </Box>
                       </Box>
@@ -146,7 +187,7 @@ const Notify = () => {
                           }}
                         >
                           <AccessTime sx={{ fontSize: 14, mr: 0.5 }} />
-                          {post.timestamp}
+                          {notification.timestamp}
                         </Box>
                       </Box>
                     </Box>
@@ -158,13 +199,29 @@ const Notify = () => {
                         pl: 7,
                       }}
                     >
-                      {post.description}
+                      {notification.description}
                     </Typography>
                   </CardContent>
                 </Card>
               );
             })}
           </Box>
+
+          {/* 載入指示器 */}
+          {isLoading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 2 }}>
+              <CircularProgress size={24} />
+            </Box>
+          )}
+
+          {/* 沒有更多數據提示 */}
+          {!hasMore && notifications.length > 0 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                已載入所有通知
+              </Typography>
+            </Box>
+          )}
         </Box>
       </Box>
     </Layout>

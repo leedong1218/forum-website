@@ -3,6 +3,7 @@ export interface PostListResponse {
   boardAvatar: string | null;
   boardColor: string;
   posts: PostType[];
+  hasMore: boolean;
 }
 
 export interface PostType {
@@ -28,6 +29,7 @@ export interface PostType {
   createdAt: string;
   isPinned: boolean;
   isLocked: boolean;
+  likes: number;
 }
 
 export interface ArticleFormValues {

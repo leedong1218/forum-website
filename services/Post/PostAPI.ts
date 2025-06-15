@@ -35,6 +35,7 @@ const PostAPI = {
     board?: string;
     sort?: string;
     search?: string;
+    page?: number;
   }): Promise<Response<PostListResponse>> => {
     return API.get(BASE_URL, { params });
   },

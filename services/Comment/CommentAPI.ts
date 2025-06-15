@@ -6,9 +6,9 @@ import { commentType } from '@/lib/types/commentType';
 const BASE_URL = '/comment';
 
 const CommentAPI = {
-  get: (postId: number): Promise<Response<commentType[]>> => {
+  get: (postId: number, page: number): Promise<Response<commentType[]>> => {
     return API.get(`${BASE_URL}`, {
-      params: { post: postId }
+      params: { post: postId, page: page }
     });
   },
 
