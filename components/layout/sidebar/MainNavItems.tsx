@@ -15,21 +15,28 @@ interface MainNavItemsProps {
   isMobile: boolean;
   isCompactView: boolean;
   handleDrawerToggle: () => void;
+  isLogin?: boolean;
 }
 
 const MainNavItems: React.FC<MainNavItemsProps> = ({
   title,
   isMobile,
   isCompactView,
-  handleDrawerToggle
+  handleDrawerToggle,
+  isLogin
 }) => {
   // 主要導航項目定義
-  const mainNavItems = [
+  const allNavItems = [
     { text: "系統公告", icon: <DashboardIcon />, link: "/" },
     { text: "所有看板", icon: <ForumIcon />, link: "/forum/all" },
     { text: "所有文章", icon: <Article />, link: "/forum" },
-    { text: "檢舉管理", icon: <Warning />, link: "/reportManagement" },
+    { text: "檢舉管理", icon: <Warning />, link: "/reportManagement", requireLogin: true },
   ];
+
+  // 根據登入狀態過濾導航項目
+  const mainNavItems = allNavItems.filter(item => 
+    !item.requireLogin || isLogin
+  );
 
   return (
     <List disablePadding>

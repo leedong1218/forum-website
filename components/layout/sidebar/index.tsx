@@ -62,6 +62,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         isMobile={isMobile}
         isCompactView={isCompactView}
         handleDrawerToggle={handleDrawerToggle}
+        isLogin={isLogin}
       />
 
       {isLogin && (
