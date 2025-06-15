@@ -1,7 +1,6 @@
 import RegisterAPI from "@/services/Register/RegisterAPI";
 import React, { useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { getCaptcha } from "@/services/Captcha/captchaAPI";
 import {
   VpnKeyOutlined as VpnKeyOutlinedIcon,
   PersonOutlineOutlined as PersonOutlineOutlinedIcon,
@@ -29,6 +28,7 @@ import styles from "@/styles/pages/Login.module.scss";
 import { useRouter } from "next/router";
 import { useMessageModal } from "@/lib/context/MessageModalContext";
 import { ModalTypes } from "@/lib/types/modalType";
+import CaptchaAPI from "@/services/Captcha/captchaAPI";
 
 interface RegisterFormInputs {
   username: string;
@@ -61,13 +61,13 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
   const fetchCaptcha = async () => {
     try {
-      const data = await getCaptcha();
+      const res = await CaptchaAPI.getCaptcha();
       setCaptcha({
-        key: data.key,
-        image_url: data.image_url.replace("/backend", ""),
+        key: res.key,
+        image_url: res.image_url.replace("/backend", ""),
       });
-    } catch (error) {
-      console.error("獲取驗證碼失敗", error);
+    } catch (err) {
+      console.error("獲取驗證碼失敗", err);
     }
   };
 
