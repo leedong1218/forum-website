@@ -127,7 +127,7 @@ export default function Layout({
             </Box>
           )}
         </Box>
-        <ActionButton />
+        <ActionButton isLogin={isLogin} />
       </Box>
     </Box>
   );

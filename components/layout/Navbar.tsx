@@ -212,7 +212,7 @@ export default function Navbar({
 
         {/* Enhanced right side user controls */}
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          {!isMobile && (
+          {!isMobile && isLogin && (
             <Tooltip title="新增貼文">
               <IconButton
                 sx={{
