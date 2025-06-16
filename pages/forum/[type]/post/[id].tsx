@@ -45,7 +45,7 @@ export default function Post() {
     router.back();
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('zh-TW', {
       year: 'numeric',
@@ -79,22 +79,22 @@ export default function Post() {
             返回討論列表
           </Typography>
         </Box>
-        
+
         <Fade in={true} timeout={500}>
-          <Card sx={{ 
-            borderRadius: 3, 
-            boxShadow: "0 4px 20px rgba(0,0,0,0.08)", 
-            p: { xs: 2, md: 4 }, 
+          <Card sx={{
+            borderRadius: 3,
+            boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+            p: { xs: 2, md: 4 },
             mb: 4
           }}>
             {/* Header */}
             <Box sx={{ borderBottom: "1px solid rgba(0,0,0,0.05)", pb: 3 }}>
-              <Box sx={{ 
-                display: "flex", 
+              <Box sx={{
+                display: "flex",
                 flexDirection: { xs: "column", sm: "row" },
-                justifyContent: "space-between", 
+                justifyContent: "space-between",
                 alignItems: { xs: "flex-start", sm: "center" },
-                mb: 2 
+                mb: 2
               }}>
                 <Link href={`/forum/${postData.boardUrl}`} passHref>
                   <Chip
@@ -102,9 +102,9 @@ export default function Post() {
                     size="small"
                     label={postData.boardName}
                     clickable
-                    sx={{ 
-                      bgcolor: postData.boardColor ? `${postData.boardColor}20` : `${theme.palette.primary.dark}20`, 
-                      color: postData.boardColor, 
+                    sx={{
+                      bgcolor: postData.boardColor ? `${postData.boardColor}20` : `${theme.palette.primary.dark}20`,
+                      color: postData.boardColor,
                       fontWeight: 600,
                       borderRadius: 1,
                       height: 28,
@@ -113,10 +113,10 @@ export default function Post() {
                     }}
                   />
                 </Link>
-                <Box sx={{ 
-                  display: "flex", 
-                  alignItems: "center", 
-                  color: "text.secondary", 
+                <Box sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  color: "text.secondary",
                   fontSize: "0.85rem",
                   mt: { xs: 1, sm: 0 }
                 }}>
@@ -125,35 +125,35 @@ export default function Post() {
                 </Box>
               </Box>
 
-              <Box sx={{ 
-                display: "flex", 
-                alignItems: "flex-start", 
+              <Box sx={{
+                display: "flex",
+                alignItems: "flex-start",
                 mt: 2,
                 pb: 1
               }}>
                 <Avatar
                   src={postData.authorAvatar || undefined}
                   alt={postData.authorName}
-                  sx={{ 
-                    width: 50, 
-                    height: 50, 
+                  sx={{
+                    width: 50,
+                    height: 50,
                     mr: 2,
                     border: postData.authorGroupColor ? `2px solid ${postData.authorGroupColor}80` : "none"
                   }}
                 />
                 <Box>
                   {postData.authorGroupName && (
-                    <Chip 
-                      label={postData.authorGroupName} 
-                      size="small" 
-                      sx={{ 
+                    <Chip
+                      label={postData.authorGroupName}
+                      size="small"
+                      sx={{
                         mb: 0.5,
-                        height: 20, 
+                        height: 20,
                         fontSize: "0.7rem",
                         bgcolor: postData.authorGroupColor ? `${postData.authorGroupColor}80` : "rgba(158, 158, 158, 0.5)",
                         color: "#fff",
                         fontWeight: 600
-                      }} 
+                      }}
                     />
                   )}
                   <Typography variant="subtitle1" fontWeight="bold">
@@ -165,11 +165,11 @@ export default function Post() {
               <Typography
                 variant="h4"
                 component="h1"
-                sx={{ 
-                  fontWeight: "bold", 
+                sx={{
+                  fontWeight: "bold",
                   mt: 4,
-                  mb: 2, 
-                  color: "text.primary", 
+                  mb: 2,
+                  color: "text.primary",
                   fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" },
                   borderLeft: `6px solid ${theme.palette.primary.main}80`,
                   pl: 2
@@ -183,17 +183,17 @@ export default function Post() {
             <Box my={4}>
               <Paper
                 elevation={0}
-                sx={{ 
-                  p: { xs: 2, md: 3 }, 
-                  borderRadius: 2, 
-                  bgcolor: "grey.50", 
+                sx={{
+                  p: { xs: 2, md: 3 },
+                  borderRadius: 2,
+                  bgcolor: "grey.50",
                   border: "1px solid rgba(0,0,0,0.06)"
                 }}
               >
                 <div
                   dangerouslySetInnerHTML={{ __html: postData.content }}
-                  style={{ 
-                    color: theme.palette.text.primary, 
+                  style={{
+                    color: theme.palette.text.primary,
                     lineHeight: 1.8
                   }}
                 />
@@ -208,7 +208,13 @@ export default function Post() {
             <Divider sx={{ my: 3 }} />
 
             {/* Interactions */}
-            <InteractionBar initialLikes={postData.likes || 0} initialComments={postData.comments || 0} />
+            <InteractionBar
+              initialLikes={postData.likesCount}
+              initialComments={postData.commentsCount}
+              postId={postData.id}
+              isLikedA={postData.isLiked}
+              isBookmarkedA={postData.isBookmarked}
+            />
 
             {/* Comments */}
             <Box mt={3}>

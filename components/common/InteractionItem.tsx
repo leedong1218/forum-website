@@ -9,6 +9,7 @@ import {
   Warning,
 } from "@mui/icons-material";
 import { ReportDialog } from "./ReportPopup";
+import PostAPI from "@/services/Post/PostAPI";
 
 // Type definitions
 interface InteractionItemProps {
@@ -24,6 +25,9 @@ interface InteractionItemProps {
 interface InteractionBarProps {
   initialLikes?: number; // Initial like count
   initialComments?: number; // Initial comment count
+  postId: number;
+  isLikedA: boolean; // Whether the post is liked
+  isBookmarkedA: boolean; // Whether the post is bookmarked
 }
 
 // Utility function to format numbers (e.g., 1000 → 1K)
@@ -81,21 +85,28 @@ const InteractionItem = ({
 const InteractionBar = ({
   initialLikes = 0,
   initialComments = 0,
+  postId,
+  isLikedA,
+  isBookmarkedA
 }: InteractionBarProps) => {
   const theme = useTheme();
-  const [isLiked, setIsLiked] = useState<boolean>(false);
-  const [isSaved, setIsSaved] = useState<boolean>(false);
+  const [isLiked, setIsLiked] = useState<boolean>(isLikedA);
+  const [isSaved, setIsSaved] = useState<boolean>(isBookmarkedA);
   const [likeCount, setLikeCount] = useState<number>(initialLikes);
   const [commentCount] = useState<number>(initialComments);
   const [reportDialogOpen, setReportDialogOpen] = useState<boolean>(false);
 
-  const handleLikeClick = (): void => {
+  const handleLikeClick = async () => {
     setIsLiked(!isLiked);
     setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
+
+    await PostAPI.like(postId);
   };
 
-  const handleSaveClick = (): void => {
+  const handleSaveClick = async () => {
     setIsSaved(!isSaved);
+
+    await PostAPI.bookMark(postId);
   };
 
   const handleOpenReport = () => {

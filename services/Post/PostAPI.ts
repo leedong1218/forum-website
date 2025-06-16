@@ -18,7 +18,7 @@ const BASE_URL = '/post';
 const PostAPI = {
   get: (id: number): Promise<Response<PostType>> => {
     return API.get(`/post/${id}`);
-  },  
+  },
   create: (data: CreatePostPayload): Promise<Response<CreatePostResponse>> => {
     const fd = new FormData();
     fd.append('board', String(data.board));
@@ -39,6 +39,12 @@ const PostAPI = {
   }): Promise<Response<PostListResponse>> => {
     return API.get(BASE_URL, { params });
   },
+
+  bookMark: (post_id: number): Promise<Response<unknown>> =>
+    API.post(`${BASE_URL}/${post_id}/bookmark/`),
+
+  like: (post_id: number): Promise<Response<unknown>> =>
+    API.post(`${BASE_URL}/${post_id}/like/`),
 };
 
 export default PostAPI;

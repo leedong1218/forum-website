@@ -28,8 +28,10 @@ export interface PostType {
   }[];
   createdAt: string;
   isPinned: boolean;
-  isLocked: boolean;
-  likes: number;
+  isLiked: boolean;
+  likesCount: number;
+  commentsCount: number;
+  isBookmarked: boolean;
 }
 
 export interface ArticleFormValues {
