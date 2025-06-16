@@ -1,7 +1,7 @@
 import { StaticImageData } from "next/image";
 
 export type BoardItem = {
-  id: number;
+  id: string;
   name: string;
   description: string;
   avatar: string | StaticImageData;
@@ -17,6 +17,8 @@ export type BoardItem = {
   title: string;
   url: string;
   colors: string;
+  followerCount?: number;
+  isFollowed?: boolean;
 };
 
 export type CreatableBoardItem = {

@@ -17,8 +17,10 @@ import {
   Tooltip,
   useTheme,
   useMediaQuery,
+  Snackbar,
+  Alert,
 } from '@mui/material';
-import { Search, Forum, Groups, List, ThumbUp } from '@mui/icons-material';
+import { Search, Groups, List, ThumbUp } from '@mui/icons-material';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/router';
 import { useLoading } from '@/lib/context/LoadingContext';
@@ -36,8 +38,25 @@ const BoardPage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  const [toast, setToast] = useState<{ open: boolean; message: string }>({ open: false, message: "" });
+  const showToast = (msg: string) => setToast({ open: true, message: msg });
+
+
   const [boards, setBoards] = useState<BoardItem[]>([]);
   const [filter, setFilter] = useState<FilterType>('all');
+
+  const fetchFollow = async (boardId: string) => {
+    const res = await BoardsAPI.follow(boardId);
+    showToast(res.message ?? "");
+
+    setBoards(prevBoards =>
+      prevBoards.map(board =>
+        board.id === boardId
+          ? { ...board, isFollow: !board.isFollow }
+          : board
+      )
+    );
+  }
 
   /** 取得看板列表 */
   useEffect(() => {
@@ -56,8 +75,11 @@ const BoardPage = () => {
           moderatorGroupColor: b.moderatorGroupColor || "#000000",
           followers: b.followers || 0,
           postsCount: b.postsCount || 0,
-          isFollow: b.isFollow || false,
-          url: b.url
+          // 修复：使用API返回的isFollowed字段
+          isFollow: b.isFollowed || false,
+          url: b.url,
+          // 修复：使用API返回的followerCount字段
+          followerCount: b.followerCount || 0
         }));
         setBoards(mapped);
       } catch (err: any) {
@@ -86,41 +108,41 @@ const BoardPage = () => {
       <Banner title="所有看板" content="探索不同主題的技術社群，加入感興趣的看板參與討論" icon={List} />
 
       {/* 搜尋與篩選 */}
-      <Box 
-        sx={{ 
-          display: 'flex', 
-          flexDirection: { xs: 'column', md: 'row' }, 
-          gap: 2, 
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          gap: 2,
           mb: 4,
           alignItems: { xs: 'stretch', md: 'center' }
         }}
       >
-        <Paper 
+        <Paper
           elevation={2}
-          sx={{ 
-            p: '2px 8px', 
-            display: 'flex', 
-            alignItems: 'center', 
-            flex: 1, 
+          sx={{
+            p: '2px 8px',
+            display: 'flex',
+            alignItems: 'center',
+            flex: 1,
             maxWidth: { xs: '100%', md: 400 },
             borderRadius: 2
           }}
         >
-          <InputBase 
-            sx={{ ml: 1, flex: 1 }} 
-            placeholder="搜尋看板..." 
-            {...register('searchTerm')} 
+          <InputBase
+            sx={{ ml: 1, flex: 1 }}
+            placeholder="搜尋看板..."
+            {...register('searchTerm')}
           />
           <IconButton color="primary">
             <Search />
           </IconButton>
         </Paper>
 
-        <ToggleButtonGroup 
-          value={filter} 
-          exclusive 
+        <ToggleButtonGroup
+          value={filter}
+          exclusive
           onChange={(_, f) => f && setFilter(f as FilterType)}
-          sx={{ 
+          sx={{
             '& .MuiToggleButton-root': {
               border: 1,
               borderColor: 'divider',
@@ -158,15 +180,15 @@ const BoardPage = () => {
                   borderRadius: 3,
                   overflow: 'hidden',
                   transition: 'all 0.3s ease',
-                  '&:hover': { 
-                    transform: 'translateY(-4px)', 
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
                     boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
                   },
                 }}
               >
-                <Box 
-                  onClick={() => {router.push(`/forum/${b.url}`);}} 
-                  sx={{ 
+                <Box
+                  onClick={() => { router.push(`/forum/${b.url}`); }}
+                  sx={{
                     cursor: 'pointer',
                     flex: 1,
                     display: 'flex',
@@ -178,10 +200,10 @@ const BoardPage = () => {
                       <Box sx={{ textAlign: 'center', mb: 2 }}>
                         <Avatar
                           src={typeof b.avatar === 'string' ? b.avatar : b.avatar?.src}
-                          sx={{ 
-                            width: isMobile ? 60 : 80, 
-                            height: isMobile ? 60 : 80, 
-                            mx: 'auto', 
+                          sx={{
+                            width: isMobile ? 60 : 80,
+                            height: isMobile ? 60 : 80,
+                            mx: 'auto',
                             mb: 2,
                             boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
                           }}
@@ -189,11 +211,11 @@ const BoardPage = () => {
                       </Box>
                       <Box sx={{ px: 1.5, mt: 1 }}>
                         <Box sx={{ textAlign: 'center', mb: 2 }}>
-                          <Typography 
-                            variant="subtitle1" 
+                          <Typography
+                            variant="subtitle1"
                             fontWeight={700}
                             align="center"
-                            sx={{ 
+                            sx={{
                               fontSize: { xs: '0.95rem', md: '1.05rem' },
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
@@ -207,15 +229,15 @@ const BoardPage = () => {
                               borderRadius: 1
                             }}
                           >
-                          {b.title}
+                            {b.title}
                           </Typography>
                         </Box>
 
                         {/* 版主資訊 */}
                         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 2 }}>
-                          <Box 
-                            sx={{ 
-                              display: 'flex', 
+                          <Box
+                            sx={{
+                              display: 'flex',
                               alignItems: 'center',
                               backgroundColor: b.moderatorGroupColor + "10",
                               borderRadius: 10,
@@ -225,17 +247,17 @@ const BoardPage = () => {
                           >
                             <Avatar
                               src={typeof b.moderatorAvatar === 'string' ? b.moderatorAvatar : b.moderatorAvatar?.src}
-                              sx={{ 
-                                width: 28, 
+                              sx={{
+                                width: 28,
                                 height: 28,
                                 border: '2px solid',
                                 borderColor: b.moderatorGroupColor || theme.palette.primary.main,
                               }}
                             />
                             <Box sx={{ ml: 1.5, overflow: 'hidden' }}>
-                              <Typography 
-                                variant="body1" 
-                                sx={{ 
+                              <Typography
+                                variant="body1"
+                                sx={{
                                   fontWeight: 600,
                                   color: b.moderatorGroupColor || theme.palette.primary.main,
                                   whiteSpace: 'nowrap',
@@ -252,11 +274,11 @@ const BoardPage = () => {
                         </Box>
 
                         {/* 看板描述 */}
-                        <Typography 
-                          variant="body2" 
-                          color="text.secondary" 
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
                           align="left"
-                          sx={{ 
+                          sx={{
                             fontSize: { xs: '0.8rem', md: '0.875rem' },
                             height: '50',
                             overflow: 'hidden',
@@ -279,7 +301,7 @@ const BoardPage = () => {
                           <Box display="flex" alignItems="center" color="text.secondary">
                             <Groups fontSize="small" sx={{ mr: 0.5 }} />
                             <Typography variant="caption" fontWeight={500}>
-                              {fmt(b.followers)}
+                              {fmt(b.followerCount ?? 0)}
                             </Typography>
                           </Box>
                         </Tooltip>
@@ -287,12 +309,16 @@ const BoardPage = () => {
 
                       {/* 追蹤按鈕 */}
                       <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          fetchFollow(b.id);
+                        }}
                         fullWidth
                         variant={b.isFollow ? 'contained' : 'outlined'}
                         size="medium"
                         startIcon={b.isFollow ? <ThumbUp fontSize="small" /> : null}
-                        sx={{ 
-                          mt: 2.5, 
+                        sx={{
+                          mt: 2.5,
                           mb: 0.5,
                           textTransform: 'none',
                           borderRadius: 1.5,
@@ -308,6 +334,22 @@ const BoardPage = () => {
           ))}
         </Grid>
       )}
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={3000}
+        onClose={() => setToast({ open: false, message: "" })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          severity="success"
+          sx={{
+            width: '100%',
+            borderRadius: 2
+          }}
+        >
+          {toast.message}
+        </Alert>
+      </Snackbar>
     </Layout>
   );
 };
