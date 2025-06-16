@@ -11,7 +11,6 @@ import {
   FavoriteBorder,
   TurnedInNot,
   AccessTime,
-  Visibility,
 } from "@mui/icons-material";
 import { PostType } from "@/lib/types/postListType";
 
@@ -58,20 +57,36 @@ const PostListItem: React.FC<PostListItemProps> = ({ post, getCategoryColor }) =
         <CardContent sx={{ p: 3 }}>
           {/* 頂部區域 - 包含版區信息 */}
           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-              <Chip
-                avatar={post.boardAvatar ? <Avatar src={post.boardAvatar} /> : null}
-                size="small"
-                label={post.boardName}
-                clickable
-                sx={{
-                  backgroundColor: categoryColor.bg,
-                  color: categoryColor.text,
-                  fontWeight: 600,
-                  borderRadius: 1,
-                  height: 28,
-                  px: 1
-                }}
-              />
+              {post.boardAvatar ? (
+                <Chip
+                  avatar={<Avatar src={post.boardAvatar} />}
+                  size="small"
+                  label={post.boardName}
+                  clickable
+                  sx={{
+                    backgroundColor: categoryColor.bg,
+                    color: categoryColor.text,
+                    fontWeight: 600,
+                    borderRadius: 1,
+                    height: 28,
+                    px: 1
+                  }}
+                />
+              ) : (
+                <Chip
+                  size="small"
+                  label={post.boardName}
+                  clickable
+                  sx={{
+                    backgroundColor: categoryColor.bg,
+                    color: categoryColor.text,
+                    fontWeight: 600,
+                    borderRadius: 1,
+                    height: 28,
+                    px: 1
+                  }}
+                />
+              )}
             
             <Box
               sx={{
@@ -166,7 +181,7 @@ const PostListItem: React.FC<PostListItemProps> = ({ post, getCategoryColor }) =
                     }}
                   >
                     <FavoriteBorder sx={{ fontSize: 16, mr: 0.5 }} />
-                    {post.likes ?? 0}
+                    {post.likesCount ?? 0}
                   </Box>
                   <Box
                     sx={{
@@ -177,7 +192,7 @@ const PostListItem: React.FC<PostListItemProps> = ({ post, getCategoryColor }) =
                     }}
                   >
                     <ChatBubbleOutline sx={{ fontSize: 16, mr: 0.5 }} />
-                    {post.comments ?? 0}
+                    {post.commentsCount ?? 0}
                   </Box>
                   <Box
                     sx={{
@@ -188,20 +203,8 @@ const PostListItem: React.FC<PostListItemProps> = ({ post, getCategoryColor }) =
                     }}
                   >
                     <TurnedInNot sx={{ fontSize: 16, mr: 0.5 }} />
-                    {post.bookmarks ?? 0}
+                    {post.bookmarksCount ?? 0}
                   </Box>
-                </Box>
-
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    color: "text.secondary",
-                    fontSize: "0.75rem",
-                  }}
-                >
-                  <Visibility sx={{ fontSize: 16, mr: 0.5 }} />
-                  {post.views ?? 0}
                 </Box>
               </Box>
             </Box>

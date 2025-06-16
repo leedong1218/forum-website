@@ -32,6 +32,7 @@ export interface PostType {
   likesCount: number;
   commentsCount: number;
   isBookmarked: boolean;
+  bookmarksCount: number;
 }
 
 export interface ArticleFormValues {

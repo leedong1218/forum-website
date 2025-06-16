@@ -25,6 +25,7 @@ interface InteractionItemProps {
 interface InteractionBarProps {
   initialLikes?: number; // Initial like count
   initialComments?: number; // Initial comment count
+  initialBookmarked?: number; // Initial bookmark count
   postId: number;
   isLikedA: boolean; // Whether the post is liked
   isBookmarkedA: boolean; // Whether the post is bookmarked
@@ -85,15 +86,17 @@ const InteractionItem = ({
 const InteractionBar = ({
   initialLikes = 0,
   initialComments = 0,
+  initialBookmarked = 0,
   postId,
   isLikedA,
-  isBookmarkedA
+  isBookmarkedA,
 }: InteractionBarProps) => {
   const theme = useTheme();
   const [isLiked, setIsLiked] = useState<boolean>(isLikedA);
   const [isSaved, setIsSaved] = useState<boolean>(isBookmarkedA);
   const [likeCount, setLikeCount] = useState<number>(initialLikes);
   const [commentCount] = useState<number>(initialComments);
+  const [saveCount] = useState<number>(initialBookmarked);
   const [reportDialogOpen, setReportDialogOpen] = useState<boolean>(false);
 
   const handleLikeClick = async () => {
@@ -155,11 +158,12 @@ const InteractionBar = ({
           active={isSaved}
           onClick={handleSaveClick}
           color={theme.palette.primary.main}
+          count={saveCount}
         />
         <Tooltip title={"檢舉"}>
           <IconButton
             onClick={handleOpenReport}
-            sx={{ p: 0.5, ml: -0.5 }}
+            sx={{ p: 0.5 }}
           >
             <Warning color="warning" />
           </IconButton>

@@ -11,7 +11,6 @@ import {
   FavoriteBorder,
   TurnedInNot,
   AccessTime,
-  Visibility,
 } from "@mui/icons-material";
 import { PostType } from "@/lib/types/postListType";
 
@@ -78,7 +77,9 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
             }}
           >
         <Chip
-          avatar={post.boardAvatar ? <Avatar src={post.boardAvatar} /> : null}
+          {...(post.boardAvatar
+            ? { avatar: <Avatar src={post.boardAvatar} /> }
+            : {})}
           size="small"
           label={post.boardName}
           sx={{
@@ -181,7 +182,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
                 }}
               >
                 <FavoriteBorder sx={{ fontSize: 16, mr: 0.5 }} />
-                {post.likes ?? 0}
+                {post.likesCount ?? 0}
               </Box>
               <Box
                 sx={{
@@ -192,7 +193,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
                 }}
               >
                 <ChatBubbleOutline sx={{ fontSize: 16, mr: 0.5 }} />
-                {post.comments ?? 0}
+                {post.commentsCount ?? 0}
               </Box>
               <Box
                 sx={{
@@ -203,20 +204,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
                 }}
               >
                 <TurnedInNot sx={{ fontSize: 16, mr: 0.5 }} />
-                {post.bookmarks ?? 0}
+                {post.bookmarksCount ?? 0}
               </Box>
-            </Box>
-
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                color: "text.secondary",
-                fontSize: "0.75rem",
-              }}
-            >
-              <Visibility sx={{ fontSize: 16, mr: 0.5 }} />
-              {post.views ?? 0}
             </Box>
           </Box>
         </CardContent>
