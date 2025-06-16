@@ -80,31 +80,39 @@ const NotificationPopover: React.FC<NotificationPopoverProps> = ({
           通知
         </Typography>
         <List sx={{ p: 0 }}>
-          {notifications.map((noti) => (
-            <ListItem
-              key={noti.id}
-              sx={{
-                px: 0,
-                cursor: noti.link ? 'pointer' : 'default',
-                '&:hover': {
-                  backgroundColor: noti.link ? '#f5f5f5' : 'transparent',
-                },
-              }}
-              onClick={() => handleClick(noti)}
-            >
-              <ListItemAvatar>
-                <Avatar sx={{ bgcolor: '#ccc', width: 32, height: 32 }}>
-                  {/* Avatar保留空 icon，未來可根據 type 顯示 */}
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={noti.message}
-                secondary={new Date(noti.created_at).toLocaleString()}
-                primaryTypographyProps={{ fontSize: '0.9rem' }}
-                secondaryTypographyProps={{ fontSize: '0.8rem' }}
-              />
-            </ListItem>
-          ))}
+          {notifications.length === 0 ? (
+            <Box sx={{ textAlign: 'center', width: '100%' }}>
+              <Typography variant="body2" color="text.secondary">
+                已讀取完所有通知
+              </Typography>
+            </Box>
+          ) : (
+            notifications.map((noti) => (
+              <ListItem
+                key={noti.id}
+                sx={{
+                  px: 0,
+                  cursor: noti.link ? 'pointer' : 'default',
+                  '&:hover': {
+                    backgroundColor: noti.link ? '#f5f5f5' : 'transparent',
+                  },
+                }}
+                onClick={() => handleClick(noti)}
+              >
+                <ListItemAvatar>
+                  <Avatar sx={{ bgcolor: '#ccc', width: 32, height: 32 }}>
+                    {/* Avatar保留空 icon，未來可根據 type 顯示 */}
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={noti.message}
+                  secondary={new Date(noti.created_at).toLocaleString()}
+                  primaryTypographyProps={{ fontSize: '0.9rem' }}
+                  secondaryTypographyProps={{ fontSize: '0.8rem' }}
+                />
+              </ListItem>
+            ))
+          )}
         </List>
         <Box sx={{ mt: 2, textAlign: 'center' }}>
           <Button

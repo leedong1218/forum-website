@@ -21,7 +21,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   const fetchNotifications = async () => {
-    
+
     try {
       const res = await notificationAPI.getPreview();
 
@@ -42,7 +42,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     if (!token) return;
 
-    const socket = new WebSocket(`ws://localhost:8000/ws/notifications/?token=${token}`);
+        const socket = new WebSocket(`ws://140.131.115.161:8000/ws/notifications/?token=${token}`);
 
     socket.onopen = () => {
       console.log('🔌 WebSocket connected');
@@ -52,8 +52,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       try {
         const data = JSON.parse(event.data);
         if (data.event === 'notification') {
-            toast.info(data.message);
-            fetchNotifications();
+          toast.info(data.message);
+          fetchNotifications();
         }
       } catch (err) {
         console.error('WebSocket JSON parsing error:', err);
