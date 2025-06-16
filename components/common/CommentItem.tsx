@@ -1,4 +1,4 @@
-// CommentSection.tsx (整合 Toast + 隱藏回覆 + 美化版本 + 無限滾動)
+// CommentSection.tsx (修正無限滾動問題)
 
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -14,7 +14,7 @@ import Sticker from "@/public/images/sticker.jpg";
 import { commentType } from "@/lib/types/commentType";
 import CommentAPI from "@/services/Comment/CommentAPI";
 import { ReportDialog } from "./ReportPopup";
-import { useInfiniteScroll } from '@/lib/hooks/useInfiniteScroll'; // 調整路徑根據你的項目結構
+import { useInfiniteScroll } from '@/lib/hooks/useInfiniteScroll';
 
 const CommentItem = ({
   comment,
@@ -92,7 +92,6 @@ const CommentItem = ({
     >
       <Box sx={{ display: 'flex', gap: 2 }}>
         <Avatar sx={{ width: 40, height: 40 }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={comment.authorAvatar || Sticker}
             alt={comment.authorName}
@@ -331,45 +330,59 @@ const CommentSection = ({ postId }: { postId: number }) => {
   const [commentText, setCommentText] = useState("");
   const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ open: boolean; message: string }>({ open: false, message: "" });
-  
+
   // 無限滾動相關狀態
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [totalComments, setTotalComments] = useState(0);
+  const [isReachEnd, setIsReachEnd] = useState(false); // 新增：是否已經到底
 
   const fetchComments = async (pageNum: number = 1, isLoadMore: boolean = false) => {
     setIsLoading(true);
     try {
-      // 假設你的 API 支援分頁參數
       const res = await CommentAPI.get(postId, pageNum);
-      
+
       if (isLoadMore) {
         setComments(prev => [...prev, ...res.data.results]);
       } else {
         setComments(res.data.results);
+        setIsReachEnd(false); // 重置到底狀態
       }
-      
-      setTotalComments(res.total || res.data.length);
-      
-      // 檢查是否還有更多留言
-      if (res.data.length < 10 || (res.total && comments.length + res.data.length >= res.total)) {
-        setHasMore(false);
+
+      setTotalComments(res.data.count);
+
+      // 檢查是否還有更多留言 - 根據當前頁數和總頁數判斷
+      const hasMoreData = pageNum < res.data.total_pages;
+      setHasMore(hasMoreData);
+
+      // 如果沒有更多數據，設置到底狀態
+      if (!hasMoreData && isLoadMore) {
+        setIsReachEnd(true);
       }
-    } catch (error) {
+
+    } catch (error: any) {
       console.error('載入留言失敗:', error);
+
+      // 處理 404 錯誤
+      if (error?.response?.status === 404 || error?.status === 404) {
+        setHasMore(false);
+        setIsReachEnd(true);
+        console.log('404 錯誤：沒有更多留言了');
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
+  // 修正 loadMoreComments - 移除 postId 依賴，使用 useCallback 但不包含會頻繁變化的值
   const loadMoreComments = useCallback(async () => {
     if (isLoading || !hasMore) return;
-    
+
     const nextPage = page + 1;
     setPage(nextPage);
     await fetchComments(nextPage, true);
-  }, [page, isLoading, hasMore, postId]);
+  }, [page, isLoading, hasMore]); // 移除 postId
 
   const { setupObserver } = useInfiniteScroll({
     hasMore,
@@ -377,44 +390,43 @@ const CommentSection = ({ postId }: { postId: number }) => {
     onLoadMore: loadMoreComments,
   });
 
+  // 當 postId 改變時重新載入
   useEffect(() => {
-    fetchComments();
+    setPage(1);
+    setHasMore(true);
+    setIsReachEnd(false);
+    fetchComments(1, false);
   }, [postId]);
 
   const showToast = (msg: string) => setToast({ open: true, message: msg });
+
+  const refreshComments = async () => {
+    setPage(1);
+    setHasMore(true);
+    setIsReachEnd(false);
+    await fetchComments(1, false);
+  };
 
   const handleSubmitComment = async () => {
     if (!commentText.trim()) return;
     await CommentAPI.create({ post: postId, content: commentText });
     setCommentText("");
     showToast("留言成功");
-    
-    // 重新載入第一頁留言
-    setPage(1);
-    setHasMore(true);
-    await fetchComments(1, false);
+    await refreshComments();
   };
 
   const handleReplySubmit = async (parentId: number, content: string) => {
     await CommentAPI.create({ post: postId, parent: parentId, content });
     setActiveReplyId(null);
     showToast("回覆成功");
-    
-    // 重新載入第一頁留言
-    setPage(1);
-    setHasMore(true);
-    await fetchComments(1, false);
+    await refreshComments();
   };
 
   const handleDeleteComment = async (commentId: number) => {
     if (!window.confirm("確定要刪除嗎？")) return;
     await CommentAPI.delete(commentId);
     showToast("留言已刪除");
-    
-    // 重新載入第一頁留言
-    setPage(1);
-    setHasMore(true);
-    await fetchComments(1, false);
+    await refreshComments();
   };
 
   const roots = comments.filter(c => c.parentId === null);
@@ -487,11 +499,11 @@ const CommentSection = ({ postId }: { postId: number }) => {
         <>
           {roots.map((comment, index) => {
             const isLastItem = index === roots.length - 1;
-            
+
             return (
               <Box
                 key={comment.id}
-                ref={isLastItem ? setupObserver : null}
+                ref={isLastItem && hasMore ? setupObserver : null} // 只有在 hasMore 時才設置 observer
               >
                 <CommentItem
                   comment={comment}
@@ -499,11 +511,7 @@ const CommentSection = ({ postId }: { postId: number }) => {
                   onReply={(id) => setActiveReplyId(id)}
                   onSubmit={handleReplySubmit}
                   onDelete={handleDeleteComment}
-                  onRefresh={() => {
-                    setPage(1);
-                    setHasMore(true);
-                    fetchComments(1, false);
-                  }}
+                  onRefresh={refreshComments}
                   activeReplyId={activeReplyId}
                   cancelReply={() => setActiveReplyId(null)}
                   showRepliesInitially={false}
@@ -511,7 +519,7 @@ const CommentSection = ({ postId }: { postId: number }) => {
               </Box>
             );
           })}
-          
+
           {/* 載入指示器 */}
           {isLoading && (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
@@ -519,11 +527,24 @@ const CommentSection = ({ postId }: { postId: number }) => {
             </Box>
           )}
 
-          {/* 沒有更多留言提示 */}
+          {/* 沒有更多留言提示 - 修改顯示邏輯 */}
           {!hasMore && !isLoading && (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-              <Typography variant="body2" color="text.secondary">
-                已載入所有留言
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  fontSize: '0.9rem'
+                }}
+              >
+                {isReachEnd || roots.length > 5 ? (
+                  <>已經到底了！沒有更多留言了 🎉</>
+                ) : (
+                  <>已經到底了！沒有更多留言了 🎉</>
+                )}
               </Typography>
             </Box>
           )}
