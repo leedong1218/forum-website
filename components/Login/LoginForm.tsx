@@ -1,6 +1,6 @@
 import { Paper, Fade, Typography } from "@mui/material";
 import styles from "@/styles/pages/Login.module.scss";
-import { getCaptcha } from "@/services/Captcha/captchaAPI";
+import CaptchaAPI from "@/services/Captcha/captchaAPI";
 import loginAPI from "@/services/Login/loginAPI";
 import { useMessageModal } from "@/lib/context/MessageModalContext";
 import { ModalTypes } from "@/lib/types/modalType";
@@ -24,6 +24,7 @@ export default function LoginForm() {
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormInputs>();
+
   const router = useRouter();
   const { setIsShow, setModalProps } = useMessageModal();
 
@@ -32,10 +33,10 @@ export default function LoginForm() {
 
   const fetchCaptcha = async () => {
     try {
-      const data = await getCaptcha();
+      const res = await CaptchaAPI.getCaptcha();
       setCaptcha({
-        key: data.key,
-        image_url: data.image_url.replace("/backend", ""),
+        key: res.key,
+        image_url: res.image_url.replace("/backend", ""),
       });
     } catch (err) {
       console.error("獲取驗證碼失敗", err);
@@ -46,13 +47,12 @@ export default function LoginForm() {
     localStorage.removeItem("access_token");
     fetchCaptcha();
 
-    // 添加懸浮線條動畫元素
+    // 動畫效果：添加浮動線條
     const loginContainer = document.querySelector(`.${styles.loginContainer}`);
     if (loginContainer) {
       const floatingLines = document.createElement("div");
       floatingLines.className = styles.floatingLines;
 
-      // 創建10條線
       for (let i = 0; i < 10; i++) {
         const line = document.createElement("div");
         line.className = styles.line;
@@ -66,12 +66,24 @@ export default function LoginForm() {
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     setIsLoading(true);
     try {
-      const res = await loginAPI.login(data.email, data.password, captcha.key, data.captcha_value);
-      setModalProps({ type: ModalTypes.SUCCESS, message: res.message || "登入成功！" });
+      const res = await loginAPI.login(
+        data.email,
+        data.password,
+        captcha.key,
+        data.captcha_value
+      );
+
+      setModalProps({
+        type: ModalTypes.SUCCESS,
+        message: res.message || "登入成功！",
+      });
       setIsShow(true);
       router.push("/");
     } catch (err: any) {
-      setModalProps({ type: ModalTypes.ERROR, message: err.message || "登入失敗" });
+      setModalProps({
+        type: ModalTypes.ERROR,
+        message: err.message || "登入失敗",
+      });
       setIsShow(true);
       fetchCaptcha();
     } finally {
@@ -93,11 +105,8 @@ export default function LoginForm() {
             登入系統
           </Typography>
 
-          <EmailPasswordFields
-            register={register}
-            errors={errors}
-          />
-          
+          <EmailPasswordFields register={register} errors={errors} />
+
           <CaptchaSection
             register={register}
             errors={errors}
@@ -105,7 +114,7 @@ export default function LoginForm() {
             fetchCaptcha={fetchCaptcha}
             disabled={isLoading}
           />
-          
+
           <LoginActions loading={isLoading} />
           <GoogleLoginButton />
         </Paper>

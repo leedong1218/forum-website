@@ -4,7 +4,6 @@ import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import PostButton from "@/components/common/Post/PostButton";
-import SubscribeButton from "@/components/common/SubscribeButton";
 import { PostType, ArticleFormValues } from "@/lib/types/postListType";
 import { sortOptions } from "@/lib/data/sortOptions";
 import EmptyState from "@/components/common/EmptyState";
@@ -280,7 +279,6 @@ export default function Article() {
           }}
         >
           <PostButton />
-          <SubscribeButton />
         </Box>
       </Banner>
 

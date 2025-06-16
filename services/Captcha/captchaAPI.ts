@@ -1,19 +1,20 @@
-import axios from 'axios';
+import API from '@/system/API';
+import { Response } from '@/lib/types/requestType';
 
 export interface CaptchaResponse {
   key: string;
   image_url: string;
 }
 
-export const getCaptcha = async (): Promise<CaptchaResponse> => {
-  const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/captcha/refresh/`, {
-    headers: {
-      'X-Requested-With': 'XMLHttpRequest',
-    }
-  });
+const BASE_URL = '/captcha/refresh/';
 
-  return {
-    key: res.data.key,
-    image_url: res.data.image_url,
-  };
+const CaptchaAPI = {
+  getCaptcha: (): Promise<Response<CaptchaResponse>> =>
+    API.get(BASE_URL, {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    }),
 };
+
+export default CaptchaAPI;

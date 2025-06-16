@@ -345,9 +345,9 @@ const CommentSection = ({ postId }: { postId: number }) => {
       const res = await CommentAPI.get(postId, pageNum);
       
       if (isLoadMore) {
-        setComments(prev => [...prev, ...res.data]);
+        setComments(prev => [...prev, ...res.data.results]);
       } else {
-        setComments(res.data);
+        setComments(res.data.results);
       }
       
       setTotalComments(res.total || res.data.length);

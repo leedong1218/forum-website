@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { getCaptcha } from "@/services/Captcha/captchaAPI";
+import CaptchaAPI from "@/services/Captcha/captchaAPI";
 import UserAPI from "@/services/User/UserAPI";
 import { useMessageModal } from "@/lib/context/MessageModalContext";
 import { ModalTypes } from "@/lib/types/modalType";
@@ -56,14 +56,13 @@ export default function EmailVerificationForm() {
 
   const fetchCaptcha = async () => {
     try {
-      const res = await getCaptcha();
-      setCaptcha({ key: res.key, image_url: res.image_url.replace("/backend", "") });
-    } catch {
-      setModalProps({
-        type: ModalTypes.ERROR,
-        message: "載入驗證碼失敗",
+      const res = await CaptchaAPI.getCaptcha();
+      setCaptcha({
+        key: res.key,
+        image_url: res.image_url.replace("/backend", ""),
       });
-      setIsShow(true);
+    } catch (err) {
+      console.error("獲取驗證碼失敗", err);
     }
   };
 

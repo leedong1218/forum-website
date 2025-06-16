@@ -29,7 +29,6 @@ const MainNavItems: React.FC<MainNavItemsProps> = ({
   const allNavItems = [
     { text: "系統公告", icon: <DashboardIcon />, link: "/" },
     { text: "所有看板", icon: <ForumIcon />, link: "/forum/all" },
-    { text: "所有文章", icon: <Article />, link: "/forum" },
     { text: "檢舉管理", icon: <Warning />, link: "/reportManagement", requireLogin: true },
   ];
 

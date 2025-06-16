@@ -12,9 +12,9 @@ module.exports = {
   images: {
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "forum-admin.ntubimdbirc.tw/backend", // ✅ 你的圖片來源主機
-        port: "", // 或 "8000" 如果有明確 port
+        protocol: "http",
+        hostname: "140.131.115.161",
+        port: "8000",
         pathname: "**",
       },
     ],

@@ -27,8 +27,8 @@ import { styled } from "@mui/material/styles";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { colors } from "@/styles/theme";
-import NotificationPopover from "../common/NotiPopup";
-import { io, Socket } from 'socket.io-client'
+import NotificationPopover from "@/components/common/NotiPopup";
+import { useNotification } from "@/lib/context/NotificationContext";
 
 const SearchField = styled(TextField)(({ theme }) => ({
   [theme.breakpoints.up("sm")]: {
@@ -75,28 +75,10 @@ export default function Navbar({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // webSocket
-  const [ws, setWs] = useState<Socket | null>(null);
-
-  useEffect(() => {
-    const socket = io('http://localhost:3000');
-    setWs(socket);
-    console.log('WebSocket connected');
-    console.log(ws);
-
-    socket.on('getMessage', (message) => {
-      console.log('Received message:', message);
-    });
-
-    return () => {
-      socket.disconnect();
-      console.log('WebSocket disconnected');
-    }
-  }, []);
-
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [firstName, setFirstName] = useState<string | null>();
   const open = Boolean(anchorEl);
+  const { notifications } = useNotification();
 
   useEffect(() => {
     setFirstName(localStorage.getItem('firstName'))
@@ -240,18 +222,19 @@ export default function Navbar({
                 }}
                 onClick={e => handleToggleNoti(e)}
               >
-                <Badge
-                  badgeContent={4}
-                  color="primary"
-                  sx={{
-                    "& .MuiBadge-badge": {
-                      fontSize: "0.7rem",
-                      boxShadow: "0 2px 5px rgba(14, 165, 233, 0.3)",
-                    },
-                  }}
-                >
-                  <NotificationsIcon sx={{ color: colors.textSecondary }} />
-                </Badge>
+            <Badge
+              badgeContent={notifications.length > 5 ? '5+' : notifications.length}
+              color="primary"
+              sx={{
+                "& .MuiBadge-badge": {
+                  fontSize: "0.7rem",
+                  boxShadow: "0 2px 5px rgba(14, 165, 233, 0.3)",
+                },
+              }}
+            >
+              <NotificationsIcon sx={{ color: colors.textSecondary }} />
+            </Badge>
+
               </IconButton>
             </Tooltip>
           )}
@@ -353,7 +336,7 @@ export default function Navbar({
         anchorEl={notiAnchorEl}
         open={notiOpen}
         onClose={handleCloseNoti}
-      // notifications={customNotifications}
+        notifications={notifications}
       />
     </AppBar>
   );

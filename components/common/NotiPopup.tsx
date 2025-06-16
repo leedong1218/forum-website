@@ -10,23 +10,16 @@ import {
   Avatar,
   Button,
 } from '@mui/material';
-import { Edit } from '@mui/icons-material';
-import ForumIcon from '@mui/icons-material/Forum';
 import { colors } from '@/styles/theme';
 import { useRouter } from 'next/router';
+import notificationAPI from '@/services/Notifications/NotificationsAPI';
 
 interface NotificationItem {
   id: number;
   type: string;
-  title: string;
   message: string;
-  time: string;
-  avatar: {
-    type: 'icon' | 'text';
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    content: any;
-    bgcolor: string;
-  };
+  created_at: string;
+  link?: string;
 }
 
 interface NotificationPopoverProps {
@@ -36,40 +29,27 @@ interface NotificationPopoverProps {
   notifications?: NotificationItem[];
 }
 
-const defaultNotifications: NotificationItem[] = [
-  {
-    id: 1,
-    type: 'reply',
-    title: '新的回覆',
-    message: '有人回覆了你的貼文',
-    time: '2分鐘前',
-    avatar: { type: 'icon', content: ForumIcon, bgcolor: colors.accent }
-  },
-  {
-    id: 2,
-    type: 'follow',
-    title: '新的追蹤者',
-    message: 'John 開始追蹤你',
-    time: '1小時前',
-    avatar: { type: 'text', content: 'J', bgcolor: colors.gradient }
-  },
-  {
-    id: 3,
-    type: 'like',
-    title: '貼文被讚',
-    message: '你的貼文獲得了10個讚',
-    time: '3小時前',
-    avatar: { type: 'icon', content: Edit, bgcolor: '#ff9800' }
-  }
-];
-
 const NotificationPopover: React.FC<NotificationPopoverProps> = ({
   anchorEl,
   open,
   onClose,
-  notifications = defaultNotifications
+  notifications = [],
 }) => {
   const router = useRouter();
+
+  const handleClick = async (noti: NotificationItem) => {
+    try {
+      await notificationAPI.markAsRead(noti.id);
+    } catch (err) {
+      console.warn('Mark as read failed', err);
+    }
+
+    if (noti.link) {
+      router.push(noti.link);
+    }
+
+    onClose();
+  };
 
   return (
     <Popover
@@ -87,11 +67,11 @@ const NotificationPopover: React.FC<NotificationPopoverProps> = ({
       PaperProps={{
         sx: {
           mt: 2,
-          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
           borderRadius: 2,
           width: 320,
           maxHeight: 400,
-          border: 'solid 1px #ccc'
+          border: 'solid 1px #ccc',
         },
       }}
     >
@@ -100,20 +80,26 @@ const NotificationPopover: React.FC<NotificationPopoverProps> = ({
           通知
         </Typography>
         <List sx={{ p: 0 }}>
-          {notifications.map((notification) => (
-            <ListItem key={notification.id} sx={{ px: 0 }}>
+          {notifications.map((noti) => (
+            <ListItem
+              key={noti.id}
+              sx={{
+                px: 0,
+                cursor: noti.link ? 'pointer' : 'default',
+                '&:hover': {
+                  backgroundColor: noti.link ? '#f5f5f5' : 'transparent',
+                },
+              }}
+              onClick={() => handleClick(noti)}
+            >
               <ListItemAvatar>
-                <Avatar sx={{ bgcolor: notification.avatar.bgcolor, width: 32, height: 32 }}>
-                  {notification.avatar.type === 'icon' ? (
-                    <notification.avatar.content sx={{ fontSize: 18 }} />
-                  ) : (
-                    notification.avatar.content
-                  )}
+                <Avatar sx={{ bgcolor: '#ccc', width: 32, height: 32 }}>
+                  {/* Avatar保留空 icon，未來可根據 type 顯示 */}
                 </Avatar>
               </ListItemAvatar>
               <ListItemText
-                primary={notification.title}
-                secondary={`${notification.message} - ${notification.time}`}
+                primary={noti.message}
+                secondary={new Date(noti.created_at).toLocaleString()}
                 primaryTypographyProps={{ fontSize: '0.9rem' }}
                 secondaryTypographyProps={{ fontSize: '0.8rem' }}
               />
@@ -121,11 +107,14 @@ const NotificationPopover: React.FC<NotificationPopoverProps> = ({
           ))}
         </List>
         <Box sx={{ mt: 2, textAlign: 'center' }}>
-          <Button 
-            variant="text" 
-            size="small" 
+          <Button
+            variant="text"
+            size="small"
             sx={{ color: colors.accent }}
-            onClick={() => router.push('/notify')}
+            onClick={() => {
+              router.push('/notify');
+              onClose();
+            }}
           >
             查看全部通知
           </Button>
