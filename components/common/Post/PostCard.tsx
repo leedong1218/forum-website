@@ -9,7 +9,9 @@ import Avatar from "@mui/material/Avatar";
 import {
   ChatBubbleOutline,
   FavoriteBorder,
+  Favorite,
   TurnedInNot,
+  TurnedIn,
   AccessTime,
 } from "@mui/icons-material";
 import { PostType } from "@/lib/types/postListType";
@@ -17,6 +19,8 @@ import { PostType } from "@/lib/types/postListType";
 interface PostCardProps {
   post: PostType;
   getCategoryColor: (category: string) => { bg: string; text: string };
+  isLiked?: boolean;
+  isBookmarked?: boolean;
 }
 
 // 工具函式：移除 HTML + 限制長度
@@ -25,7 +29,10 @@ const getTextPreview = (html: string, maxLength = 60): string => {
   return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
 };
 
-const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
+const PostCard: React.FC<PostCardProps> = ({
+  post,
+  getCategoryColor,
+}) => {
   const categoryColor = getCategoryColor(post.boardUrl);
   const preview = getTextPreview(post.content);
 
@@ -76,22 +83,22 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
               mb: 2,
             }}
           >
-        <Chip
-          {...(post.boardAvatar
-            ? { avatar: <Avatar src={post.boardAvatar} /> }
-            : {})}
-          size="small"
-          label={post.boardName}
-          sx={{
-            backgroundColor: categoryColor.bg,
-            color: categoryColor.text,
-            fontWeight: 600,
-            borderRadius: 1.5,
-            px: 1,
-            height: 24,
-            mr: 1,
-          }}
-        />
+            <Chip
+              {...(post.boardAvatar
+                ? { avatar: <Avatar src={post.boardAvatar} /> }
+                : {})}
+              size="small"
+              label={post.boardName}
+              sx={{
+                backgroundColor: categoryColor.bg,
+                color: categoryColor.text,
+                fontWeight: 600,
+                borderRadius: 1.5,
+                px: 1,
+                height: 24,
+                mr: 1,
+              }}
+            />
             <Box
               sx={{
                 display: "flex",
@@ -172,16 +179,20 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
               mt: "auto",
             }}
           >
-            <Box sx={{ display: "flex", gap: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Box
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  color: "text.secondary",
+                  color: post.isLiked ? "#e91e63" : "text.secondary",
                   fontSize: "0.75rem",
                 }}
               >
-                <FavoriteBorder sx={{ fontSize: 16, mr: 0.5 }} />
+                {post.isLiked ? (
+                  <Favorite sx={{ fontSize: 16, mr: 0.5 }} />
+                ) : (
+                  <FavoriteBorder sx={{ fontSize: 16, mr: 0.5 }} />
+                )}
                 {post.likesCount ?? 0}
               </Box>
               <Box
@@ -195,17 +206,21 @@ const PostCard: React.FC<PostCardProps> = ({ post, getCategoryColor }) => {
                 <ChatBubbleOutline sx={{ fontSize: 16, mr: 0.5 }} />
                 {post.commentsCount ?? 0}
               </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  color: "text.secondary",
-                  fontSize: "0.75rem",
-                }}
-              >
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                color: post.isBookmarked ? "#2196f3" : "text.secondary",
+                fontSize: "0.75rem",
+              }}
+            >
+              {post.isBookmarked ? (
+                <TurnedIn sx={{ fontSize: 16, mr: 0.5 }} />
+              ) : (
                 <TurnedInNot sx={{ fontSize: 16, mr: 0.5 }} />
-                {post.bookmarksCount ?? 0}
-              </Box>
+              )}
+              {post.bookmarksCount ?? 0}
             </Box>
           </Box>
         </CardContent>

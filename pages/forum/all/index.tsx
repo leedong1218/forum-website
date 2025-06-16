@@ -275,14 +275,6 @@ const BoardPage = () => {
                     <Box sx={{ mt: 'auto' }}>
                       <Divider sx={{ my: 2 }} />
                       <Box display="flex" justifyContent="space-around">
-                        <Tooltip title="文章數量">
-                          <Box display="flex" alignItems="center" color="text.secondary">
-                            <Forum fontSize="small" sx={{ mr: 0.5 }} />
-                            <Typography variant="caption" fontWeight={500}>
-                              {fmt(b.postsCount)}
-                            </Typography>
-                          </Box>
-                        </Tooltip>
                         <Tooltip title="成員數">
                           <Box display="flex" alignItems="center" color="text.secondary">
                             <Groups fontSize="small" sx={{ mr: 0.5 }} />
