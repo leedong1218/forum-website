@@ -36,11 +36,12 @@ const CommentItem = ({
   activeReplyId: number | null;
   cancelReply: () => void;
   showRepliesInitially?: boolean;
+
 }) => {
   const [replyText, setReplyText] = useState("");
   const [showReplies, setShowReplies] = useState(showRepliesInitially);
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
+  const [liked, setLiked] = useState(comment.isLiked);
+  const [likeCount, setLikeCount] = useState(comment.likesCount || 0);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(comment.content);
   const [reportDialogOpen, setReportDialogOpen] = useState<boolean>(false);
@@ -52,7 +53,8 @@ const CommentItem = ({
     }
   };
 
-  const toggleLike = () => {
+  const toggleLike = async () => {
+    await CommentAPI.like(comment.id.toString());
     setLiked(!liked);
     setLikeCount(liked ? likeCount - 1 : likeCount + 1);
   };

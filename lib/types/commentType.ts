@@ -11,5 +11,7 @@ export interface commentType {
     authorName: string;
     authorGroupName: string;
     authorGroupColor: string;
+    isLiked: boolean;
+    likesCount: number;
   }
   

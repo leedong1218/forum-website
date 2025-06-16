@@ -22,8 +22,13 @@ const CommentAPI = {
   update: (id: number, content: string): Promise<Response<unknown>> => {
     return API.patch(`/comment/${id}`, { content });
   },
+
   delete: (id: number): Promise<Response<unknown>> => {
     return API.patch(`/comment/${id}`, { isLocked: true });
+  },
+  
+  like: (comment_id: string): Promise<Response<unknown>> => {
+    return API.post(`/comment/${comment_id}/like/`);
   },
 };
 
