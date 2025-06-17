@@ -1,196 +1,238 @@
+import React, { useState } from 'react';
 import {
+  List,
+  Card,
+  CardContent,
   Box,
-  Paper,
   Typography,
-  Grid,
-  Avatar,
   Chip,
+  Avatar,
   Button
 } from '@mui/material';
 import {
-  Groups,
-  Forum,
+  People,
+  Article,
+  Bookmark,
+  BookmarkBorder
 } from '@mui/icons-material';
-import { boards } from '@/lib/data/personal/detail';
-import { TabPanelProps } from '@/lib/types/userProfileType';
+import Link from 'next/link';
+import BoardsAPI from '@/services/Boards/BoardsAPI';
 
-// Tab panel component for the parent tabs
-function TabPanel({ children, value, index, ...other }: TabPanelProps) {
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`tabpanel-${index}`}
-      aria-labelledby={`tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
-    </div>
-  );
+export type BoardTypes = {
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  memberCount?: number;
+  postCount?: number;
+  isFollowing?: boolean;
+  avatar?: string;
+  link?: string;
 }
 
-export default function BoardList() {
-  // Sample tab value (in a real component, this would be passed as a prop)
-  const tabValue = 1;
+interface BoardListProps {
+  follows: BoardTypes[];
+}
 
-  // Handle follow/unfollow action
-  const handleFollowToggle = (boardId: number) => {
-    console.log(boardId);
+export default function BoardList({ follows }: BoardListProps) {
+  // 使用本地狀態來追蹤每個看板的追蹤狀態
+  const [localFollowStates, setLocalFollowStates] = useState<Record<string, boolean>>({});
+  
+  // 如果沒有追蹤的看板，顯示提示訊息
+  if (!follows || follows.length === 0) {
+    return (
+      <Box sx={{ 
+        textAlign: 'center', 
+        py: 8,
+        color: 'text.secondary'
+      }}>
+        <Typography variant="h6" gutterBottom>
+          尚未追蹤任何看板
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 3 }}>
+          開始探索並追蹤感興趣的看板吧！
+        </Typography>
+        <Button
+          component={Link}
+          href="/forum/all"
+          variant="contained"
+          sx={{ borderRadius: 2 }}
+        >
+          探索看板
+        </Button>
+      </Box>
+    );
+  }
+
+  const handleToggleFollow = async (boardId: string, currentStatus: boolean) => {
+    // 立即更新本地狀態（樂觀更新）
+    setLocalFollowStates(prev => ({
+      ...prev,
+      [boardId]: !currentStatus
+    }));
+
+    try {
+      // 調用 API
+      await BoardsAPI.follow(boardId);
+      // API 成功，本地狀態已經是正確的
+    } catch (error) {
+      // API 失敗，回滾本地狀態
+      console.error('追蹤操作失敗:', error);
+      setLocalFollowStates(prev => ({
+        ...prev,
+        [boardId]: currentStatus
+      }));
+      // 可以在這裡顯示錯誤提示
+    }
+  };
+
+  // 獲取實際的追蹤狀態（優先使用本地狀態）
+  const getFollowStatus = (boardId: string, originalStatus: boolean) => {
+    return localFollowStates.hasOwnProperty(boardId) 
+      ? localFollowStates[boardId] 
+      : originalStatus;
   };
 
   return (
-    <TabPanel value={tabValue} index={1}>
-      <Grid sx={{display: 'grid', gridTemplateColumns: {xl: 'repeat(3, 1fr)', md: 'repeat(2, 1fr)'}, gap: 3}}>
-        {boards.map((board) => {
-          return (
-            <Grid key={board.id}>
-              <Paper
-                elevation={0}
+    <List sx={{ width: "100%", p: 0 }}>
+      {follows.map((board, index) => {
+        const currentFollowStatus = getFollowStatus(board.id, board.isFollowing || false);
+        
+        return (
+          <Card
+            key={board.id || index}
+            sx={{
+              mb: 2,
+              borderRadius: 2,
+              transition: "all 0.2s ease",
+              "&:hover": {
+                transform: "translateY(-2px)",
+                boxShadow: "0 8px 16px rgba(0, 0, 0, 0.1)",
+              },
+              border: "1px solid #f0f0f0",
+              overflow: "hidden",
+            }}
+          >
+            <CardContent sx={{ py: 2 }}>
+              <Box
                 sx={{
-                  borderRadius: 3,
-                  border: "1px solid rgba(0,0,0,0.08)",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
-                  overflow: "hidden",
-                  height: "100%",
                   display: "flex",
-                  flexDirection: "column",
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: "0 12px 24px rgba(0, 0, 0, 0.08)",
-                    borderColor: "rgba(0,0,0,0.12)",
-                  },
+                  alignItems: "center",
+                  justifyContent: "space-between"
                 }}
               >
-                <Box
-                  sx={{
-                    p: 3,
-                    pb: 2,
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "100%",
-                  }}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                    <Avatar
-                      sx={{
-                        bgcolor: board.color,
-                        fontWeight: 600,
-                        mr: 1.5,
-                        width: 40,
-                        height: 40,
-                      }}
-                    >
-                      {board.icon}
-                    </Avatar>
-                    <Box>
+                <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
+                  {/* 看板頭像 */}
+                  <Avatar
+                    src={board.avatar}
+                    sx={{
+                      width: 48,
+                      height: 48,
+                      mr: 2,
+                      bgcolor: '#e3f2fd'
+                    }}
+                  >
+                    {board.name.charAt(0)}
+                  </Avatar>
+
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    {/* 看板名稱 */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
                       <Typography
+                        component={Link}
+                        href={board.link || `/board/${board.id}`}
                         variant="h6"
-                        sx={{ fontWeight: 600, lineHeight: 1.2 }}
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: "1rem",
+                          color: "#1e293b",
+                          textDecoration: "none",
+                          "&:hover": {
+                            color: "#1976d2"
+                          }
+                        }}
                       >
                         {board.name}
                       </Typography>
-                      <Chip
-                        label={`活躍度: ${board.activityLevel}`}
-                        size="small"
-                        sx={{
-                          height: 20,
-                          fontSize: "0.65rem",
-                          bgcolor:
-                            board.activityLevel === "高"
-                              ? "#dcfce7"
-                              : "#fef3c7",
-                          color:
-                            board.activityLevel === "高"
-                              ? "#16a34a"
-                              : "#d97706",
-                          fontWeight: 600,
-                          mt: 0.5,
-                        }}
-                      />
+                      
+                      {board.category && (
+                        <Chip
+                          size="small"
+                          label={board.category}
+                          sx={{
+                            ml: 1,
+                            height: 20,
+                            fontSize: "0.7rem",
+                            bgcolor: '#f5f5f5'
+                          }}
+                        />
+                      )}
                     </Box>
-                  </Box>
 
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      mb: 2,
-                      lineHeight: 1.6,
-                      display: "-webkit-box",
-                      WebkitBoxOrient: "vertical",
-                      WebkitLineClamp: 3,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      flexGrow: 1,
-                    }}
-                  >
-                    {board.description}
-                  </Typography>
-
-                  <Box
-                    sx={{ pt: 2, borderTop: "1px solid rgba(0,0,0,0.06)" }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 2,
-                      }}
-                    >
+                    {/* 看板描述 */}
+                    {board.description && (
                       <Typography
-                        variant="caption"
+                        variant="body2"
                         sx={{
+                          color: "#64748b",
+                          mb: 1,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap"
+                        }}
+                      >
+                        {board.description}
+                      </Typography>
+                    )}
+
+                    {/* 統計資訊 */}
+                    <Box sx={{ display: "flex", gap: 2 }}>
+                      {typeof board.memberCount === 'number' && (
+                        <Box sx={{
                           display: "flex",
                           alignItems: "center",
                           color: "text.secondary",
-                          fontWeight: 500,
-                        }}
-                      >
-                        <Groups sx={{ mr: 0.5, fontSize: 14 }} />
-                        {board.members.toLocaleString()} 成員
-                      </Typography>
+                          fontSize: "0.75rem"
+                        }}>
+                          <People sx={{ fontSize: 14, mr: 0.5 }} />
+                          {board.memberCount.toLocaleString()} 成員
+                        </Box>
+                      )}
 
-                      <Typography
-                        variant="caption"
-                        sx={{
+                      {typeof board.postCount === 'number' && (
+                        <Box sx={{
                           display: "flex",
                           alignItems: "center",
                           color: "text.secondary",
-                          fontWeight: 500,
-                        }}
-                      >
-                        <Forum sx={{ mr: 0.5, fontSize: 14 }} />
-                        {board.posts.toLocaleString()} 文章
-                      </Typography>
+                          fontSize: "0.75rem"
+                        }}>
+                          <Article sx={{ fontSize: 14, mr: 0.5 }} />
+                          {board.postCount.toLocaleString()} 文章
+                        </Box>
+                      )}
                     </Box>
-
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      onClick={() => handleFollowToggle(board.id)}
-                      sx={{
-                        bgcolor: 'transparent',
-                        color: "text.secondary",
-                        border: "1px solid rgba(0,0,0,0.12)",
-                        borderRadius: 2,
-                        textTransform: "none",
-                        fontWeight: 600,
-                        "&:hover": {
-                          bgcolor: "rgba(0,0,0,0.04)"
-                        },
-                      }}
-                    >
-                      已追蹤
-                    </Button>
                   </Box>
                 </Box>
-              </Paper>
-            </Grid>
-          );
-        })}
-      </Grid>
-    </TabPanel>
+
+                {/* 追蹤按鈕 */}
+                <Button
+                  variant={currentFollowStatus ? "outlined" : "contained"}
+                  size="small"
+                  startIcon={currentFollowStatus ? <Bookmark /> : <BookmarkBorder />}
+                  onClick={() => handleToggleFollow(board.id, currentFollowStatus)}
+                  sx={{
+                    borderRadius: 2,
+                    minWidth: 90,
+                    ml: 2
+                  }}
+                >
+                  {currentFollowStatus ? '已追蹤' : '追蹤'}
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
+        );
+      })}
+    </List>
   );
 }

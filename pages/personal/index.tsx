@@ -22,7 +22,14 @@ export default function Personal() {
 
   useEffect(() => {
     UserAPI.self()
-      .then(res => setUserProfile(res.data))
+      .then(res => {
+        if (res.data) {
+          setUserProfile({
+            ...res.data,
+            id: String(res.data.id),
+          });
+        }
+      })
       .catch(err => console.error("取得用戶資料失敗", err))
   }, []);
 
@@ -154,7 +161,7 @@ export default function Personal() {
         </Box>
       </Box>
       <Box>
-        <PaginationTags />
+        <PaginationTags userId={userProfile?.id || ''} />
       </Box>
       <EditPopup
         isEditingProfile={isEditingProfile}
