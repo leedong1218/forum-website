@@ -40,7 +40,7 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     UserAPI.self()
-      .then(res => {setUser(res.data); localStorage.setItem('firstName', res.data ? res.data.username?.[0]?.toUpperCase() : '')})
+      .then(res => { setUser(res.data); localStorage.setItem('firstName', res.data ? res.data.username?.[0]?.toUpperCase() : '') })
       .catch(err => console.error("取得用戶資料失敗", err))
       .finally(() => setLoading(false));
   }, []);
@@ -100,39 +100,39 @@ const Profile: React.FC = () => {
             </Avatar>
           )}
         </FloatingBox>
-<Typography
-  variant="body2"
-  component="span"
-  sx={{
-    fontWeight: 600,
-    color: user?.groupColor,
-    backgroundColor: user?.groupColor 
-      ? `${user.groupColor}1A` 
-      : 'transparent',
-    borderRadius: '16px',
-    border: user?.groupColor ? `1px solid ${user.groupColor}33` : 'none',
-    px: 1.2,
-    py: 0.3,
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '0.9rem',
-    height: '28px',
-    minHeight: '28px',
-    lineHeight: 1,
-    whiteSpace: 'nowrap',
-    verticalAlign: 'middle',
-    '&:hover': {
-      backgroundColor: user?.groupColor 
-        ? `${user.groupColor}30` 
-        : 'rgba(0, 0, 0, 0.04)',
-      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-    },
-    transition: 'all 0.2s ease',
-  }}
->
-  {loading ? <Skeleton width={80} height={16} /> : user?.group}
-</Typography>
+        <Typography
+          variant="body2"
+          component="span"
+          sx={{
+            fontWeight: 600,
+            color: user?.groupColor,
+            backgroundColor: user?.groupColor
+              ? `${user.groupColor}1A`
+              : 'transparent',
+            borderRadius: '16px',
+            border: user?.groupColor ? `1px solid ${user.groupColor}33` : 'none',
+            px: 1.2,
+            py: 0.3,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.9rem',
+            height: '28px',
+            minHeight: '28px',
+            lineHeight: 1,
+            whiteSpace: 'nowrap',
+            verticalAlign: 'middle',
+            '&:hover': {
+              backgroundColor: user?.groupColor
+                ? `${user.groupColor}30`
+                : 'rgba(0, 0, 0, 0.04)',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+            },
+            transition: 'all 0.2s ease',
+          }}
+        >
+          {loading ? <Skeleton width={80} height={16} /> : user?.group}
+        </Typography>
 
         <Typography variant="h6" sx={{ fontWeight: 700, color: colors.textPrimary }}>
           {loading ? <Skeleton width={80} /> : user?.displayName}

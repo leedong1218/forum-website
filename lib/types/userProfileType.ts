@@ -11,6 +11,10 @@ export interface UserProfile {
   coverUrl?: string;
   joinedDate?: string;
   verified?: boolean;
+  likeCount: number;
+  postCount: number;
+  info?: string;
+  avatar?: string;
 }
 
 export const STATS_CARDS = [

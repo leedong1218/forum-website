@@ -20,6 +20,15 @@ export interface VerifyEmailPayload {
   captcha_value: string;
 }
 
+export interface UploadAvatarPayload {
+  avatar?: File[];
+}
+
+type UpdateProfilePayload = {
+  displayName?: string;
+  info?: string;
+}
+
 const BASE_URL = '/user';
 
 const UserAPI = {
@@ -31,6 +40,19 @@ const UserAPI = {
     API.post(`${BASE_URL}/self/email/verify`, data),
   'verifyToken': (token: string): Promise<Response<null>> =>
     API.get(`/verify-email`, { params: { token } }),
+
+  'avatar': (data: UploadAvatarPayload): Promise<Response<unknown>> => {
+    const fd = new FormData();
+    data.avatar?.forEach(f => fd.append('avatar', f));
+
+    return API.post(`${BASE_URL}/avatar/`, fd, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+
+  'profile': (data: UpdateProfilePayload): Promise<Response<unknown>> =>
+    API.put(`${BASE_URL}/profile/`, data),
+
 };
 
 export default UserAPI;

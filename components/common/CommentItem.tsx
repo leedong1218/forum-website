@@ -10,7 +10,6 @@ import {
   FavoriteBorder, Favorite, Reply, ExpandMore, ExpandLess, DeleteOutline, EditOutlined,
   Warning
 } from "@mui/icons-material";
-import Sticker from "@/public/images/sticker.jpg";
 import { commentType } from "@/lib/types/commentType";
 import CommentAPI from "@/services/Comment/CommentAPI";
 import { ReportDialog } from "./ReportPopup";
@@ -94,11 +93,16 @@ const CommentItem = ({
     >
       <Box sx={{ display: 'flex', gap: 2 }}>
         <Avatar sx={{ width: 40, height: 40 }}>
-          <img
-            src={comment.authorAvatar || Sticker}
-            alt={comment.authorName}
-            style={{ objectFit: 'cover' }}
-          />
+          {comment.authorAvatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={comment.authorAvatar}
+              alt={comment.authorName}
+              style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+            />
+          ) : (
+            comment.authorName?.charAt(0)?.toUpperCase() || '?'
+          )}
         </Avatar>
         <Box flex={1}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

@@ -6,8 +6,8 @@ const notificationAPI = {
   getPreview: (): Promise<Response<NotificationItem[]>> =>
     API.get('/notifications/unread/preview'),
 
-  getAllUnread: (): Promise<Response<NotificationItem[]>> =>
-    API.get('/notifications/unread/all'),
+  getAllUnread: (params?: { page?: number; }): Promise<Response<NotificationItem[]>> =>
+    API.get('/notifications/unread/all', { params }),
 
   markAsRead: (id: number): Promise<Response<unknown>> =>
     API.post(`/notifications/read/${id}`),
