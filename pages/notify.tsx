@@ -40,6 +40,7 @@ type Notification = {
 
 type NotificationResults = {
   results: Notification[];
+  total_pages: number; // 新增 total_pages 欄位
 }
 
 // API響應類型
@@ -53,12 +54,13 @@ type NotificationResponse = {
 const Notify = () => {
   const title = "通知";
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1); // 從 1 開始
+  const [totalPages, setTotalPages] = useState(1); // 新增總頁數狀態
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [initialLoading, setInitialLoading] = useState(true);
 
-const getIconComponent = (iconName: string, color?: string) => {
+  const getIconComponent = (iconName: string, color?: string) => {
     const iconMap: { [key: string]: React.ElementType } = {
       'info': Info,
       'warning': Warning,
@@ -113,15 +115,18 @@ const getIconComponent = (iconName: string, color?: string) => {
     }
   };
 
-  const fetchNotifications = async (pageParam = 0, append = false) => {
+  const fetchNotifications = async (pageParam = 1, append = false) => {
     try {
       setIsLoading(true);
 
-      // 這裡假設你的API支持分頁參數，如果不支持，可以移除page參數
-      const res: NotificationResponse = await notificationAPI.getAllUnread();
+      const res: NotificationResponse = await notificationAPI.getAllUnread({ page: pageParam });
 
       if (res.request === "success") {
         const newNotifications = res.data.results || [];
+        const totalPagesFromAPI = res.data.total_pages || 1;
+
+        // 更新總頁數
+        setTotalPages(totalPagesFromAPI);
 
         if (append) {
           setNotifications(prev => [...prev, ...newNotifications]);
@@ -129,10 +134,8 @@ const getIconComponent = (iconName: string, color?: string) => {
           setNotifications(newNotifications);
         }
 
-        // 如果返回的數據少於預期，說明沒有更多數據了
-        if (newNotifications.length < 5) { // 假設每頁5條數據
-          setHasMore(false);
-        }
+        // 使用 total_pages 來判斷是否還有更多數據
+        setHasMore(pageParam < totalPagesFromAPI);
       } else {
         toast.error(res.message || '無法取得通知');
       }
@@ -146,14 +149,14 @@ const getIconComponent = (iconName: string, color?: string) => {
   };
 
   useEffect(() => {
-    fetchNotifications(0, false);
+    fetchNotifications(1, false);
 
     const token = localStorage.getItem('access_token');
 
     if (!token) return;
 
     const socket = new WebSocket(`ws://140.131.115.161:8000/ws/notifications/?token=${token}`);
-    
+
     socket.onopen = () => {
       console.log('🔌 WebSocket connected');
     };
@@ -163,8 +166,9 @@ const getIconComponent = (iconName: string, color?: string) => {
         const data = JSON.parse(event.data);
         if (data.event === 'notification') {
           toast.info(data.message);
-          // 重新載入通知列表
-          fetchNotifications(0, false);
+          // 重新載入通知列表，重置到第一頁
+          setPage(1);
+          fetchNotifications(1, false);
         }
       } catch (err) {
         console.error('WebSocket JSON parsing error:', err);
@@ -236,8 +240,11 @@ const getIconComponent = (iconName: string, color?: string) => {
     try {
       await notificationAPI.delete(id);
       toast.success('通知已刪除');
+      // 刪除成功後，從本地狀態移除該通知
+      setNotifications(prev => prev.filter(notification => notification.id !== id));
     } catch (error) {
       console.error('取消通知失敗:', error);
+      toast.error('刪除通知失敗');
     }
   }
 
@@ -268,7 +275,7 @@ const getIconComponent = (iconName: string, color?: string) => {
               </Typography>
             </Box>
           ) : (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
               {notifications.map((notification, index) => {
                 const isLastItem = index === notifications.length - 1;
 
@@ -278,22 +285,21 @@ const getIconComponent = (iconName: string, color?: string) => {
                     ref={isLastItem ? setupObserver : null}
                     onClick={() => handleNotificationClick(notification)}
                     sx={{
-                      p: '1rem 0 .5rem',
-                      borderRadius: 3,
-                      transition: "all 0.3s ease",
+                      p: 2,
+                      borderRadius: 2,
+                      transition: "all 0.2s ease",
                       cursor: notification.link ? 'pointer' : 'default',
                       "&:hover": {
-                        transform: "translateY(-4px)",
-                        boxShadow: "0 12px 20px rgba(0, 0, 0, 0.1)",
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 8px 16px rgba(0, 0, 0, 0.1)",
                       },
                       border: `1px solid ${colors.accentLight}`,
-                      backgroundColor: notification.is_read ? "rgb(255, 255, 255)" : "white",
-                      overflow: "visible",
+                      backgroundColor: notification.is_read ? "rgba(0, 0, 0, 0.02)" : "white",
                       position: "relative",
                       opacity: notification.is_read ? 0.7 : 1,
                     }}
                   >
-                    {/* 左側類型標記 */}
+                    {/* 左側標記線 */}
                     <Box
                       sx={{
                         position: "absolute",
@@ -301,99 +307,78 @@ const getIconComponent = (iconName: string, color?: string) => {
                         top: 0,
                         bottom: 0,
                         width: 4,
-                        background: notification.color || colors.accent,
-                        borderTopLeftRadius: 12,
-                        borderBottomLeftRadius: 12,
+                        backgroundColor: notification.color || colors.accent,
+                        borderRadius: "0 2px 2px 0",
                       }}
                     />
 
-                    {/* 未讀指示器 */}
-                    {!notification.is_read && (
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          top: 8,
-                          left: 15,
-                          width: 8,
-                          height: 8,
-                          borderRadius: "50%",
-                          backgroundColor: colors.accent,
-                        }}
-                      />
-                    )}
-
-                    <IconButton sx={{
-                      position: "absolute",
-                      top: 8,
-                      right: 8,
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                    }}
+                    {/* 刪除按鈕 */}
+                    <IconButton
+                      sx={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        width: 24,
+                        height: 24,
+                      }}
                       onClick={(event) => {
                         event.stopPropagation();
                         handleCancel(notification.id);
-                      }}>
-                      <Cancel sx={{ color: 'red' }} />
+                      }}
+                    >
+                      <Cancel sx={{ fontSize: 16, color: 'rgba(0, 0, 0, 0.4)' }} />
                     </IconButton>
 
-                    <CardContent sx={{ p: "1rem 2rem", width: "100%" }}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "flex-start",
-                          mb: 1,
-                        }}
-                      >
-                        <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
+                    <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, pr: 4 }}>
+                      {/* 頭像和未讀指示器 */}
+                      <Box sx={{ position: "relative" }}>
                         <Avatar
                           sx={{
                             bgcolor: notification.color || colors.accent,
-                            mr: 2,
                             width: 40,
                             height: 40,
                           }}
                         >
                           {getIconComponent(notification.icon, notification.color)}
                         </Avatar>
-
-                          <Box sx={{ flex: 1, minWidth: 0 }}>
-                            <Typography
-                              component="div"
-                              sx={{
-                                fontWeight: notification.is_read ? 400 : 600,
-                                color: colors.textPrimary,
-                                fontSize: '0.95rem',
-                                lineHeight: 1.4,
-                                wordBreak: 'break-word',
-                              }}
-                            >
-                              {notification.message}
-                            </Typography>
-                          </Box>
-                        </Box>
-
-                        <Box sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          ml: 2,
-                          flexShrink: 0,
-                        }}>
+                        {!notification.is_read && (
                           <Box
                             sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              color: "text.secondary",
-                              fontSize: "0.75rem",
+                              position: "absolute",
+                              top: -2,
+                              right: -2,
+                              width: 10,
+                              height: 10,
+                              borderRadius: "50%",
+                              backgroundColor: colors.accent,
+                              border: "2px solid white",
                             }}
-                          >
-                            <AccessTime sx={{ fontSize: 14, mr: 0.5 }} />
+                          />
+                        )}
+                      </Box>
+
+                      {/* 內容區域 */}
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography
+                          sx={{
+                            fontWeight: notification.is_read ? 400 : 600,
+                            color: colors.textPrimary,
+                            fontSize: '0.95rem',
+                            lineHeight: 1.4,
+                            mb: 1,
+                          }}
+                        >
+                          {notification.message}
+                        </Typography>
+
+                        <Box sx={{ display: "flex", alignItems: "center", color: "text.secondary" }}>
+                          <AccessTime sx={{ fontSize: 14, mr: 0.5 }} />
+                          <Typography variant="caption">
                             {formatTimestamp(notification.created_at)}
-                          </Box>
+                          </Typography>
                         </Box>
                       </Box>
-                    </CardContent>
+                    </Box>
                   </Card>
                 );
               })}
@@ -411,7 +396,7 @@ const getIconComponent = (iconName: string, color?: string) => {
           {!hasMore && notifications.length > 0 && (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 2 }}>
               <Typography variant="body2" color="text.secondary">
-                已載入所有通知
+                已載入所有通知 ({page}/{totalPages} 頁)
               </Typography>
             </Box>
           )}
