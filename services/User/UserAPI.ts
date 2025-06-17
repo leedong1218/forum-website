@@ -53,6 +53,11 @@ const UserAPI = {
   'profile': (data: UpdateProfilePayload): Promise<Response<unknown>> =>
     API.put(`${BASE_URL}/profile/`, data),
 
+  'activity': (user_id: string, type: string, page: number): Promise<Response<unknown>> =>
+    API.get(`${BASE_URL}/${user_id}/activity`, {
+      params: { type: type, page: page }
+    }),
+
 };
 
 export default UserAPI;

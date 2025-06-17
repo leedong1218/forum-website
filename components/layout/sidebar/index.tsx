@@ -5,7 +5,6 @@ import Toolbar from "@mui/material/Toolbar";
 
 // 引入側邊欄的子組件
 import MainNavItems from "./MainNavItems";
-import FollowedBoards from "./FollowedBoards";
 import SimplifiedProfile from "./SimplifiedProfile";
 import { IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -64,16 +63,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         handleDrawerToggle={handleDrawerToggle}
         isLogin={isLogin}
       />
-
-      {isLogin && (
-        <FollowedBoards
-          title={title}
-          isMobile={isMobile}
-          isCompactView={isCompactView}
-          handleDrawerToggle={handleDrawerToggle}
-        />
-      )}
-      
 
       {/* 在壓縮視圖下 (1200px) 或寬度 1500px 以下時，在側邊欄底部顯示簡化的個人資料 */}
       {(isCompactView || hideProfileSidebar) && isLogin && <SimplifiedProfile />}

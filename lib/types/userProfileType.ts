@@ -2,6 +2,7 @@ import { ArticleOutlined, ThumbUp } from "@mui/icons-material";
 import { ReactNode } from "react";
 
 export interface UserProfile {
+  id?: string;
   username?: string;
   email?: string;
   displayName?: string;
