@@ -173,7 +173,7 @@ const Profile: React.FC = () => {
       <Box sx={infoBoxStyle}>
         <ThumbUp sx={iconStyle} />
         <Typography variant="body2" sx={{ color: colors.textSecondary }}>
-          按讚數
+          獲得讚數
         </Typography>
         <Typography variant="body2" sx={{ fontWeight: 600, color: colors.textPrimary, ml: "auto" }}>
           {loading ? <Skeleton width={30} /> : user?.likeCount ?? 0}

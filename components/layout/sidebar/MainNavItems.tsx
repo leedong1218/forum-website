@@ -6,7 +6,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ForumIcon from "@mui/icons-material/Forum";
-import { Article, Warning } from "@mui/icons-material";
+import { Warning } from "@mui/icons-material";
 import Link from "@mui/material/Link";
 import { colors } from "@/styles/theme"; // Import colors from theme file
 

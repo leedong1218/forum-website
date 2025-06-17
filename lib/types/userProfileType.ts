@@ -1,4 +1,4 @@
-import { ArticleOutlined, Groups, ThumbUp } from "@mui/icons-material";
+import { ArticleOutlined, ThumbUp } from "@mui/icons-material";
 import { ReactNode } from "react";
 
 export interface UserProfile {
@@ -14,9 +14,7 @@ export interface UserProfile {
 }
 
 export const STATS_CARDS = [
-  { icon: Groups, label: '追蹤者', count: 142 },
-  { icon: Groups, label: '正在追蹤', count: 98 },
-  { icon: ArticleOutlined, label: '文章', count: 56 },
+  { icon: ArticleOutlined, label: '貼文數', count: 56 },
   { icon: ThumbUp, label: '獲得讚數', count: '1.2K' }
 ];
 

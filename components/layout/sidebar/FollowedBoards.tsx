@@ -16,9 +16,8 @@ import CodeIcon from "@mui/icons-material/Code";
 import DataObjectIcon from "@mui/icons-material/DataObject";
 import Link from "@mui/material/Link";
 import { styled } from "@mui/material/styles";
-import { colors } from "@/styles/theme"; // Import colors from theme file
+import { colors } from "@/styles/theme";
 
-// 脈衝動畫組件
 const PulseBox = styled(Box)(({ }) => ({
   position: "absolute",
   top: 8,
@@ -26,7 +25,7 @@ const PulseBox = styled(Box)(({ }) => ({
   width: 8,
   height: 8,
   borderRadius: "50%",
-  bgcolor: colors.secondaryAccent, // Assuming warningColor is similar to secondaryAccent
+  bgcolor: colors.secondaryAccent,
   animation: "pulse 2s infinite",
   "@keyframes pulse": {
     "0%": {
@@ -86,7 +85,6 @@ const FollowedBoards: React.FC<FollowedBoardsProps> = ({
     <>
       <Divider sx={{ my: 2.5 }} />
 
-      {/* 追蹤看板標題 */}
       <Box
         sx={{
           display: "flex",
@@ -115,7 +113,6 @@ const FollowedBoards: React.FC<FollowedBoardsProps> = ({
         </Tooltip>
       </Box>
 
-      {/* 追蹤看板列表 */}
       <List disablePadding sx={{ flexGrow: 1 }}>
         {followedBoards.map((item) => (
           <Link 
