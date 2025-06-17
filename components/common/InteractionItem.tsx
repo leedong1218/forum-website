@@ -11,34 +11,31 @@ import {
 import { ReportDialog } from "./ReportPopup";
 import PostAPI from "@/services/Post/PostAPI";
 
-// Type definitions
 interface InteractionItemProps {
-  icon: ReactNode; // Icon to display when not active
-  activeIcon: ReactNode; // Icon to display when active
-  count?: number; // Count to display
-  label: string; // Tooltip text
-  active: boolean; // Whether the interaction is active
-  onClick: () => void; // Click handler
-  color: string; // Color when active
+  icon: ReactNode;
+  activeIcon: ReactNode;
+  count?: number;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  color: string;
 }
 
 interface InteractionBarProps {
-  initialLikes?: number; // Initial like count
-  initialComments?: number; // Initial comment count
-  initialBookmarked?: number; // Initial bookmark count
+  initialLikes?: number;
+  initialComments?: number;
+  initialBookmarked?: number;
   postId: number;
-  isLikedA: boolean; // Whether the post is liked
-  isBookmarkedA: boolean; // Whether the post is bookmarked
+  isLikedA: boolean;
+  isBookmarkedA: boolean;
 }
 
-// Utility function to format numbers (e.g., 1000 → 1K)
 const formatNumber = (num: number): string => {
   if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
   if (num >= 1000) return (num / 1000).toFixed(1) + "K";
   return num.toString();
 };
 
-// Interaction item component (for like or comment)
 const InteractionItem = ({
   icon,
   activeIcon,
@@ -49,18 +46,13 @@ const InteractionItem = ({
   color,
 }: InteractionItemProps) => {
   const theme = useTheme();
-
   return (
     <Box sx={{ display: "flex", alignItems: "center", mr: 1 }}>
       <Tooltip title={label}>
         <IconButton
           onClick={onClick}
           sx={{
-            display: "flex",
-            alignItems: "center",
-            fontSize: "0.75rem",
             color: active ? color : "text.secondary",
-            transition: "all 0.2s",
             "&:hover": {
               transform: "scale(1.1)",
               color: active ? color : theme.palette.grey[600],
@@ -71,11 +63,7 @@ const InteractionItem = ({
         </IconButton>
       </Tooltip>
       {count !== undefined && (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ fontWeight: 600, ml: 0.5 }}
-        >
+        <Typography variant="body2" sx={{ fontWeight: 600, ml: 0.5 }}>
           {formatNumber(count)}
         </Typography>
       )}
@@ -102,7 +90,6 @@ const InteractionBar = ({
   const handleLikeClick = async () => {
     setIsLiked(!isLiked);
     setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
-
     await PostAPI.like(postId);
   };
 
@@ -113,23 +100,8 @@ const InteractionBar = ({
     await PostAPI.bookMark(postId);
   };
 
-  const handleOpenReport = () => {
-    setReportDialogOpen(true);
-  }
-
-  const handleCloseReport = () => {
-    setReportDialogOpen(false);
-  };
-
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        pt: 1,
-      }}
-    >
+    <Box sx={{ display: "flex", justifyContent: "space-between", pt: 1 }}>
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <InteractionItem
           icon={<FavoriteBorder />}
@@ -140,14 +112,13 @@ const InteractionBar = ({
           onClick={handleLikeClick}
           color={theme.palette.error.main}
         />
-
         <InteractionItem
           icon={<ChatBubbleOutline />}
           activeIcon={<ChatBubbleOutline />}
           count={commentCount}
           label="留言"
           active={false}
-          onClick={() => { }}
+          onClick={() => {}}
           color={theme.palette.primary.main}
         />
       </Box>
@@ -162,17 +133,16 @@ const InteractionBar = ({
           color={theme.palette.primary.main}
         />
         <Tooltip title={"檢舉"}>
-          <IconButton
-            onClick={handleOpenReport}
-            sx={{ p: 0.5 }}
-          >
+          <IconButton onClick={() => setReportDialogOpen(true)}>
             <Warning color="warning" />
           </IconButton>
         </Tooltip>
       </Box>
       <ReportDialog
         open={reportDialogOpen}
-        onClose={handleCloseReport}
+        onClose={() => setReportDialogOpen(false)}
+        targetId={postId}
+        targetType="post"
       />
     </Box>
   );
