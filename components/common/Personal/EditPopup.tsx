@@ -1,15 +1,24 @@
 import { EditPopupTypes } from "@/lib/types/userProfileType";
+import UserAPI from "@/services/User/UserAPI";
 import { Close } from "@mui/icons-material";
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField, Typography } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
-export default function EditPopup({isEditingProfile, setIsEditingProfile, userData, onSave}: EditPopupTypes) {
+export default function EditPopup({ isEditingProfile, setIsEditingProfile, userData, onSave }: EditPopupTypes) {
   const [formData, setFormData] = useState({
-    name: userData?.name || "",
-    bio: userData?.bio || "",
-    location: userData?.location || "",
-    website: userData?.website || ""
+    displayName: userData?.displayName || "",
+    info: userData?.info || "",
   });
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const initialData = {
+      displayName: userData?.displayName || "",
+      info: userData?.info || "",
+    };
+    setFormData(initialData);
+  }, [userData]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChange = (e: any) => {
@@ -20,9 +29,26 @@ export default function EditPopup({isEditingProfile, setIsEditingProfile, userDa
     }));
   };
 
-  const handleSubmit = () => {
-    onSave(formData);
-    setIsEditingProfile(false);
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+
+      // 先調用 API 更新資料
+      const response = await UserAPI.profile(formData);
+
+      // API 成功後才更新父組件狀態
+      if (response) {
+        onSave(formData);
+        setIsEditingProfile(false);
+        toast.success('個人資料已更新成功！');
+      }
+    } catch (error) {
+      console.error('更新個人資料失敗:', error);
+      // 這裡可以加入錯誤處理，例如顯示錯誤訊息
+    } finally {
+      window.location.reload();
+      setLoading(false);
+    }
   };
 
   return (
@@ -53,7 +79,7 @@ export default function EditPopup({isEditingProfile, setIsEditingProfile, userDa
           <Close />
         </IconButton>
       </DialogTitle>
-      
+
       <DialogContent sx={{ p: 3 }}>
         <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           <Box>
@@ -62,12 +88,13 @@ export default function EditPopup({isEditingProfile, setIsEditingProfile, userDa
             </Typography>
             <TextField
               fullWidth
-              name="name"
-              value={formData.name}
+              name="displayName"  // 修正：改為 displayName
+              value={formData.displayName}
               onChange={handleChange}
               size="small"
               placeholder="輸入您的姓名"
               variant="outlined"
+              disabled={loading}
             />
           </Box>
 
@@ -77,32 +104,35 @@ export default function EditPopup({isEditingProfile, setIsEditingProfile, userDa
             </Typography>
             <TextField
               fullWidth
-              name="bio"
-              value={formData.bio}
+              name="info"  // 修正：改為 info
+              value={formData.info}
               onChange={handleChange}
               multiline
               rows={3}
               placeholder="輸入您的個人簡介"
               variant="outlined"
+              disabled={loading}
             />
           </Box>
         </Box>
       </DialogContent>
-      
+
       <DialogActions sx={{ p: 3, pt: 0 }}>
-        <Button 
-          variant="outlined" 
+        <Button
+          variant="outlined"
           onClick={() => setIsEditingProfile(false)}
           sx={{ borderRadius: 2, px: 3 }}
+          disabled={loading}
         >
           取消
         </Button>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           onClick={handleSubmit}
           sx={{ borderRadius: 2, px: 3, bgcolor: 'primary.main' }}
+          disabled={loading}
         >
-          儲存
+          {loading ? '儲存中...' : '儲存'}
         </Button>
       </DialogActions>
     </Dialog>

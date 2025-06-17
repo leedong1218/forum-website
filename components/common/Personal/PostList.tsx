@@ -8,164 +8,159 @@ import {
 } from '@mui/material';
 import {
   AccessTime,
-  Favorite,
   ChatBubbleOutline,
-  Bookmark,
-  Visibility
+  FavoriteBorder,
 } from '@mui/icons-material';
 import Link from 'next/link';
-import { posts } from '@/lib/data/personal/detail';
 
-export default function PostList() {
+export type PostTypes = {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  timestamp: string;
+  likes: number;
+  comments: number;
+  views: number;
+  boardUrl: string;
+  content: string;
+  boardColor?: string;
+  createdAt: string;
+  likesCount: number;
+  commentsCount: number;
+  boardName: string;
+}
+
+interface PostListProps {
+  posts: PostTypes[];
+}
+
+export default function PostList({ posts }: PostListProps) {
+  if (!posts || posts.length === 0) {
+    return (
+      <Box sx={{
+        textAlign: 'center',
+        py: 6,
+        color: 'text.secondary'
+      }}>
+        <Typography variant="h6" gutterBottom>
+          尚無發布的文章
+        </Typography>
+        <Typography variant="body2">
+          開始創作您的第一篇文章吧！
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
-    <List sx={{ width: "100%" }}>
-      {posts.map((post, index) => {
-        return (
-          <Card
-            component={Link}
-            href={post.link || `/post/${post.id}`}
-            key={index}
-            sx={{
-              mb: 3,
-              borderRadius: 3,
-              transition: "all 0.3s ease",
-              "&:hover": {
-                transform: "translateY(-4px)",
-                boxShadow: "0 12px 24px rgba(0, 0, 0, 0.1)",
-              },
-              border: "1px solid #f0f0f0",
-              textDecoration: "none",
-              overflow: "hidden",
-            }}
-          >
-            <CardContent sx={{ py: 1 }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  mb: 1,
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <Chip
-                    size="small"
-                    label={post.category}
-                    sx={{
-                      backgroundColor: post.bg,
-                      // color: post.text,
-                      fontWeight: 600,
-                      borderRadius: 1.5,
-                      fontSize: "0.75rem",
-                      height: 24,
-                      mr: 2,
-                    }}
-                  />
-
-                  <Typography
-                    variant="h6"
-                    component="div"
-                    sx={{
-                      fontWeight: 600,
-                      fontSize: "1.1rem",
-                      color: "#1e293b",
-                    }}
-                  >
-                    {post.title}
-                  </Typography>
-                </Box>
-
-                <Box
+    <List sx={{ width: "100%", p: 0 }}>
+      {posts.map((post) => (
+        <Card
+          component={Link}
+          href={`/forum/${post.boardUrl}/post/${post.id}`}
+          key={post.id}
+          sx={{
+            textDecoration: 'none', // 👉 移除底線
+            '&:hover': {
+              textDecoration: 'none', // 👉 滑鼠移上時也不要出現底線
+            }
+          }}
+        >
+          <CardContent sx={{
+            p: 3,
+            mb: 2,
+            border: "1px solid #e5e7eb",
+            borderRadius: 2,
+            transition: "all 0.2s ease",
+            "&:hover": {
+              transform: "translateY(-2px)",
+              boxShadow: "0 8px 20px rgba(0, 0, 0, 0.08)",
+            },
+            cursor: "pointer",
+          }}>
+            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Box sx={{ display: "flex", mb: 2, alignItems: "center" }}>
+                <Chip
+                  size="small"
+                  label={post.boardName}
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    color: "text.secondary",
+                    backgroundColor: post.boardColor,
+                    color: '#fff',
+                    fontWeight: 500,
                     fontSize: "0.75rem",
                   }}
-                >
-                  <AccessTime sx={{ fontSize: 14, mr: 0.5 }} />
-                  {post.timestamp}
-                </Box>
-              </Box>
+                />
 
-              <Typography
-                variant="body2"
-                sx={{
-                  mb: 2,
-                  display: "-webkit-box",
-                  WebkitBoxOrient: "vertical",
-                  WebkitLineClamp: 2,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  color: "#64748b",
-                  lineHeight: 1.6,
-                }}
-              >
-                {post.description}
-              </Typography>
+                {/* Title */}
+                <Typography
+                  variant="h6"
+                  component="div"
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: "1.125rem",
+                    color: "#111827",
+                    lineHeight: 1.4,
+                    ml: 1,
+                  }}
+                >
+                  {post.title}
+                </Typography>
+              </Box>
 
               <Box
                 sx={{
                   display: "flex",
-                  justifyContent: "space-between",
                   alignItems: "center",
-                  mt: 2,
-                  pt: 2,
-                  borderTop: "1px solid rgba(0,0,0,0.06)",
+                  color: "text.secondary",
+                  fontSize: "0.75rem",
                 }}
               >
-                <Box sx={{ display: "flex", gap: 3 }}>
-                  {/* 點讚數量 */}
-                  <Box sx={{ 
-                    display: "flex", 
-                    alignItems: "center", 
-                    color: "text.secondary",
-                    fontSize: "0.75rem" 
-                  }}>
-                    <Favorite sx={{ fontSize: 14, mr: 0.5, color: "#f43f5e" }} />
-                    {post.likes}
-                  </Box>
-                  
-                  {/* 評論數量 */}
-                  <Box sx={{ 
-                    display: "flex", 
-                    alignItems: "center", 
-                    color: "text.secondary",
-                    fontSize: "0.75rem" 
-                  }}>
-                    <ChatBubbleOutline sx={{ fontSize: 14, mr: 0.5 }} />
-                    {post.comments}
-                  </Box>
-                  
-                  {/* 收藏數量 */}
-                  <Box sx={{ 
-                    display: "flex", 
-                    alignItems: "center", 
-                    color: "text.secondary",
-                    fontSize: "0.75rem" 
-                  }}>
-                    <Bookmark sx={{ fontSize: 14, mr: 0.5 }} />
-                    {post.bookmarks}
-                  </Box>
+                <AccessTime sx={{ fontSize: 14, mr: 0.5 }} />
+                {new Date(post.createdAt).toLocaleDateString()}
+              </Box>
+            </Box>
+
+            <div
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
+
+            {/* Stats */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                pt: 2,
+                mt: 1,
+                borderTop: "1px solid #ccc",
+              }}
+            >
+              <Box sx={{ display: "flex", gap: 3 }}>
+                <Box sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  color: "#6b7280",
+                  fontSize: "0.875rem"
+                }}>
+                  <FavoriteBorder sx={{ fontSize: 16, mr: 0.5 }} />
+                  {post.likesCount}
                 </Box>
 
-                {/* 檢視次數 */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    color: "text.secondary",
-                    fontSize: "0.75rem",
-                  }}
-                >
-                  <Visibility sx={{ fontSize: 16, mr: 0.5 }} />
-                  {post.views.toLocaleString()}
+                <Box sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  color: "#6b7280",
+                  fontSize: "0.875rem"
+                }}>
+                  <ChatBubbleOutline sx={{ fontSize: 16, mr: 0.5 }} />
+                  {post.commentsCount}
                 </Box>
               </Box>
-            </CardContent>
-          </Card>
-        );
-      })}
+            </Box>
+          </CardContent>
+        </Card>
+      ))}
     </List>
   );
 }

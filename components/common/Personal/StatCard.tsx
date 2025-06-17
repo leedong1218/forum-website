@@ -3,8 +3,7 @@ interface Type {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: any;
   label: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  count: any;
+  count: number;
 }
 
 const CARD_STYLES = {
@@ -25,7 +24,7 @@ const CARD_STYLES = {
 const accentColor = "#0ea5e9"; // 主藍色
 
 export const StatCard = ({ icon: Icon, label, count }: Type) => (
-  <Paper elevation={0} sx={CARD_STYLES}>
+  <Paper sx={CARD_STYLES}>
     <Icon sx={{ color: accentColor, mr: 1.5, fontSize: 24 }} />
     <Box>
       <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
