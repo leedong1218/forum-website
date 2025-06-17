@@ -112,7 +112,7 @@ const CommentItem = ({
                 <Typography
                   fontWeight={600}
                   sx={{ color: comment.authorGroupColor || 'inherit' }}
-                >123
+                >
                   {comment.authorName}
                 </Typography>
                 <Chip
