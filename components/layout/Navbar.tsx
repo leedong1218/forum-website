@@ -205,6 +205,7 @@ export default function Navbar({
                     bgcolor: colors.accentLight,
                   },
                 }}
+                onClick={() => router.push("/create-post")}
               >
                 <Edit />
               </IconButton>
