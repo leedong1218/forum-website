@@ -322,7 +322,10 @@ const CommentItem = ({
       <ReportDialog
         open={reportDialogOpen}
         onClose={handleCloseReport}
+        targetId={comment.id}
+        targetType="comment"
       />
+
     </Paper>
   );
 };
