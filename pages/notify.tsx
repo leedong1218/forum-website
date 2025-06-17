@@ -58,9 +58,8 @@ const Notify = () => {
   const [hasMore, setHasMore] = useState(true);
   const [initialLoading, setInitialLoading] = useState(true);
 
-  // 根據icon字符串返回對應的圖標組件
-  const getIconComponent = (iconName: string) => {
-    const iconMap: { [key: string]: React.ComponentType } = {
+const getIconComponent = (iconName: string, color?: string) => {
+    const iconMap: { [key: string]: React.ElementType } = {
       'info': Info,
       'warning': Warning,
       'success': CheckCircle,
@@ -68,7 +67,32 @@ const Notify = () => {
       'forum': Forum,
       'edit': Edit,
     };
-    return iconMap[iconName] || Info;
+
+    const Icon = iconMap[iconName];
+
+    if (Icon) {
+      return (
+        <Icon sx={{ fontSize: 20 }} />
+      );
+    } else {
+      return (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={iconName}
+          alt="icon"
+          style={{
+            width: 50,
+            height: 50,
+            objectFit: 'contain',
+            borderRadius: '50%',
+            backgroundColor: color || '#ccc',
+          }}
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = '/fallback-icon.png';
+          }}
+        />
+      );
+    }
   };
 
   // 格式化時間戳
@@ -246,7 +270,6 @@ const Notify = () => {
           ) : (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               {notifications.map((notification, index) => {
-                const IconComponent = getIconComponent(notification.icon);
                 const isLastItem = index === notifications.length - 1;
 
                 return (
@@ -324,14 +347,16 @@ const Notify = () => {
                         }}
                       >
                         <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
-                          <Avatar sx={{
+                        <Avatar
+                          sx={{
                             bgcolor: notification.color || colors.accent,
                             mr: 2,
                             width: 40,
                             height: 40,
-                          }}>
-                            {React.createElement(IconComponent as React.ElementType, { sx: { fontSize: 20 } })}
-                          </Avatar>
+                          }}
+                        >
+                          {getIconComponent(notification.icon, notification.color)}
+                        </Avatar>
 
                           <Box sx={{ flex: 1, minWidth: 0 }}>
                             <Typography

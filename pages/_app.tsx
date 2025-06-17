@@ -1,5 +1,6 @@
 // pages/_app.tsx
 import { useEffect } from "react";
+import { useRouter } from "next/router";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { LoadingProvider } from "@/lib/context/LoadingContext";
 import { MessageModalProvider, useMessageModal } from "@/lib/context/MessageModalContext";
@@ -23,8 +24,8 @@ function AppContent({ Component, pageProps }: AppProps) {
           type: ModalTypes.WARNING,
           message: msg,
           handleClick: () => {
-            window.location.href = '/login';
-          }
+            window.location.href = "/login";
+          },
         });
         setIsShow(true);
       },
@@ -47,14 +48,24 @@ function AppContent({ Component, pageProps }: AppProps) {
 }
 
 export default function App(appProps: AppProps) {
+  const { Component, pageProps } = appProps;
+  const router = useRouter();
+
+  // ✅ 這裡排除 login 頁面不套用 NotificationProvider
+  const isLoginPage = router.pathname.startsWith("/login");
+
+  const content = isLoginPage ? (
+    <AppContent Component={Component} pageProps={pageProps} />
+  ) : (
+    <NotificationProvider>
+      <AppContent Component={Component} pageProps={pageProps} />
+    </NotificationProvider>
+  );
+
   return (
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
       <LoadingProvider>
-        <MessageModalProvider>
-          <NotificationProvider>
-            <AppContent {...appProps} />
-          </NotificationProvider>
-        </MessageModalProvider>
+        <MessageModalProvider>{content}</MessageModalProvider>
       </LoadingProvider>
     </GoogleOAuthProvider>
   );

@@ -132,7 +132,7 @@ export default function Personal() {
               />
             </Tooltip>
           </Box>
-          <Box sx={{ mb: 1 }}>我是一個</Box>
+          <Box sx={{ mb: 1 }}>{userProfile?.info}</Box>
           <Box className={styles.digital}>
             {STATS_CARDS.map((card, index) => (
               <StatCard key={index} icon={card.icon} label={card.label} count={card.count} />
