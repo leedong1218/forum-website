@@ -1,10 +1,10 @@
 import Layout from "@/components/layout/Layout";
 import { Avatar, Badge, Box, Button, Chip, IconButton, Tooltip, Typography } from "@mui/material";
 import styles from "@/styles/pages/Personal.module.scss";
-import { CalendarMonth, Camera, Check, ContentCopy, Edit } from "@mui/icons-material";
+import { ArticleOutlined, CalendarMonth, Camera, Check, ContentCopy, Edit, ThumbUp } from "@mui/icons-material";
 import UserAPI from "@/services/User/UserAPI";
 import { useEffect, useState } from "react";
-import { EditPopupTypes, STATS_CARDS, UserProfile } from "@/lib/types/userProfileType";
+import { EditPopupTypes, UserProfile } from "@/lib/types/userProfileType";
 import { StatCard } from "@/components/common/Personal/StatCard";
 import EditPopup from "@/components/common/Personal/EditPopup";
 import PaginationTags from "@/components/common/Personal/PaginationTags";
@@ -53,10 +53,18 @@ export default function Personal() {
               sx={{
                 width: 140, height: 140, border: '4px solid white',
                 boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-              }}
-              src={userProfile?.avatarUrl}
-              alt="Profile Picture"
-            />
+              }}>
+              {userProfile?.avatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={userProfile?.avatar}
+                  alt={userProfile?.displayName}
+                  style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                />
+              ) : (
+                userProfile?.displayName?.charAt(0)?.toUpperCase() || '?'
+              )}
+            </Avatar>
           </Badge>
           <Tooltip title="更換大頭照">
             <IconButton
@@ -134,9 +142,8 @@ export default function Personal() {
           </Box>
           <Box sx={{ mb: 1 }}>{userProfile?.info}</Box>
           <Box className={styles.digital}>
-            {STATS_CARDS.map((card, index) => (
-              <StatCard key={index} icon={card.icon} label={card.label} count={card.count} />
-            ))}
+            <StatCard icon={ArticleOutlined} label={'貼文數'} count={userProfile?.postCount ?? 0} />
+            <StatCard icon={ThumbUp} label={'獲得讚數'} count={userProfile?.likeCount ?? 0} />
           </Box>
         </Box>
       </Box>

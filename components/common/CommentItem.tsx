@@ -10,7 +10,6 @@ import {
   FavoriteBorder, Favorite, Reply, ExpandMore, ExpandLess, DeleteOutline, EditOutlined,
   Warning
 } from "@mui/icons-material";
-import Sticker from "@/public/images/sticker.jpg";
 import { commentType } from "@/lib/types/commentType";
 import CommentAPI from "@/services/Comment/CommentAPI";
 import { ReportDialog } from "./ReportPopup";
