@@ -8,6 +8,7 @@ import { EditPopupTypes, UserProfile } from "@/lib/types/userProfileType";
 import { StatCard } from "@/components/common/Personal/StatCard";
 import EditPopup from "@/components/common/Personal/EditPopup";
 import PaginationTags from "@/components/common/Personal/PaginationTags";
+import { AvatarChangeDialog } from "@/components/common/Personal/AvatarChangeDialog";
 
 // 主題色彩定義
 const accentColor = "#0ea5e9"; // 主藍色
@@ -17,6 +18,7 @@ export default function Personal() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>();
   const [userCopied, setUserCopied] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [openAvatarDialog, setOpenAvatarDialog] = useState(false);
 
   useEffect(() => {
     UserAPI.self()
@@ -32,6 +34,10 @@ export default function Personal() {
 
   const handleSave = (updatedData: EditPopupTypes) => {
     console.log("Updated profile data:", updatedData);
+  };
+
+  const handleAvatarChange = () => {
+    window.location.reload();
   };
 
   return (
@@ -75,7 +81,7 @@ export default function Personal() {
                 '&:hover': { bgcolor: accentColorDark },
                 border: '2px solid white'
               }}
-            // onClick={() => setOpenAvatarDialog(true)}
+              onClick={() => setOpenAvatarDialog(true)}
             >
               <Camera sx={{ fontSize: 18 }} />
             </IconButton>
@@ -155,6 +161,14 @@ export default function Personal() {
         setIsEditingProfile={setIsEditingProfile}
         userData={userProfile}
         onSave={handleSave}
+      />
+      <AvatarChangeDialog
+        open={openAvatarDialog}
+        onClose={() => setOpenAvatarDialog(false)}
+        currentAvatar={userProfile?.avatar}
+        onAvatarChange={handleAvatarChange}
+        accentColor={accentColor}
+        accentColorDark={accentColorDark}
       />
     </Layout>
   )
