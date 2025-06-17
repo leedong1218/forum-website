@@ -94,9 +94,9 @@ const InteractionBar = ({
   const theme = useTheme();
   const [isLiked, setIsLiked] = useState<boolean>(isLikedA);
   const [isSaved, setIsSaved] = useState<boolean>(isBookmarkedA);
+  const [savedCount, setSavedCount] = useState<number>(initialBookmarked);
   const [likeCount, setLikeCount] = useState<number>(initialLikes);
   const [commentCount] = useState<number>(initialComments);
-  const [saveCount] = useState<number>(initialBookmarked);
   const [reportDialogOpen, setReportDialogOpen] = useState<boolean>(false);
 
   const handleLikeClick = async () => {
@@ -108,6 +108,7 @@ const InteractionBar = ({
 
   const handleSaveClick = async () => {
     setIsSaved(!isSaved);
+    setSavedCount((prev) => (isSaved ? prev - 1 : prev + 1));
 
     await PostAPI.bookMark(postId);
   };
@@ -154,11 +155,11 @@ const InteractionBar = ({
         <InteractionItem
           icon={<TurnedInNot />}
           activeIcon={<Bookmark />}
+          count={savedCount}
           label="收藏"
           active={isSaved}
           onClick={handleSaveClick}
           color={theme.palette.primary.main}
-          count={saveCount}
         />
         <Tooltip title={"檢舉"}>
           <IconButton

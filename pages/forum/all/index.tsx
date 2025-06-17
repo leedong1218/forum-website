@@ -41,21 +41,46 @@ const BoardPage = () => {
   const [toast, setToast] = useState<{ open: boolean; message: string }>({ open: false, message: "" });
   const showToast = (msg: string) => setToast({ open: true, message: msg });
 
-
   const [boards, setBoards] = useState<BoardItem[]>([]);
   const [filter, setFilter] = useState<FilterType>('all');
 
   const fetchFollow = async (boardId: string) => {
-    const res = await BoardsAPI.follow(boardId);
-    showToast(res.message ?? "");
+    const currentBoard = boards.find(board => board.id === boardId);
+    if (!currentBoard) return;
 
     setBoards(prevBoards =>
       prevBoards.map(board =>
         board.id === boardId
-          ? { ...board, isFollow: !board.isFollow }
+          ? {
+            ...board,
+            isFollow: !board.isFollow,
+            // 根据追踪状态调整人数
+            followerCount: board.isFollow
+              ? Math.max(0, (board.followerCount || 0) - 1)
+              : (board.followerCount || 0) + 1
+          }
           : board
       )
     );
+
+    try {
+      const res = await BoardsAPI.follow(boardId);
+      showToast(res.message ?? "");
+    } catch (error) {
+      console.error('Follow API failed:', error);
+      setBoards(prevBoards =>
+        prevBoards.map(board =>
+          board.id === boardId
+            ? {
+              ...board,
+              isFollow: currentBoard.isFollow,
+              followerCount: currentBoard.followerCount
+            }
+            : board
+        )
+      );
+      showToast("操作失败，请重试");
+    }
   }
 
   /** 取得看板列表 */
@@ -82,6 +107,7 @@ const BoardPage = () => {
           followerCount: b.followerCount || 0
         }));
         setBoards(mapped);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.log(err?.message);
       } finally {
