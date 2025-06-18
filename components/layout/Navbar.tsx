@@ -29,6 +29,7 @@ import { useEffect, useState } from "react";
 import { colors } from "@/styles/theme";
 import NotificationPopover from "@/components/common/NotiPopup";
 import { useNotification } from "@/lib/context/NotificationContext";
+import UserAPI from "@/services/User/UserAPI";
 
 const SearchField = styled(TextField)(({ theme }) => ({
   [theme.breakpoints.up("sm")]: {
@@ -77,11 +78,20 @@ export default function Navbar({
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [firstName, setFirstName] = useState<string | null>();
+  const [avatar, setAvatar] = useState<string | null>(null);
   const open = Boolean(anchorEl);
   const { notifications } = useNotification();
 
+  const fetchData = async () => {
+    const res = await UserAPI.self();
+    setAvatar(res.data.avatar)
+  }
+
   useEffect(() => {
-    setFirstName(localStorage.getItem('firstName'))
+    if (isLogin) {
+      fetchData();
+    }
+    setFirstName(localStorage.getItem('firstName'));
   }, [])
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -223,18 +233,18 @@ export default function Navbar({
                 }}
                 onClick={e => handleToggleNoti(e)}
               >
-            <Badge
-              badgeContent={notifications.length > 5 ? '5+' : notifications.length}
-              color="primary"
-              sx={{
-                "& .MuiBadge-badge": {
-                  fontSize: "0.7rem",
-                  boxShadow: "0 2px 5px rgba(14, 165, 233, 0.3)",
-                },
-              }}
-            >
-              <NotificationsIcon sx={{ color: colors.textSecondary }} />
-            </Badge>
+                <Badge
+                  badgeContent={notifications.length > 5 ? '5+' : notifications.length}
+                  color="primary"
+                  sx={{
+                    "& .MuiBadge-badge": {
+                      fontSize: "0.7rem",
+                      boxShadow: "0 2px 5px rgba(14, 165, 233, 0.3)",
+                    },
+                  }}
+                >
+                  <NotificationsIcon sx={{ color: colors.textSecondary }} />
+                </Badge>
 
               </IconButton>
             </Tooltip>
@@ -263,9 +273,17 @@ export default function Navbar({
                         ? `0 0 0 2px ${colors.accentLight}`
                         : "none",
                       transition: "all 0.3s ease",
-                    }}
-                  >
-                    {firstName}
+                    }}>
+                    {avatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={avatar}
+                        alt={''}
+                        style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                      />
+                    ) : (
+                      firstName
+                    )}
                   </Avatar>
                 </IconButton>
               </Tooltip>
@@ -297,7 +315,16 @@ export default function Navbar({
                         fontSize: "0.8rem",
                       }}
                     >
-                      {firstName}
+                      {avatar ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={avatar}
+                          alt={''}
+                          style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                        />
+                      ) : (
+                        firstName
+                      )}
                     </Avatar>
                   </ListItemIcon>
                   <ListItemText primary="個人檔案" />
