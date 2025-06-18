@@ -294,7 +294,6 @@ const Notify = () => {
                         boxShadow: "0 8px 16px rgba(0, 0, 0, 0.1)",
                       },
                       border: `1px solid ${colors.accentLight}`,
-                      backgroundColor: notification.is_read ? "rgba(0, 0, 0, 0.02)" : "white",
                       position: "relative",
                       opacity: notification.is_read ? 0.7 : 1,
                     }}

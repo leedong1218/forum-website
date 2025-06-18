@@ -7,7 +7,7 @@ export interface PostListResponse {
 }
 
 export interface PostType {
-  id: number;
+  id: string;
   title: string;
   content: string;
   board: number;

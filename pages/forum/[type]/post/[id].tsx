@@ -9,11 +9,24 @@ import PostAttachments from "@/components/common/Post/PostAttachments";
 import {
   Box, Typography, Chip, Avatar, Card,
   Paper, useTheme, Divider, CircularProgress,
-  Container, Fade, IconButton
+  Container, Fade, IconButton,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  DialogActions,
+  DialogContent,
+  Button,
+  DialogContentText,
+  DialogTitle,
+  Dialog,
+  Alert,
+  AlertTitle
 } from "@mui/material";
-import { AccessTime, ArrowBack } from "@mui/icons-material";
+import { AccessTime, ArrowBack, Delete, Edit, MoreHoriz, ErrorOutline } from "@mui/icons-material";
 import PostAPI from "@/services/Post/PostAPI";
 import { PostType } from "@/lib/types/postListType";
+import { toast } from "react-toastify";
 
 export default function Post() {
   const router = useRouter();
@@ -21,14 +34,68 @@ export default function Post() {
   const { setLoading } = useLoading();
   const [postData, setPostData] = useState<PostType | null>(null);
   const [loading, setLocalLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isPostDeleted, setIsPostDeleted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleEdit = () => {
+    router.push(`/forum/${postData?.boardUrl}/post/edit/${postData?.id}`);
+    handleClose();
+  };
+
+  const handleDelete = () => {
+    setDeleteDialogOpen(true);
+    handleClose();
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await PostAPI.delete(postData?.id || '');
+      setDeleteDialogOpen(false);
+
+      toast.success('文章已成功刪除');
+
+      router.back();
+    } catch (error) {
+      console.error("刪除文章失敗", error);
+
+      setDeleteDialogOpen(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteDialogOpen(false);
+  };
 
   const fetchPost = async (id: string) => {
     try {
       setLoading(true);
       const res = await PostAPI.get(Number(id));
       setPostData(res.data || null);
-    } catch (err) {
+      setIsPostDeleted(false);
+      setErrorMessage("");
+    } catch (err: any) {
       console.error("取得文章失敗", err);
+      
+      // 檢查錯誤訊息是否包含文章已被刪除的相關資訊
+      const errorMsg = err?.response?.data?.message || err?.message || "";
+      if (errorMsg.includes("已被刪除") || errorMsg.includes("不存在") || errorMsg.includes("deleted")) {
+        setIsPostDeleted(true);
+        setErrorMessage("此文章已被刪除");
+      } else {
+        setErrorMessage("載入文章時發生錯誤");
+      }
     } finally {
       setLoading(false);
       setLocalLoading(false);
@@ -56,13 +123,143 @@ export default function Post() {
     }).format(date);
   };
 
-  if (loading || !postData) {
+  if (loading) {
     return (
       <Layout>
         <Container maxWidth="lg">
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
             <CircularProgress size={60} thickness={4} color="primary" />
           </Box>
+        </Container>
+      </Layout>
+    );
+  }
+
+  // 如果文章已被刪除，顯示相應的訊息區塊
+  if (isPostDeleted) {
+    return (
+      <Layout>
+        <Container maxWidth="lg">
+          <Box mb={2} display="flex" alignItems="center">
+            <IconButton onClick={handleBack} sx={{ mr: 1 }}>
+              <ArrowBack />
+            </IconButton>
+            <Typography variant="subtitle2" color="text.secondary">
+              返回討論列表
+            </Typography>
+          </Box>
+
+          <Fade in={true} timeout={500}>
+            <Card sx={{
+              borderRadius: 3,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+              p: { xs: 3, md: 4 },
+              mb: 4,
+              textAlign: "center"
+            }}>
+              <Alert 
+                severity="warning" 
+                sx={{ 
+                  mb: 3, 
+                  borderRadius: 2,
+                  '& .MuiAlert-icon': {
+                    fontSize: '2rem'
+                  }
+                }}
+              >
+                <AlertTitle sx={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+                  文章不存在
+                </AlertTitle>
+                <Typography variant="body1" sx={{ mt: 1 }}>
+                  {errorMessage}
+                </Typography>
+              </Alert>
+
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center',
+                color: 'text.secondary'
+              }}>
+                <ErrorOutline sx={{ 
+                  fontSize: '4rem', 
+                  mb: 2, 
+                  color: 'warning.main',
+                  opacity: 0.7 
+                }} />
+                <Typography variant="h6" sx={{ mb: 1, fontWeight: 500 }}>
+                  很抱歉，您要查看的文章已經不存在
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 3, maxWidth: '400px' }}>
+                  此文章可能已被作者或管理員刪除，或者連結有誤。
+                </Typography>
+                
+                <Button 
+                  variant="contained" 
+                  onClick={handleBack}
+                  startIcon={<ArrowBack />}
+                  sx={{ 
+                    borderRadius: 2,
+                    px: 3,
+                    py: 1
+                  }}
+                >
+                  返回上一頁
+                </Button>
+              </Box>
+            </Card>
+          </Fade>
+        </Container>
+      </Layout>
+    );
+  }
+
+  // 如果有其他錯誤但不是文章被刪除
+  if (!postData && errorMessage) {
+    return (
+      <Layout>
+        <Container maxWidth="lg">
+          <Box mb={2} display="flex" alignItems="center">
+            <IconButton onClick={handleBack} sx={{ mr: 1 }}>
+              <ArrowBack />
+            </IconButton>
+            <Typography variant="subtitle2" color="text.secondary">
+              返回討論列表
+            </Typography>
+          </Box>
+
+          <Fade in={true} timeout={500}>
+            <Card sx={{
+              borderRadius: 3,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+              p: { xs: 3, md: 4 },
+              mb: 4,
+              textAlign: "center"
+            }}>
+              <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+                <AlertTitle sx={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+                  載入失敗
+                </AlertTitle>
+                <Typography variant="body1" sx={{ mt: 1 }}>
+                  {errorMessage}
+                </Typography>
+              </Alert>
+
+              <Button 
+                variant="contained" 
+                onClick={() => fetchPost(String(router.query.id))}
+                sx={{ mr: 2 }}
+              >
+                重新載入
+              </Button>
+              <Button 
+                variant="outlined" 
+                onClick={handleBack}
+              >
+                返回上一頁
+              </Button>
+            </Card>
+          </Fade>
         </Container>
       </Layout>
     );
@@ -87,6 +284,40 @@ export default function Post() {
             p: { xs: 2, md: 4 },
             mb: 4
           }}>
+            {postData?.isMine && (
+              <Box sx={{ mb: 2, display: "flex", alignItems: "center", justifyContent: "end" }}>
+                <IconButton
+                  onClick={handleClick}
+                  aria-controls={open ? 'post-menu' : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={open ? 'true' : undefined}
+                >
+                  <MoreHoriz />
+                </IconButton>
+                <Menu
+                  id="post-menu"
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleClose}
+                  MenuListProps={{
+                    'aria-labelledby': 'post-button',
+                  }}
+                >
+                  <MenuItem onClick={handleEdit}>
+                    <ListItemIcon>
+                      <Edit sx={{ color: '#1d3557' }} fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>編輯</ListItemText>
+                  </MenuItem>
+                  <MenuItem onClick={handleDelete}>
+                    <ListItemIcon>
+                      <Delete sx={{ color: '#c1121f' }} fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>刪除</ListItemText>
+                  </MenuItem>
+                </Menu>
+              </Box>
+            )}
             {/* Header */}
             <Box sx={{ borderBottom: "1px solid rgba(0,0,0,0.05)", pb: 3 }}>
               <Box sx={{
@@ -96,15 +327,15 @@ export default function Post() {
                 alignItems: { xs: "flex-start", sm: "center" },
                 mb: 2
               }}>
-                <Link href={`/forum/${postData.boardUrl}`} passHref>
+                <Link href={`/forum/${postData?.boardUrl}`} passHref>
                   <Chip
-                    avatar={postData.boardAvatar ? <Avatar src={postData.boardAvatar} /> : null}
+                    avatar={postData?.boardAvatar ? <Avatar src={postData.boardAvatar} /> : null}
                     size="small"
-                    label={postData.boardName}
+                    label={postData?.boardName}
                     clickable
                     sx={{
-                      bgcolor: postData.boardColor ? `${postData.boardColor}20` : `${theme.palette.primary.dark}20`,
-                      color: postData.boardColor,
+                      bgcolor: postData?.boardColor ? `${postData.boardColor}20` : `${theme.palette.primary.dark}20`,
+                      color: postData?.boardColor,
                       fontWeight: 600,
                       borderRadius: 1,
                       height: 28,
@@ -121,7 +352,7 @@ export default function Post() {
                   mt: { xs: 1, sm: 0 }
                 }}>
                   <AccessTime fontSize="small" sx={{ mr: 0.5 }} />
-                  {formatDate(postData.createdAt)}
+                  {formatDate(postData?.createdAt || '')}
                 </Box>
               </Box>
 
@@ -132,17 +363,17 @@ export default function Post() {
                 pb: 1
               }}>
                 <Avatar
-                  src={postData.authorAvatar || undefined}
-                  alt={postData.authorName}
+                  src={postData?.authorAvatar || undefined}
+                  alt={postData?.authorName}
                   sx={{
                     width: 50,
                     height: 50,
                     mr: 2,
-                    border: postData.authorGroupColor ? `2px solid ${postData.authorGroupColor}80` : "none"
+                    border: postData?.authorGroupColor ? `2px solid ${postData.authorGroupColor}80` : "none"
                   }}
                 />
                 <Box>
-                  {postData.authorGroupName && (
+                  {postData?.authorGroupName && (
                     <Chip
                       label={postData.authorGroupName}
                       size="small"
@@ -157,7 +388,7 @@ export default function Post() {
                     />
                   )}
                   <Typography variant="subtitle1" fontWeight="bold">
-                    {postData.authorName}
+                    {postData?.authorName}
                   </Typography>
                 </Box>
               </Box>
@@ -175,7 +406,7 @@ export default function Post() {
                   pl: 2
                 }}
               >
-                {postData.title}
+                {postData?.title}
               </Typography>
             </Box>
 
@@ -191,7 +422,7 @@ export default function Post() {
                 }}
               >
                 <div
-                  dangerouslySetInnerHTML={{ __html: postData.content }}
+                  dangerouslySetInnerHTML={{ __html: postData?.content || '' }}
                   style={{
                     color: theme.palette.text.primary,
                     lineHeight: 1.8
@@ -201,7 +432,7 @@ export default function Post() {
             </Box>
 
             {/* 附加檔案 */}
-            {postData.attachments && postData.attachments.length > 0 && (
+            {postData?.attachments && postData.attachments.length > 0 && (
               <PostAttachments attachments={postData.attachments} />
             )}
 
@@ -209,21 +440,58 @@ export default function Post() {
 
             {/* Interactions */}
             <InteractionBar
-              initialLikes={postData.likesCount}
-              initialComments={postData.commentsCount}
-              initialBookmarked={postData.bookmarksCount}
-              postId={postData.id}
-              isLikedA={postData.isLiked}
-              isBookmarkedA={postData.isBookmarked}
+              initialLikes={postData?.likesCount || 0}
+              initialComments={postData?.commentsCount || 0}
+              initialBookmarked={postData?.bookmarksCount || 0}
+              postId={postData?.id || ''}
+              isLikedA={postData?.isLiked || false}
+              isBookmarkedA={postData?.isBookmarked || false}
             />
 
             {/* Comments */}
             <Box mt={3}>
-              <CommentSection postId={postData.id} />
+              <CommentSection postId={postData?.id || ''} />
             </Box>
           </Card>
         </Fade>
       </Container>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCancelDelete}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle id="delete-dialog-title" sx={{ pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', color: '#c1121f' }}>
+            <Delete sx={{ mr: 1 }} />
+            確認刪除文章
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            您確定要刪除這篇文章嗎？此操作無法復原。
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button
+            onClick={handleCancelDelete}
+            variant="outlined"
+            sx={{ mr: 1 }}
+          >
+            取消
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            variant="contained"
+            color="error"
+            startIcon={<Delete />}
+          >
+            刪除
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Layout>
   );
 }

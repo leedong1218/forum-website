@@ -40,11 +40,28 @@ const PostAPI = {
     return API.get(BASE_URL, { params });
   },
 
-  bookMark: (post_id: number): Promise<Response<unknown>> =>
+  bookMark: (post_id: string): Promise<Response<unknown>> =>
     API.post(`${BASE_URL}/${post_id}/bookmark/`),
 
-  like: (post_id: number): Promise<Response<unknown>> =>
+  like: (post_id: string): Promise<Response<unknown>> =>
     API.post(`${BASE_URL}/${post_id}/like/`),
+
+  update: (post_id: string, data: CreatePostPayload): Promise<Response<unknown>> => {
+    const fd = new FormData();
+    fd.append('board', String(data.board));
+    fd.append('title', data.title);
+    fd.append('content', data.content);
+
+    data.attachments?.forEach(f => fd.append('attachments', f));
+
+    return API.patch(`${BASE_URL}/${post_id}/edit/`, fd, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+
+  delete: (post_id: string): Promise<Response<unknown>> =>
+    API.delete(`${BASE_URL}/${post_id}/delete/`),
+
 };
 
 export default PostAPI;
