@@ -211,6 +211,7 @@ export default function Post() {
             <InteractionBar
               initialLikes={postData.likesCount}
               initialComments={postData.commentsCount}
+              initialBookmarked={postData.bookmarksCount}
               postId={postData.id}
               isLikedA={postData.isLiked}
               isBookmarkedA={postData.isBookmarked}
