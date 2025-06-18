@@ -39,7 +39,9 @@ const MainNavItems: React.FC<MainNavItemsProps> = ({
   }
 
   useEffect(() => {
-    fetchData();
+    if (localStorage.getItem('access_token')) {
+      fetchData();
+    }
   }, []);
 
   const mainNavItems = allNavItems.filter(item => {

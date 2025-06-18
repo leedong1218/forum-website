@@ -21,16 +21,18 @@ export default function Personal() {
   const [openAvatarDialog, setOpenAvatarDialog] = useState(false);
 
   useEffect(() => {
-    UserAPI.self()
-      .then(res => {
-        if (res.data) {
-          setUserProfile({
-            ...res.data,
-            id: String(res.data.id),
-          });
-        }
-      })
-      .catch(err => console.error("取得用戶資料失敗", err))
+    if (localStorage.getItem('access_token')) {
+      UserAPI.self()
+        .then(res => {
+          if (res.data) {
+            setUserProfile({
+              ...res.data,
+              id: String(res.data.id),
+            });
+          }
+        })
+        .catch(err => console.error("取得用戶資料失敗", err))
+    }
   }, []);
 
   const handleCopyUsername = () => {

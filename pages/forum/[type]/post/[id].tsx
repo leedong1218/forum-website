@@ -87,7 +87,7 @@ export default function Post() {
       setErrorMessage("");
     } catch (err: any) {
       console.error("取得文章失敗", err);
-      
+
       // 檢查錯誤訊息是否包含文章已被刪除的相關資訊
       const errorMsg = err?.response?.data?.message || err?.message || "";
       if (errorMsg.includes("已被刪除") || errorMsg.includes("不存在") || errorMsg.includes("deleted")) {
@@ -157,10 +157,10 @@ export default function Post() {
               mb: 4,
               textAlign: "center"
             }}>
-              <Alert 
-                severity="warning" 
-                sx={{ 
-                  mb: 3, 
+              <Alert
+                severity="warning"
+                sx={{
+                  mb: 3,
                   borderRadius: 2,
                   '& .MuiAlert-icon': {
                     fontSize: '2rem'
@@ -175,17 +175,17 @@ export default function Post() {
                 </Typography>
               </Alert>
 
-              <Box sx={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
+              <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
                 color: 'text.secondary'
               }}>
-                <ErrorOutline sx={{ 
-                  fontSize: '4rem', 
-                  mb: 2, 
+                <ErrorOutline sx={{
+                  fontSize: '4rem',
+                  mb: 2,
                   color: 'warning.main',
-                  opacity: 0.7 
+                  opacity: 0.7
                 }} />
                 <Typography variant="h6" sx={{ mb: 1, fontWeight: 500 }}>
                   很抱歉，您要查看的文章已經不存在
@@ -193,12 +193,12 @@ export default function Post() {
                 <Typography variant="body2" sx={{ mb: 3, maxWidth: '400px' }}>
                   此文章可能已被作者或管理員刪除，或者連結有誤。
                 </Typography>
-                
-                <Button 
-                  variant="contained" 
+
+                <Button
+                  variant="contained"
                   onClick={handleBack}
                   startIcon={<ArrowBack />}
-                  sx={{ 
+                  sx={{
                     borderRadius: 2,
                     px: 3,
                     py: 1
@@ -245,15 +245,15 @@ export default function Post() {
                 </Typography>
               </Alert>
 
-              <Button 
-                variant="contained" 
+              <Button
+                variant="contained"
                 onClick={() => fetchPost(String(router.query.id))}
                 sx={{ mr: 2 }}
               >
                 重新載入
               </Button>
-              <Button 
-                variant="outlined" 
+              <Button
+                variant="outlined"
                 onClick={handleBack}
               >
                 返回上一頁
@@ -462,33 +462,144 @@ export default function Post() {
         aria-describedby="delete-dialog-description"
         maxWidth="sm"
         fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            overflow: 'hidden',
+            boxShadow: '0 20px 40px rgba(193, 18, 31, 0.15)',
+            background: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)',
+          }
+        }}
+        BackdropProps={{
+          sx: {
+            backdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          }
+        }}
       >
-        <DialogTitle id="delete-dialog-title" sx={{ pb: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', color: '#c1121f' }}>
-            <Delete sx={{ mr: 1 }} />
-            確認刪除文章
+        <DialogTitle
+          id="delete-dialog-title"
+          sx={{
+            pb: 2,
+            pt: 3,
+            background: 'linear-gradient(135deg, #fff5f5 0%, #fee2e2 100%)',
+            borderBottom: '1px solid rgba(193, 18, 31, 0.1)'
+          }}
+        >
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            textAlign: 'center'
+          }}>
+            <Box sx={{
+              width: 64,
+              height: 64,
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #c1121f 0%, #dc2626 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mb: 2,
+              boxShadow: '0 8px 24px rgba(193, 18, 31, 0.3)',
+              animation: 'pulse 2s infinite'
+            }}>
+              <Delete sx={{
+                fontSize: 32,
+                color: 'white',
+              }} />
+            </Box>
+            <Typography
+              variant="h5"
+              component="h2"
+              sx={{
+                color: '#c1121f',
+                fontWeight: 600,
+                fontSize: '1.4rem'
+              }}
+            >
+              確認刪除文章
+            </Typography>
           </Box>
         </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="delete-dialog-description">
-            您確定要刪除這篇文章嗎？此操作無法復原。
+
+        <DialogContent sx={{
+          px: 4,
+          py: 3,
+          textAlign: 'center'
+        }}>
+          <DialogContentText
+            id="delete-dialog-description"
+            sx={{
+              fontSize: '1.1rem',
+              color: '#6b7280',
+              lineHeight: 1.6,
+              mb: 1
+            }}
+          >
+            您確定要刪除這篇文章嗎？
+          </DialogContentText>
+          <DialogContentText
+            sx={{
+              fontSize: '0.9rem',
+              color: '#9ca3af',
+              fontStyle: 'italic'
+            }}
+          >
+            此操作無法復原，請謹慎考慮。
           </DialogContentText>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3 }}>
+
+        <DialogActions sx={{
+          px: 4,
+          pb: 4,
+          pt: 2,
+          gap: 2,
+          justifyContent: 'center'
+        }}>
           <Button
             onClick={handleCancelDelete}
             variant="outlined"
-            sx={{ mr: 1 }}
+            size="large"
+            sx={{
+              minWidth: 120,
+              height: 48,
+              borderRadius: '12px',
+              borderColor: '#e5e7eb',
+              color: '#6b7280',
+              fontWeight: 500,
+              '&:hover': {
+                borderColor: '#d1d5db',
+                backgroundColor: '#f9fafb',
+                transform: 'translateY(-1px)',
+              },
+              transition: 'all 0.2s ease'
+            }}
           >
             取消
           </Button>
           <Button
             onClick={handleConfirmDelete}
             variant="contained"
-            color="error"
+            size="large"
             startIcon={<Delete />}
+            sx={{
+              minWidth: 120,
+              height: 48,
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #c1121f 0%, #dc2626 100%)',
+              fontWeight: 600,
+              boxShadow: '0 4px 16px rgba(193, 18, 31, 0.3)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #a11018 0%, #b91c1c 100%)',
+                boxShadow: '0 6px 20px rgba(193, 18, 31, 0.4)',
+                transform: 'translateY(-2px)',
+              },
+              transition: 'all 0.2s ease'
+            }}
           >
-            刪除
+            確認刪除
           </Button>
         </DialogActions>
       </Dialog>

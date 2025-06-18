@@ -36,13 +36,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   useEffect(() => {
-    fetchNotifications();
-
     const token = localStorage.getItem('access_token');
 
     if (!token) return;
+    fetchNotifications();
 
-        const socket = new WebSocket(`ws://140.131.115.161:8000/ws/notifications/?token=${token}`);
+    const socket = new WebSocket(`ws://140.131.115.161:8000/ws/notifications/?token=${token}`);
 
     socket.onopen = () => {
       console.log('🔌 WebSocket connected');

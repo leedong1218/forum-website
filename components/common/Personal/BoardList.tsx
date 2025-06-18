@@ -17,6 +17,7 @@ import {
 } from '@mui/icons-material';
 import Link from 'next/link';
 import BoardsAPI from '@/services/Boards/BoardsAPI';
+import { useRouter } from 'next/router';
 
 export type BoardTypes = {
   id: string;
@@ -35,10 +36,9 @@ interface BoardListProps {
 }
 
 export default function BoardList({ follows }: BoardListProps) {
-  // 使用本地狀態來追蹤每個看板的追蹤狀態
+  const router = useRouter();
   const [localFollowStates, setLocalFollowStates] = useState<Record<string, boolean>>({});
   
-  // 如果沒有追蹤的看板，顯示提示訊息
   if (!follows || follows.length === 0) {
     return (
       <Box sx={{ 
@@ -120,6 +120,7 @@ export default function BoardList({ follows }: BoardListProps) {
                   alignItems: "center",
                   justifyContent: "space-between"
                 }}
+                onClick={() => router.push(`/forum/${board.url}`)}
               >
                 <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
                   {/* 看板頭像 */}
@@ -226,7 +227,7 @@ export default function BoardList({ follows }: BoardListProps) {
                     ml: 2
                   }}
                 >
-                  {currentFollowStatus ? '已追蹤' : '追蹤'}
+                  {currentFollowStatus ? '追蹤' : '已追蹤'}
                 </Button>
               </Box>
             </CardContent>
