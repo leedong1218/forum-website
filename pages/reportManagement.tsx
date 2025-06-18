@@ -1,4 +1,4 @@
-import React, { SyntheticEvent, useState } from 'react';
+import React, { SyntheticEvent, useEffect, useState } from 'react';
 import {
   Box,
   Card,
@@ -43,6 +43,7 @@ import {
 import Banner from '@/components/common/Banner';
 import Layout from '@/components/layout/Layout';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import ReportAPI from '@/services/Report/ReportAPI';
 
 type ReportType = {
   id: number;
@@ -54,76 +55,35 @@ type ReportType = {
   status: string;
   reportDate: string;
   author: string;
+  created_at: string;
+  target_type: string;
+  reasonLabel: string;
+  description?: string;
+  targetText: string;
+  reporterName: string;
+  targetLink: string;
 }
 
 const ReportManagement = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [selectedReport, setSelectedReport] = useState<ReportType | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [reviewDecision, setReviewDecision] = useState<'approved' | 'rejected' | null>(null);
+  const [reviewDecision, setReviewDecision] = useState<'accepted' | 'rejected' | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [articleReports, setArticleReports] = useState<ReportType[]>([]);
+  const [commentReports, setCommentReports] = useState<ReportType[]>([]);
   const title = "檢舉管理";
 
-  const articleReports = [
-    {
-      id: 1,
-      type: "不當內容",
-      content: "該文章包含不實資訊，誤導讀者對於政策的理解",
-      reporter: "user123",
-      reportedContent: "關於新政策的討論文章",
-      contentLink: "https://example.com/article/123",
-      status: "pending",
-      reportDate: "2024-06-10",
-      author: "張三"
-    },
-    {
-      id: 2,
-      type: "仇恨言論",
-      content: "文章中包含歧視性言論，對特定族群進行攻擊",
-      reporter: "user456",
-      reportedContent: "社會議題討論",
-      contentLink: "https://example.com/article/456",
-      status: "approved",
-      reportDate: "2024-06-09",
-      author: "李四"
-    },
-    {
-      id: 3,
-      type: "垃圾訊息",
-      content: "重複發布相同內容，疑似垃圾訊息",
-      reporter: "user789",
-      reportedContent: "廣告宣傳文章",
-      contentLink: "https://example.com/article/789",
-      status: "rejected",
-      reportDate: "2024-06-08",
-      author: "王五"
-    }
-  ];
+  const fetchData = async () => {
+    const res = await ReportAPI.getReportList();
+    console.log(res);
+    setArticleReports(res.data.filter(report => report.target_type === 'post'));
+    setCommentReports(res.data.filter(report => report.target_type === 'comment'));
+  }
 
-  const commentReports = [
-    {
-      id: 4,
-      type: "人身攻擊",
-      content: "留言中對其他用戶進行人身攻擊",
-      reporter: "user111",
-      reportedContent: "你這個白癡根本不懂...",
-      contentLink: "https://example.com/article/123#comment-456",
-      status: "pending",
-      reportDate: "2024-06-11",
-      author: "趙六"
-    },
-    {
-      id: 5,
-      type: "不當內容",
-      content: "留言內容不雅，包含不當用詞",
-      reporter: "user222",
-      reportedContent: "髒話連篇的留言內容",
-      contentLink: "https://example.com/article/789#comment-123",
-      status: "approved",
-      reportDate: "2024-06-10",
-      author: "錢七"
-    }
-  ];
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const getStatusConfig = (status: string) => {
     switch (status) {
@@ -135,7 +95,7 @@ const ReportManagement = () => {
           bgColor: '#fff3cd',
           textColor: '#856404'
         };
-      case 'approved':
+      case 'accepted':
         return {
           color: 'success',
           text: '檢舉成立',
@@ -177,7 +137,9 @@ const ReportManagement = () => {
 
   // const currentReports = activeTab === 0 ? articleReports : commentReports;
 
-  const handleReviewReport = () => {
+  const handleReviewReport = async (id: string) => {
+    await ReportAPI.reviewReport(id, reviewDecision);
+    window.location.reload();
     if (selectedReport && reviewDecision) {
       console.log(`檢舉 ${selectedReport.id} 審核結果: ${reviewDecision}`);
       setOpenDialog(false);
@@ -197,7 +159,7 @@ const ReportManagement = () => {
     setOpenDialog(true);
   };
 
-  const handleCheckboxChange = (decision: 'approved' | 'rejected') => {
+  const handleCheckboxChange = (decision: 'accepted' | 'rejected') => {
     setReviewDecision(reviewDecision === decision ? null : decision);
   };
 
@@ -290,7 +252,7 @@ const ReportManagement = () => {
                     待審核
                   </Box>
                 </MenuItem>
-                <MenuItem value="approved">
+                <MenuItem value="accepted">
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <CheckCircleIcon sx={{ fontSize: 16, color: '#155724' }} />
                     成立
@@ -320,7 +282,7 @@ const ReportManagement = () => {
                       <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={2}>
                         <Stack direction="row" spacing={1}>
                           <Chip
-                            label={report.type}
+                            label={report.reasonLabel}
                             color={typeConfig.color}
                             size="small"
                           />
@@ -337,7 +299,7 @@ const ReportManagement = () => {
                         </Stack>
                         <Stack direction="row" alignItems="center" spacing={0.5} color="text.secondary">
                           <CalendarIcon sx={{ fontSize: 16 }} />
-                          <Typography variant="body2">{report.reportDate}</Typography>
+                          <Typography variant="body2">{new Date(report.created_at).toLocaleDateString()}</Typography>
                         </Stack>
                       </Stack>
 
@@ -357,7 +319,7 @@ const ReportManagement = () => {
                               overflow: 'hidden',
                             }}
                           >
-                            {report.content}
+                            {report.description}
                           </Typography>
                         </Grid>
                         <Grid>
@@ -374,7 +336,7 @@ const ReportManagement = () => {
                               overflow: 'hidden',
                             }}
                           >
-                            {report.reportedContent}
+                            {report.targetText}
                           </Typography>
                         </Grid>
                       </Grid>
@@ -386,11 +348,7 @@ const ReportManagement = () => {
                         <Stack direction="row" spacing={3}>
                           <Stack direction="row" alignItems="center" spacing={0.5} color="text.secondary">
                             <PersonIcon sx={{ fontSize: 16 }} />
-                            <Typography variant="body2">檢舉人: {report.reporter}</Typography>
-                          </Stack>
-                          <Stack direction="row" alignItems="center" spacing={0.5} color="text.secondary">
-                            <PersonIcon sx={{ fontSize: 16 }} />
-                            <Typography variant="body2">作者: {report.author}</Typography>
+                            <Typography variant="body2">檢舉人: {report.reporterName}</Typography>
                           </Stack>
                         </Stack>
                         <Stack direction="row" spacing={1}>
@@ -398,7 +356,7 @@ const ReportManagement = () => {
                             startIcon={<OpenInNewIcon />}
                             size="small"
                             component={Link}
-                            href={report.contentLink}
+                            href={report.targetLink}
                             target="_blank"
                             rel="noopener noreferrer"
                             sx={{ textDecoration: 'none' }}
@@ -445,7 +403,7 @@ const ReportManagement = () => {
           <DialogTitle sx={{ pb: 1 }}>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Typography variant="h6" fontWeight="bold">
-                檢舉審核 - {selectedReport?.type}
+                檢舉審核 - {selectedReport?.reasonLabel}
               </Typography>
               <IconButton onClick={() => setOpenDialog(false)} size="small">
                 <CloseIcon />
@@ -461,7 +419,7 @@ const ReportManagement = () => {
                     檢舉內容
                   </Typography>
                   <Paper sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
-                    <Typography variant="body2">{selectedReport.content}</Typography>
+                    <Typography variant="body2">{selectedReport.description}</Typography>
                   </Paper>
                 </Box>
 
@@ -470,7 +428,7 @@ const ReportManagement = () => {
                     被檢舉{activeTab === 0 ? '文章' : '留言'}
                   </Typography>
                   <Paper sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
-                    <Typography variant="body2">{selectedReport.reportedContent}</Typography>
+                    <Typography variant="body2">{selectedReport.targetText}</Typography>
                   </Paper>
                 </Box>
 
@@ -479,13 +437,13 @@ const ReportManagement = () => {
                     原文連結
                   </Typography>
                   <Link
-                    href={selectedReport.contentLink}
+                    href={selectedReport.targetLink}
                     target="_blank"
                     rel="noopener noreferrer"
                     sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
                   >
                     <OpenInNewIcon sx={{ fontSize: 16 }} />
-                    {selectedReport.contentLink}
+                    {selectedReport.targetLink}
                   </Link>
                 </Box>
 
@@ -493,11 +451,10 @@ const ReportManagement = () => {
                   <Grid>
                     <Typography variant="body2" fontWeight="bold">檢舉人</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {selectedReport.reporter}
+                      {selectedReport.reporterName}
                     </Typography>
                   </Grid>
                   <Grid>
-                    <Typography variant="body2" fontWeight="bold">作者</Typography>
                     <Typography variant="body2" color="text.secondary">
                       {selectedReport.author}
                     </Typography>
@@ -505,7 +462,7 @@ const ReportManagement = () => {
                   <Grid>
                     <Typography variant="body2" fontWeight="bold">檢舉日期</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {selectedReport.reportDate}
+                      {new Date(selectedReport.created_at).toLocaleDateString()}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -521,14 +478,14 @@ const ReportManagement = () => {
                         <FormControlLabel
                           control={
                             <Checkbox
-                              checked={reviewDecision === 'approved'}
-                              onChange={() => handleCheckboxChange('approved')}
+                              checked={reviewDecision === 'accepted'}
+                              onChange={() => handleCheckboxChange('accepted')}
                               icon={<CheckCircleIcon sx={{ color: 'grey.400' }} />}
                               checkedIcon={<CheckCircleIcon sx={{ color: 'success.main' }} />}
                             />
                           }
                           label="檢舉成立"
-                          sx={{ color: reviewDecision === 'approved' ? 'success.main' : 'text.primary' }}
+                          sx={{ color: reviewDecision === 'accepted' ? 'success.main' : 'text.primary' }}
                         />
                         <FormControlLabel
                           control={
@@ -555,7 +512,7 @@ const ReportManagement = () => {
               <Button
                 variant="contained"
                 startIcon={<SendIcon />}
-                onClick={handleReviewReport}
+                onClick={() => handleReviewReport(selectedReport.id)}
                 disabled={!reviewDecision}
                 color={"primary"}
               >

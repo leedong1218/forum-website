@@ -15,6 +15,12 @@ export interface RegisterType {
 const RegisterAPI = {
   register: (data: RegisterType): Promise<Response<unknown>> =>
     API.post('/register', data),
+
+  getReport: (): Promise<Response<unknown>> =>
+    API.get('/register/list'),
+
+  review: (report_id: string): Promise<Response<unknown>> =>
+    API.patch(`/register/${report_id}/list`, { params: { report_id: report_id } }),
 };
 
 export default RegisterAPI;

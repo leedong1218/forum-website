@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -9,6 +9,7 @@ import ForumIcon from "@mui/icons-material/Forum";
 import { Warning } from "@mui/icons-material";
 import Link from "@mui/material/Link";
 import { colors } from "@/styles/theme"; // Import colors from theme file
+import UserAPI from "@/services/User/UserAPI";
 
 interface MainNavItemsProps {
   title?: string;
@@ -25,25 +26,36 @@ const MainNavItems: React.FC<MainNavItemsProps> = ({
   handleDrawerToggle,
   isLogin
 }) => {
-  // 主要導航項目定義
+  const [state, setState] = useState<boolean>(false);
   const allNavItems = [
     { text: "系統公告", icon: <DashboardIcon />, link: "/" },
     { text: "所有看板", icon: <ForumIcon />, link: "/forum/all" },
     { text: "檢舉管理", icon: <Warning />, link: "/reportManagement", requireLogin: true },
   ];
 
-  // 根據登入狀態過濾導航項目
-  const mainNavItems = allNavItems.filter(item => 
-    !item.requireLogin || isLogin
-  );
+  const fetchData = async () => {
+    const res = await UserAPI.self();
+    setState(res.data.isModerator || false);
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const mainNavItems = allNavItems.filter(item => {
+    if (item.text === "檢舉管理") {
+      return isLogin && state;
+    }
+    return !item.requireLogin || isLogin;
+  });
 
   return (
     <List disablePadding>
       {mainNavItems.map((item) => (
-        <Link 
-          key={item.text} 
-          href={item.link} 
-          underline="none" 
+        <Link
+          key={item.text}
+          href={item.link}
+          underline="none"
           onClick={(isMobile || isCompactView) ? handleDrawerToggle : undefined}
         >
           <ListItem disablePadding sx={{ mb: 1 }}>

@@ -39,11 +39,11 @@ export const ReportAPI = {
   createReport: (data: CreateReportType): Promise<Response<unknown>> =>
     API.post('/report', data),
 
-  getReportList: (params: {type: string; status?: string}): Promise<Response<ReportItem[]>> =>
-    API.get('/reports', { params }),
+  getReportList: (): Promise<Response<ReportItem[]>> =>
+    API.get('/report/admin/list'),
 
-  reviewReport: (id: number, decision: 'approved'|'rejected'): Promise<Response<unknown>> =>
-    API.patch(`/reports/${id}/review`, { decision }),
+  reviewReport: (report_id: string, status: 'approved' | 'rejected'): Promise<Response<unknown>> =>
+    API.patch(`/report/admin/${report_id}/review`, { status }),
 };
 
 export default ReportAPI;
