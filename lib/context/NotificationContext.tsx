@@ -41,7 +41,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!token) return;
     fetchNotifications();
 
-    const socket = new WebSocket(`ws://140.131.115.161:8000/ws/notifications/?token=${token}`);
+    const wsUrl = process.env.NEXT_PUBLIC_WEB_URL;
+    const socket = new WebSocket(`${wsUrl}/ws/notifications/?token=${token}`);
 
     socket.onopen = () => {
       console.log('🔌 WebSocket connected');
