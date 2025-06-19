@@ -330,16 +330,6 @@ export default function Navbar({
                   </ListItemIcon>
                   <ListItemText primary="個人檔案" />
                 </MenuItem>
-                <MenuItem
-                  onClick={handleMenuClose}
-                  component={Link}
-                  href="/settings"
-                >
-                  <ListItemIcon>
-                    <Edit fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText primary="設置" />
-                </MenuItem>
                 <Divider />
                 <MenuItem onClick={handleMenuClose}>
                   <ListItemText
