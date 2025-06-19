@@ -48,12 +48,13 @@ export default function Article() {
   const [posts, setPosts] = useState<PostType[]>([]);
   const [boardAvatar, setBoardAvatar] = useState<string | null>(null);
   const [boardColor, setBoardColor] = useState("#64748b");
-  
+
   // 無限滾動相關狀態
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [isLogin, setIsLogin] = useState(true);
 
   // 修改 fetchPosts 函數以支援分頁
   const fetchPosts = async (params: {
@@ -64,7 +65,7 @@ export default function Article() {
     isLoadMore?: boolean;
   }) => {
     const { page = 1, isLoadMore = false } = params;
-    
+
     try {
       if (isLoadMore) {
         setIsLoadingMore(true);
@@ -81,7 +82,7 @@ export default function Article() {
       });
 
       const data = res.data;
-      
+
       if (!isLoadMore) {
         // 初次載入或重新搜尋時，重置貼文列表
         setTitle(data?.boardName || "所有文章");
@@ -93,10 +94,10 @@ export default function Article() {
         // 載入更多時，將新貼文添加到現有列表
         setPosts(prevPosts => [...prevPosts, ...(data?.posts || [])]);
       }
-      
+
       // 檢查是否還有更多資料
       setHasMore(data?.hasMore !== false && (data?.posts?.length || 0) > 0);
-      
+
     } catch (error) {
       console.error("Error fetching posts:", error);
       if (!isLoadMore) {
@@ -116,10 +117,10 @@ export default function Article() {
   // 載入更多貼文的處理函數
   const loadMorePosts = useCallback(async () => {
     if (!hasMore || isLoadingMore || initialLoad) return;
-    
+
     const nextPage = currentPage + 1;
     setCurrentPage(nextPage);
-    
+
     await fetchPosts({
       type: type as string,
       sort: getValues("sortType"),
@@ -149,6 +150,12 @@ export default function Article() {
         page: 1,
       });
     }
+
+
+    if (!localStorage.getItem("access_token")) {
+      setIsLogin(false);
+      return;
+    }
   }, [router.isReady, type]);
 
   // 處理排序變更
@@ -156,7 +163,7 @@ export default function Article() {
     setPosts([]); // 清空現有貼文
     setCurrentPage(1);
     setHasMore(true);
-    
+
     fetchPosts({
       type: type as string,
       sort: value,
@@ -170,7 +177,7 @@ export default function Article() {
     setPosts([]); // 清空現有貼文
     setCurrentPage(1);
     setHasMore(true);
-    
+
     fetchPosts({
       type: type as string,
       sort: getValues("sortType"),
@@ -185,7 +192,7 @@ export default function Article() {
     setPosts([]); // 清空現有貼文
     setCurrentPage(1);
     setHasMore(true);
-    
+
     fetchPosts({
       type: type as string,
       sort: getValues("sortType"),
@@ -203,14 +210,14 @@ export default function Article() {
     }
 
     const PostsComponent = viewMode === "grid" ? PostsGrid : PostsList;
-    
+
     return (
       <>
-        <PostsComponent 
-          posts={posts} 
-          getCategoryColor={() => categoryColor} 
+        <PostsComponent
+          posts={posts}
+          getCategoryColor={() => categoryColor}
         />
-        
+
         {/* 無限滾動觸發點 */}
         {hasMore && (
           <Box
@@ -224,7 +231,7 @@ export default function Article() {
             }}
           />
         )}
-        
+
         {/* 載入更多指示器 */}
         {isLoadingMore && (
           <Box
@@ -241,7 +248,7 @@ export default function Article() {
             </Typography>
           </Box>
         )}
-        
+
         {/* 沒有更多內容提示 */}
         {!hasMore && posts.length > 0 && (
           <Box
@@ -269,17 +276,19 @@ export default function Article() {
         avatarUrl={boardAvatar}
         textColor={categoryColor.text}
       >
-        <Box
-          sx={{
-            display: "flex",
-            gap: 1,
-            mt: 2,
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
-          <PostButton />
-        </Box>
+        {isLogin &&
+          <Box
+            sx={{
+              display: "flex",
+              gap: 1,
+              mt: 2,
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
+            <PostButton />
+          </Box>
+        }
       </Banner>
 
       <Box
