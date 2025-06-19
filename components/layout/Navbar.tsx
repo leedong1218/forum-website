@@ -84,15 +84,16 @@ export default function Navbar({
 
   const fetchData = async () => {
     const res = await UserAPI.self();
-    setAvatar(res.data.avatar)
+    setAvatar(res.data.avatar);
+    setFirstName(localStorage.getItem('firstName'));
   }
 
   useEffect(() => {
-    if (isLogin) {
-      fetchData();
+    if (!isLogin) {
+      return
     }
-    setFirstName(localStorage.getItem('firstName'));
-  }, [])
+    fetchData();
+  }, [isLogin])
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
