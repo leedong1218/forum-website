@@ -8,6 +8,7 @@ import Navbar from "./Navbar";
 import Sidebar from "./sidebar";
 import ProfileSection from "./profile/ProfileSection";
 import ActionButton from "../common/ActionButton";
+import Head from 'next/head';
 
 // 背景色
 const bgColor = "#edede9"; // Light gray background
@@ -50,85 +51,93 @@ export default function Layout({
   };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: bgColor }}>
-      <CssBaseline />
+    <>
+    <Head>
+      <title>論壇網站</title>
+      <meta name="description" content="" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <link rel="icon" href="/chat.ico" />
+    </Head>
+      <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: bgColor }}>
+        <CssBaseline />
 
-      {/* 導航欄 */}
-      <Navbar
-        handleDrawerToggle={handleDrawerToggle}
-        isCompactView={isCompactView}
-        isLogin={isLogin}
-      />
+        {/* 導航欄 */}
+        <Navbar
+          handleDrawerToggle={handleDrawerToggle}
+          isCompactView={isCompactView}
+          isLogin={isLogin}
+        />
 
-      {/* 側邊欄 */}
-      <Sidebar
-        title={title}
-        isMobile={isMobile}
-        isCompactView={isCompactView}
-        hideProfileSidebar={hideProfileSidebar}
-        mobileOpen={mobileOpen}
-        handleDrawerToggle={handleDrawerToggle}
-        isLogin={isLogin}
-      />
+        {/* 側邊欄 */}
+        <Sidebar
+          title={title}
+          isMobile={isMobile}
+          isCompactView={isCompactView}
+          hideProfileSidebar={hideProfileSidebar}
+          mobileOpen={mobileOpen}
+          handleDrawerToggle={handleDrawerToggle}
+          isLogin={isLogin}
+        />
 
-      {/* 主要內容區域 + 個人資料卡 */}
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: { xs: 2, sm: 3 },
-          mt: 8,
-          position: "relative",
-          display: "flex",
-          flexDirection: "column",
-          minHeight: "calc(100vh - 64px)", // 減去頂部導航欄高度
-        }}
-      >
+        {/* 主要內容區域 + 個人資料卡 */}
         <Box
+          component="main"
           sx={{
+            flexGrow: 1,
+            p: { xs: 2, sm: 3 },
+            mt: 8,
+            position: "relative",
             display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            width: "100%",
-            gap: { xs: 0, md: 3 },
-            flexGrow: 1, // 讓內容區域佔據剩餘空間
+            flexDirection: "column",
+            minHeight: "calc(100vh - 64px)", // 減去頂部導航欄高度
           }}
         >
-          {/* 主要內容區域 */}
           <Box
             sx={{
-              flexGrow: 1,
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
               width: "100%",
-              mb: showMobileProfile && (isMobile || isTablet) ? 3 : 0,
+              gap: { xs: 0, md: 3 },
+              flexGrow: 1, // 讓內容區域佔據剩餘空間
             }}
           >
-            {children}
-          </Box>
-
-          {/* 個人資料區域以及在線用戶 - 僅在寬屏 (>1500px) 顯示在右側 */}
-          {showProfileCard && !hideProfileSidebar && isLogin && (
+            {/* 主要內容區域 */}
             <Box
               sx={{
-                width: { sm: "100%", md: profileCardWidth },
-                flexShrink: 0,
-                display: "flex",
-                flexDirection: "column",
-                gap: 3,
+                flexGrow: 1,
+                width: "100%",
+                mb: showMobileProfile && (isMobile || isTablet) ? 3 : 0,
               }}
             >
-              <ProfileSection
-                isMobile={isMobile}
-                isTablet={isTablet}
-                isCompactView={isCompactView}
-                hideProfileSidebar={hideProfileSidebar}
-                showMobileProfile={showMobileProfile}
-                handleMobileProfileToggle={handleMobileProfileToggle}
-                profileCardWidth={profileCardWidth}
-              />
+              {children}
             </Box>
-          )}
+
+            {/* 個人資料區域以及在線用戶 - 僅在寬屏 (>1500px) 顯示在右側 */}
+            {showProfileCard && !hideProfileSidebar && isLogin && (
+              <Box
+                sx={{
+                  width: { sm: "100%", md: profileCardWidth },
+                  flexShrink: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 3,
+                }}
+              >
+                <ProfileSection
+                  isMobile={isMobile}
+                  isTablet={isTablet}
+                  isCompactView={isCompactView}
+                  hideProfileSidebar={hideProfileSidebar}
+                  showMobileProfile={showMobileProfile}
+                  handleMobileProfileToggle={handleMobileProfileToggle}
+                  profileCardWidth={profileCardWidth}
+                />
+              </Box>
+            )}
+          </Box>
+          <ActionButton isLogin={isLogin} />
         </Box>
-        <ActionButton isLogin={isLogin} />
       </Box>
-    </Box>
+    </>
   );
 }

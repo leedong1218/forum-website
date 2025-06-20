@@ -13,6 +13,7 @@ import {
 import { colors } from '@/styles/theme';
 import { useRouter } from 'next/router';
 import notificationAPI from '@/services/Notifications/NotificationsAPI';
+import { CheckCircle, Edit, Error, Forum, Info, Warning } from '@mui/icons-material';
 
 interface NotificationItem {
   id: number;
@@ -20,6 +21,8 @@ interface NotificationItem {
   message: string;
   created_at: string;
   link?: string;
+  icon?: string;
+  color?: string;
 }
 
 interface NotificationPopoverProps {
@@ -49,6 +52,43 @@ const NotificationPopover: React.FC<NotificationPopoverProps> = ({
     }
 
     onClose();
+  };
+
+  const getIconComponent = (iconName: string, color?: string) => {
+    const iconMap: { [key: string]: React.ElementType } = {
+      'info': Info,
+      'warning': Warning,
+      'success': CheckCircle,
+      'error': Error,
+      'forum': Forum,
+      'edit': Edit,
+    };
+
+    const Icon = iconMap[iconName];
+
+    if (Icon) {
+      return (
+        <Icon sx={{ fontSize: 20 }} />
+      );
+    } else {
+      return (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={iconName}
+          alt="icon"
+          style={{
+            width: 50,
+            height: 50,
+            objectFit: 'contain',
+            borderRadius: '50%',
+            backgroundColor: color || '#ccc',
+          }}
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = '/fallback-icon.png';
+          }}
+        />
+      );
+    }
   };
 
   return (
@@ -100,8 +140,12 @@ const NotificationPopover: React.FC<NotificationPopoverProps> = ({
                 onClick={() => handleClick(noti)}
               >
                 <ListItemAvatar>
-                  <Avatar sx={{ bgcolor: '#ccc', width: 32, height: 32 }}>
-                    {/* Avatar保留空 icon，未來可根據 type 顯示 */}
+                  <Avatar
+                    sx={{
+                      bgcolor: noti.color || colors.accent, width: 32, height: 32
+                    }}
+                  >
+                    {getIconComponent(noti.icon ?? '', noti.color)}
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText
