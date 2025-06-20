@@ -41,6 +41,6 @@ export interface ArticleFormValues {
   viewMode: ViewMode;
 }
 
-export type SortType = "熱門" | "最新";
+export type SortType = "top" | "new";
 
 export type ViewMode = "grid" | "list";

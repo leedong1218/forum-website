@@ -1,8 +1,9 @@
 import { SetStateAction, useEffect, useState } from 'react';
 import { Box, Tab, Tabs, CircularProgress, Alert } from '@mui/material';
-import ArticleIcon from '@mui/icons-material/Article';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
-import SettingsIcon from '@mui/icons-material/Settings';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import { TabPanelProps } from '@/lib/types/userProfileType';
 import PostList, { PostTypes } from './PostList';
 import BoardList from './BoardList';
@@ -27,6 +28,7 @@ export default function PaginationTags({ userId }: { userId: string }) {
   const [tabValue, setTabValue] = useState(0);
   const [posts, setPosts] = useState<PostTypes[]>([]);
   const [follows, setFollows] = useState([]);
+  const [bookmarks, seBookmarks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,18 +39,22 @@ export default function PaginationTags({ userId }: { userId: string }) {
       setLoading(true);
       setError(null);
 
-      const [postsRes, followsRes] = await Promise.all([
+      const [postsRes, bookmarksRes, followsRes] = await Promise.all([
         UserAPI.activity(userId, 'posts', 1),
+        UserAPI.activity(userId, 'bookmarks', 1),
         UserAPI.activity(userId, 'follows', 1)
       ]);
 
-      console.log('API Response:', { postsRes, followsRes });
+      console.log('API Response:', { postsRes, bookmarksRes, followsRes });
 
-      // 確保返回的數據格式正確
       if (postsRes?.data) {
-        // 如果 API 返回的是包含 posts 數組的對象
         const postsData = Array.isArray(postsRes.data) ? postsRes.data : postsRes.data.results || [];
         setPosts(postsData);
+      }
+
+      if (bookmarksRes?.data) {
+        const bookmarksData = Array.isArray(bookmarksRes.data) ? bookmarksRes.data : bookmarksRes.data.results || [];
+        seBookmarks(bookmarksData);
       }
 
       if (followsRes?.data) {
@@ -103,7 +109,7 @@ export default function PaginationTags({ userId }: { userId: string }) {
           }}
         >
           <Tab
-            icon={<ArticleIcon />}
+            icon={<EditNoteIcon />}
             iconPosition="start"
             label="發布的文章"
             sx={{
@@ -115,9 +121,9 @@ export default function PaginationTags({ userId }: { userId: string }) {
             }}
           />
           <Tab
-            icon={<BookmarkIcon />}
+            icon={<StarBorderIcon />}
             iconPosition="start"
-            label="追蹤的看板"
+            label="收藏的文章"
             sx={{
               textTransform: "none",
               fontWeight: tabValue === 1 ? 600 : 400,
@@ -127,14 +133,26 @@ export default function PaginationTags({ userId }: { userId: string }) {
             }}
           />
           <Tab
-            icon={<SettingsIcon />}
+            icon={<SubscriptionsIcon />}
             iconPosition="start"
-            label="設定"
+            label="追蹤的看板"
             sx={{
               textTransform: "none",
               fontWeight: tabValue === 2 ? 600 : 400,
               fontSize: "0.95rem",
               color: tabValue === 2 ? accentColor : "text.secondary",
+              minHeight: 56,
+            }}
+          />
+          <Tab
+            icon={<ManageAccountsIcon />}
+            iconPosition="start"
+            label="設定"
+            sx={{
+              textTransform: "none",
+              fontWeight: tabValue === 3 ? 600 : 400,
+              fontSize: "0.95rem",
+              color: tabValue === 3 ? accentColor : "text.secondary",
               minHeight: 56,
             }}
           />
@@ -175,11 +193,17 @@ export default function PaginationTags({ userId }: { userId: string }) {
 
           <TabPanel value={tabValue} index={1}>
             <Box sx={{ typography: 'body1' }}>
-              <BoardList follows={follows} />
+              <PostList posts={bookmarks} />
             </Box>
           </TabPanel>
 
           <TabPanel value={tabValue} index={2}>
+            <Box sx={{ typography: 'body1' }}>
+              <BoardList follows={follows} />
+            </Box>
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={3}>
             <Box sx={{ minHeight: '400px' }}>
               <Box sx={{ typography: 'body1' }}>
                 用戶設定頁面。

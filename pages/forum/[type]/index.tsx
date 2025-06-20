@@ -34,7 +34,7 @@ export default function Article() {
   const { register, getValues, control, watch, setValue } =
     useForm<ArticleFormValues>({
       defaultValues: {
-        sortType: "熱門",
+        sortType: "top",
         searchValue: "",
         viewMode: "grid",
       },
